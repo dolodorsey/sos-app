@@ -1,0 +1,3 @@
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; padding: 0; background: #080808; color: #fff; }
+:root { --accent: #FF6B35; --font-heading: 'Cormorant Garamond', serif; --font-body: 'DM Sans', sans-serif; }
