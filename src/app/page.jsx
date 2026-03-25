@@ -1,6 +1,6 @@
 'use client';
 
-import { KHGFormButton } from '../../components/KHGForms';
+import { KHGFormButton } from '@/components/KHGForms';
 
 export default function Home() {
   return (

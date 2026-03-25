@@ -1,6 +1,6 @@
 'use client';
 
-import { KHGFormGrid } from '../../components/KHGForms';
+import { KHGFormGrid } from '@/components/KHGForms';
 
 export default function ConnectPage() {
   return (
