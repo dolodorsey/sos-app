@@ -374,7 +374,7 @@ function FormModal({ formType, brandKey, onClose }) {
     e.preventDefault();
     setStatus('submitting');
     try {
-      const res = await fetch('/api/forms/submit', {
+      const res = await fetch('https://dorsey.app.n8n.cloud/webhook/khg-form-submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ brand_key: brandKey, form_type: formType, ...formData }),

@@ -1,0 +1,30 @@
+{
+  "appId": "com.sos.app",
+  "appName": "SOS",
+  "webDir": "out",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2500,
+      "launchAutoHide": true,
+      "backgroundColor": "#080808",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#080808"
+    }
+  },
+  "ios": {
+    "contentInset": "always",
+    "allowsLinkPreview": true,
+    "scrollEnabled": true,
+    "scheme": "SOS",
+    "preferredContentMode": "mobile"
+  }
+}
