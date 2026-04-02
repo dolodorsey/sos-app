@@ -1,533 +1,413 @@
-'use client';
-import { useState, useEffect, useCallback } from 'react';
+import{useState,useEffect,useCallback}from'react';
 
-/* ─── Supabase direct (avoid import issues with Next.js client) ─── */
-const SB_URL = 'https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
-const N8N = 'https://dorsey.app.n8n.cloud/webhook';
+/* ═══════════════════════════════════════════
+   S.O.S — SUPERHEROES ON STANDBY
+   Full rebuild — Lovable extraction + Supabase data
+   8 categories, 40 services, Shield plans, citizen/hero
+   ═══════════════════════════════════════════ */
 
-const sbAuth = async (endpoint, body) => {
-  const r = await fetch(`${SB_URL}/auth/v1/${endpoint}`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
-    body: JSON.stringify(body),
-  });
-  const d = await r.json(); if (d.error || d.msg) throw new Error(d.error_description || d.msg || d.error || 'Auth failed'); return d;
-};
+const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
+const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
+const getSosUserId=async(authId,token)=>{const d=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${authId}&select=id,role`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}}).then(r=>r.json());return d?.[0]||null;};
+const sbAuth=async(ep,body)=>{const r=await fetch(`${SB}/auth/v1/${ep}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${SK}`},body:JSON.stringify(body)});const d=await r.json();if(d.error||d.msg)throw new Error(d.error_description||d.msg||d.error);return d;};
 
-const doSignUp = async (email, pw, name, role) => {
-  const d = await sbAuth('signup', { email, password: pw, data: { full_name: name, role, app: 'sos' } });
-  fetch(`${N8N}/sos-new-user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, full_name: name, role, app: 'sos' }) }).catch(() => {});
-  return d;
-};
-const doSignIn = async (email, pw) => sbAuth('token?grant_type=password', { email, password: pw });
-const getStoredSession = () => {
-  try { const s = localStorage.getItem('sos_session'); return s ? JSON.parse(s) : null; } catch { return null; }
-};
-const storeSession = (s) => { try { localStorage.setItem('sos_session', JSON.stringify(s)); } catch {} };
-const clearSession = () => { try { localStorage.removeItem('sos_session'); } catch {} };
+/* ─── Theme ─── */
+const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#FF6B35',accentDark:'#E55A2B',gold:'#FFB347',blue:'#3B82F6',green:'#10B981',red:'#EF4444',purple:'#8B5CF6',text:'#FFFFFF',sub:'rgba(255,255,255,0.6)',muted:'rgba(255,255,255,0.35)',border:'rgba(255,255,255,0.08)',overlay:'rgba(8,12,20,0.95)'};
+const ff="'Inter',-apple-system,BlinkMacSystemFont,sans-serif";
+const F=(d='row',a='center',j='center',g=0)=>({display:'flex',flexDirection:d,alignItems:a,justifyContent:j,gap:g});
+const btn=(bg,c='#fff',x)=>({background:bg,color:c,border:'none',borderRadius:14,padding:'14px 28px',fontSize:16,fontWeight:700,cursor:'pointer',transition:'all .2s',fontFamily:'inherit',...x});
+const card={background:C.card,borderRadius:16,padding:20,border:`1px solid ${C.border}`};
+const inp={width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:'inherit'};
 
-const getSosUserId = async (authId, token) => {
-  try {
-    const h = { apikey: SB_KEY, Authorization: `Bearer ${token || SB_KEY}` };
-    const r = await fetch(`${SB_URL}/rest/v1/sos_users?auth_id=eq.${authId}&select=id&limit=1`, { headers: h });
-    const d = await r.json();
-    return d?.[0]?.id || null;
-  } catch { return null; }
-};
-
-const createBooking = async (b, token) => {
-  // sos_missions.citizen_id FK → sos_users.id (not auth.users.id)
-  const sosId = await getSosUserId(b.customer_id, token);
-  if (!sosId) { console.error('No sos_users record for auth_id', b.customer_id); return false; }
-  const r = await fetch(`${SB_URL}/rest/v1/sos_missions`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${token || SB_KEY}`, Prefer: 'return=representation' },
-    body: JSON.stringify({ citizen_id: sosId, status: 'requested', pickup_address: b.address || 'GPS Location', estimated_price: b.total_price || 0, request_type: 'now' }),
-  });
-  fetch(`${N8N}/sos-service-request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...b, sos_user_id: sosId, app: 'sos' }) }).catch(() => {});
-  return r.ok;
-};
-
-/* ─── SOS Dark Palette ─── */
-const C = {
-  bg:'#0a0a0a',card:'#141414',card2:'#1a1a1a',primary:'#FF6B35',red:'#ef4444',
-  green:'#10b981',yellow:'#facc15',white:'#fff',text:'#f0f0f0',muted:'#666',
-  gray:'#8a8a8a',grayLight:'#555',grayLighter:'#2a2a2a',border:'#222',teal:'#14b8a6',
-};
-const F = (d='row',a='center',j='center',g=0) => ({ display:'flex',flexDirection:d,alignItems:a,justifyContent:j,gap:g });
-const btn = (bg,c='#fff',x) => ({ background:bg,color:c,border:'none',borderRadius:14,padding:'14px 28px',fontSize:16,fontWeight:700,cursor:'pointer',transition:'all .2s',fontFamily:'inherit',...x });
-const card = { background:C.card,borderRadius:16,padding:20,border:`1px solid ${C.border}` };
-const inp = { width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:'inherit' };
-
-/* ─── Services ─── */
-const QUICK = [
-  {name:'Flat Tire',emoji:'🛞',price:75,eta:'25 min',desc:'Tire change or patch'},
-  {name:'Jump Start',emoji:'🔋',price:55,eta:'20 min',desc:'Dead battery jump'},
-  {name:'Lockout',emoji:'🔑',price:65,eta:'20 min',desc:'Locked out of vehicle'},
-  {name:'Tow Truck',emoji:'🚛',price:125,eta:'35 min',desc:'Vehicle towing'},
-  {name:'Gas Delivery',emoji:'⛽',price:45,eta:'20 min',desc:'Emergency fuel'},
-  {name:'Overheating',emoji:'🌡️',price:85,eta:'30 min',desc:'Coolant & diagnostics'},
-];
-
-const CATS = [
-  { id:'roadside',name:'Roadside Emergency',icon:'🚨',color:'#FF6B35',services:[
-    {name:'Flat Tire Change',desc:'Spare tire mount or patch',price:'$75',eta:'20-30 min'},
-    {name:'Jump Start',desc:'Battery jump or replacement',price:'$55',eta:'15-25 min'},
-    {name:'Lockout Service',desc:'Unlock your vehicle',price:'$65',eta:'15-25 min'},
-    {name:'Tow Truck',desc:'Local or long-distance tow',price:'$125+',eta:'25-40 min'},
-    {name:'Gas Delivery',desc:'Emergency fuel drop-off',price:'$45',eta:'15-25 min'},
-    {name:'Overheating',desc:'Coolant top-off & diagnostics',price:'$85',eta:'25-35 min'},
-    {name:'Stuck Vehicle',desc:'Winch out from mud/snow/ditch',price:'$95',eta:'30-45 min'},
+/* ─── 8 Categories + 40 Services ─── */
+const CATS=[
+  {id:'emergency-roadside',name:'Emergency Roadside',icon:'\u{1F6A8}',color:'#FF6B35',desc:'24/7 emergency rescue services',services:[
+    {name:'Towing',desc:'Secure tow to your destination',price:'$75',eta:'5-10 min'},
+    {name:'Flat Tire Help',desc:'Spare install or patch',price:'$55',eta:'5-10 min'},
+    {name:'Tire Concierge',desc:'Buy, pickup & install',price:'$85',eta:'10-20 min'},
+    {name:'Jump Start',desc:'Battery boost',price:'$45',eta:'5-10 min'},
+    {name:'Battery Replace',desc:'Deliver & install',price:'$95',eta:'10-20 min'},
+    {name:'Fuel Delivery',desc:'Gas, diesel, EV',price:'$55',eta:'5-10 min'},
+    {name:'Lockout',desc:'Non-destructive unlock',price:'$50',eta:'5-10 min'},
+    {name:'Winch Out & Recovery',desc:'Get you unstuck',price:'$95',eta:'10-20 min'},
   ]},
-  { id:'maintenance',name:'Maintenance',icon:'🔧',color:'#14b8a6',services:[
-    {name:'Oil Change',desc:'Full synthetic oil change',price:'$65',eta:'30-45 min'},
-    {name:'Brake Inspection',desc:'Pad check & fluid top-off',price:'$45',eta:'20-30 min'},
-    {name:'Battery Replace',desc:'New battery install',price:'$120',eta:'20-30 min'},
-    {name:'Tire Rotation',desc:'All 4 tires rotated',price:'$40',eta:'25-35 min'},
-    {name:'Fluid Top-Off',desc:'All fluids checked & filled',price:'$35',eta:'15-20 min'},
-    {name:'Wiper Blades',desc:'New wiper blades installed',price:'$30',eta:'10-15 min'},
+  {id:'mobile-maintenance',name:'Mobile Maintenance',icon:'\u{1F527}',color:'#14b8a6',desc:'On-site repairs & maintenance',services:[
+    {name:'Oil Change',desc:'Full synthetic available',price:'$65',eta:'10-20 min'},
+    {name:'Fluids / Top-ups',desc:'Coolant, brake, washer',price:'$35',eta:'5-10 min'},
+    {name:'OBD Scan + Report',desc:'Diagnostic readout',price:'$40',eta:'5-10 min'},
+    {name:'Bulb Replacement',desc:'Headlight, tail, signal',price:'$30',eta:'5-10 min'},
+    {name:'Belt/Hose Swap',desc:'Minor belt & hose',price:'$85',eta:'20-40 min'},
+    {name:'Brake Pads',desc:'On-site where feasible',price:'$120',eta:'20-40 min'},
   ]},
-  { id:'detailing',name:'Detailing',icon:'✨',color:'#8b5cf6',services:[
-    {name:'Express Wash',desc:'Exterior wash & dry',price:'$35',eta:'30 min'},
-    {name:'Interior Detail',desc:'Vacuum, wipe, freshen',price:'$75',eta:'45-60 min'},
-    {name:'Full Detail',desc:'Complete in + out',price:'$150',eta:'90-120 min'},
-    {name:'Ceramic Coating',desc:'Paint protection',price:'$250',eta:'2-3 hrs'},
-    {name:'Headlight Restore',desc:'Clear yellowed lights',price:'$55',eta:'30-45 min'},
+  {id:'glass-body',name:'Glass & Body',icon:'\u{1F539}',color:'#3B82F6',desc:'Windshield, dents & surface repair',services:[
+    {name:'Windshield Repair',desc:'Chip & crack repair',price:'$65',eta:'10-20 min'},
+    {name:'Windshield Replace',desc:'Full replacement',price:'Quote',eta:'Scheduled'},
+    {name:'Paintless Dent Repair',desc:'No-paint dent removal',price:'Quote',eta:'Scheduled'},
+    {name:'Scratch Buff',desc:'Minor surface repair',price:'$75',eta:'10-20 min'},
   ]},
-  { id:'inspection',name:'Inspection',icon:'🔍',color:'#f59e0b',services:[
-    {name:'Pre-Purchase',desc:'Full vehicle inspection',price:'$95',eta:'45-60 min'},
-    {name:'Check Engine',desc:'OBD2 scan & diagnosis',price:'$55',eta:'20-30 min'},
-    {name:'Emissions',desc:'Smog check prep',price:'$45',eta:'30-45 min'},
-    {name:'AC Diagnostics',desc:'AC system check',price:'$75',eta:'30-45 min'},
-    {name:'Tire Pressure',desc:'TPMS check & inflate',price:'$20',eta:'10-15 min'},
+  {id:'car-wash-detailing',name:'Car Wash & Detailing',icon:'\u2728',color:'#8b5cf6',desc:'Express wash to full detail',services:[
+    {name:'Express Wash',desc:'Quick exterior wash',price:'$35',eta:'5-10 min'},
+    {name:'Interior Detail',desc:'Deep clean interior',price:'$85',eta:'20-40 min'},
+    {name:'Full Detail',desc:'Complete in & out',price:'$150',eta:'20-40 min'},
+    {name:'Ceramic Coating',desc:'Professional coating',price:'Quote',eta:'Scheduled'},
+    {name:'Odor / Sanitization',desc:'Ozone & deep clean',price:'$65',eta:'10-20 min'},
   ]},
-  { id:'specialty',name:'Specialty',icon:'🏎️',color:'#ef4444',services:[
-    {name:'Motorcycle Tow',desc:'Motorcycle transport',price:'$95',eta:'30-45 min'},
-    {name:'RV/Trailer',desc:'Large vehicle service',price:'$175+',eta:'45-60 min'},
-    {name:'Fleet Service',desc:'Multi-vehicle dispatch',price:'Quote',eta:'Scheduled'},
-    {name:'Exotic Transport',desc:'Enclosed trailer',price:'$250+',eta:'Scheduled'},
+  {id:'convenience-addons',name:'Convenience Add-Ons',icon:'\u{1F6D2}',color:'#f59e0b',desc:'Errands, installs & extras',services:[
+    {name:'Errand Assist',desc:'Parts pickup',price:'$40',eta:'10-20 min'},
+    {name:'Accessory Install',desc:'Dash cam, mounts',price:'$55',eta:'10-20 min'},
+    {name:'Safety Kit Delivery',desc:'Flares, first aid',price:'$35',eta:'5-10 min'},
+    {name:'Wiper Blade Install',desc:'Replace worn wipers',price:'$25',eta:'5-10 min'},
+    {name:'Key/Fob Support',desc:'Where legal',price:'Quote',eta:'Scheduled'},
+  ]},
+  {id:'fleet-services',name:'Fleet Services',icon:'\u{1F690}',color:'#06b6d4',desc:'Multi-vehicle & business accounts',services:[
+    {name:'Fleet Jump/Lockout',desc:'Priority response',price:'$45',eta:'5-10 min'},
+    {name:'Fleet Fuel',desc:'Bulk fuel delivery',price:'$55',eta:'10-20 min'},
+    {name:'Fleet Wash',desc:'Multi-vehicle wash',price:'$40',eta:'10-20 min'},
+    {name:'Fleet Inspections',desc:'Pre-trip compliance',price:'$60',eta:'10-20 min'},
+  ]},
+  {id:'seasonal-specialty',name:'Seasonal & Specialty',icon:'\u2744\uFE0F',color:'#f43f5e',desc:'Weather prep & seasonal care',services:[
+    {name:'Winter Prep',desc:'Fluids, tires, battery',price:'$85',eta:'20-40 min'},
+    {name:'Summer Prep',desc:'AC, coolant, tires',price:'$75',eta:'20-40 min'},
+    {name:'Seasonal Tire Swap',desc:'Winter/summer swap',price:'$80',eta:'20-40 min'},
+    {name:'Storm Cleanup',desc:'Post-storm assistance',price:'Quote',eta:'Scheduled'},
+  ]},
+  {id:'premium-concierge',name:'Premium Concierge',icon:'\u{1F451}',color:'#D4A853',desc:'VIP service & white-glove care',services:[
+    {name:'Valet Fuel + Wash',desc:'Fuel & wash combo',price:'$75',eta:'10-20 min'},
+    {name:'Pickup/Return Mechanic',desc:'We pick up, fix, return',price:'Quote',eta:'Scheduled'},
+    {name:'Tire/Rim Upgrade',desc:'Concierge sourcing',price:'Quote',eta:'Scheduled'},
+    {name:'VIP Roadside Priority',desc:'Top-tier dispatch',price:'$95',eta:'5-10 min'},
   ]},
 ];
 
-const PLANS = [
-  {name:'Basic',price:'$0',per:'forever',feats:['Pay-as-you-go','Standard dispatch','GPS tracking','Email support'],pop:false},
-  {name:'SOS+',price:'$7.99',per:'/mo',feats:['2 free assists/mo','Priority dispatch','Live GPS','24/7 line','15% off services'],pop:true},
-  {name:'Unlimited',price:'$14.99',per:'/mo',feats:['Unlimited assists','VIP dispatch','GPS + ETA alerts','24/7 concierge','25% off all','Family (3 vehicles)','Free annual inspection'],pop:false},
+const QUICK=[
+  {name:'Flat Tire',emoji:'\u{1F6DE}',price:55,eta:'5-10 min',desc:'Spare install or patch'},
+  {name:'Jump Start',emoji:'\u{1F50B}',price:45,eta:'5-10 min',desc:'Battery boost'},
+  {name:'Lockout',emoji:'\u{1F511}',price:50,eta:'5-10 min',desc:'Non-destructive unlock'},
+  {name:'Towing',emoji:'\u{1F69B}',price:75,eta:'5-10 min',desc:'Secure tow'},
+  {name:'Fuel Delivery',emoji:'\u26FD',price:55,eta:'5-10 min',desc:'Gas, diesel, EV'},
+  {name:'Battery Replace',emoji:'\u{1F50B}',price:95,eta:'10-20 min',desc:'Deliver & install'},
 ];
 
-const validEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-const pwStr = p => { if(p.length<8)return{l:'Too short',c:C.red,w:20};let s=0;if(/[a-z]/.test(p))s++;if(/[A-Z]/.test(p))s++;if(/[0-9]/.test(p))s++;if(/[^a-zA-Z0-9]/.test(p))s++;return s<=1?{l:'Weak',c:'#f59e0b',w:40}:s===2?{l:'Fair',c:'#facc15',w:60}:s===3?{l:'Good',c:C.primary,w:80}:{l:'Strong',c:C.green,w:100}; };
+const PLANS=[
+  {name:'Shield Free',price:'$0',per:'/forever',feats:['Pay-as-you-go pricing','Standard response time','GPS tracking','Email support'],pop:false},
+  {name:'Shield',price:'$7.99',per:'/mo',feats:['Priority response','24/7 Command Center','Free tow under 10mi','15% off all services','Live GPS + ETA alerts'],pop:true},
+  {name:'Shield Pro',price:'$14.99',per:'/mo',feats:['VIP priority response','24/7 Command Center','Free tow under 25mi','25% off all services','Family coverage (up to 4)','Dedicated concierge line'],pop:false},
+];
 
-/* ═══ MAIN ═══ */
-export default function SOSApp() {
-  const [screen,setScreen] = useState('landing');
-  const [fade,setFade] = useState(true);
-  const [userName,setUserName] = useState('');
-  const [userId,setUserId] = useState('');
-  const [token,setToken] = useState('');
+const HOW_STEPS=[
+  {icon:'\u{1F4E1}',title:'Send Your Signal',desc:'Tap SOS NOW and describe your situation. We instantly locate verified Heroes near you.'},
+  {icon:'\u{1F9B8}',title:'Hero Dispatched',desc:'We match you with the closest qualified Hero. Track their arrival in real-time with GPS.'},
+  {icon:'\u2705',title:'Mission Complete',desc:'Professional service with transparent pricing. Pay securely through the app when the job is complete.'},
+];
 
-  useEffect(() => {
-    const s = getStoredSession();
-    if (s?.access_token && s?.user) {
-      setUserName(s.user.user_metadata?.full_name || s.user.email?.split('@')[0] || 'Driver');
-      setUserId(s.user.id); setToken(s.access_token);
-      setScreen(s.user.user_metadata?.role === 'hero' ? 'hero' : 'driver');
-    }
-  }, []);
+const REVIEWS=[
+  {text:"S.O.S saved me when I was stranded with a flat tire at 2 AM. The Hero arrived in 6 minutes and had me back on the road quickly.",name:'Sarah M.',plan:'Shield Member',stars:5},
+  {text:"As a rideshare driver, S.O.S keeps me earning. The family plan covers my whole fleet at an amazing price.",name:'Mike R.',plan:'Family Plan',stars:5},
+  {text:"The Hero was professional, fast, and kind. Best rescue experience I've ever had.",name:'Jessica L.',plan:'Shield Pro',stars:5},
+];
 
-  const nav = useCallback(s => { setFade(false); setTimeout(() => { setScreen(s); setFade(true); window.scrollTo(0,0); }, 200); }, []);
+const TRUST=[
+  {icon:'\u2713',label:'Background Checked',desc:'Comprehensive verification for all Heroes'},
+  {icon:'\u2B50',label:'Highly Rated',desc:'Only top-rated professionals'},
+  {icon:'\u{1F4CD}',label:'GPS Tracked',desc:'Real-time location sharing'},
+  {icon:'\u{1F512}',label:'Insured',desc:'Full liability coverage'},
+];
 
-  const handleSignOut = () => { clearSession(); setUserName(''); setUserId(''); setToken(''); nav('landing'); };
+export default function SOSApp(){
+  const[screen,setScreen]=useState('landing');
+  const[authMode,setAuthMode]=useState('signup');
+  const[authRole,setAuthRole]=useState('citizen');
+  const[email,setEmail]=useState('');const[pw,setPw]=useState('');const[name,setName]=useState('');
+  const[err,setErr]=useState('');const[loading,setLoading]=useState(false);
+  const[session,setSession]=useState(null);const[sosUser,setSosUser]=useState(null);
+  const[selectedService,setSelectedService]=useState(null);
+  const[selectedCat,setSelectedCat]=useState(null);
+  const[dispatchPhase,setDispatchPhase]=useState(null);
+  const[eta,setEta]=useState(0);
+  const[heroOnPatrol,setHeroOnPatrol]=useState(false);
+  const[heroTab,setHeroTab]=useState('dashboard');
 
-  return (
-    <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700;9..40,800;9..40,900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-        @keyframes rise{0%{opacity:0;transform:translateY(24px)}100%{opacity:1;transform:translateY(0)}}
-        @keyframes pop{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
-        @keyframes slideUp{0%{opacity:0;transform:translateY(40px)}100%{opacity:1;transform:translateY(0)}}
-        @keyframes pulseGlow{0%,100%{box-shadow:0 0 20px rgba(255,107,53,0.3)}50%{box-shadow:0 0 40px rgba(255,107,53,0.6)}}
-        @keyframes pulseRing{0%{transform:scale(1);opacity:1}100%{transform:scale(1.5);opacity:0}}
-        @keyframes bounceIn{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
-        .rise{animation:rise .5s ease-out both}.pop{animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}.slideUp{animation:slideUp .6s ease-out both}
-        body{margin:0;background:#0a0a0a}*{box-sizing:border-box}::-webkit-scrollbar{display:none}
-      `}</style>
-      <div style={{ maxWidth:430,margin:'0 auto',minHeight:'100dvh',background:C.bg,fontFamily:"'DM Sans',sans-serif",color:C.text,position:'relative',overflow:'hidden',opacity:fade?1:0,transition:'opacity .2s' }}>
-        {screen==='landing' && <Landing onHelp={()=>nav('auth-driver')} onHero={()=>nav('auth-hero')} />}
-        {screen==='auth-driver' && <Auth role="driver" onBack={()=>nav('landing')} onOk={(n,id,tk)=>{ setUserName(n);setUserId(id);setToken(tk);nav('driver'); }} />}
-        {screen==='auth-hero' && <Auth role="hero" onBack={()=>nav('landing')} onOk={(n,id,tk)=>{ setUserName(n);setUserId(id);setToken(tk);nav('hero'); }} />}
-        {screen==='driver' && <DriverApp userName={userName} userId={userId} token={token} onBack={handleSignOut} />}
-        {screen==='hero' && <HeroDash userName={userName} onBack={handleSignOut} />}
-      </div>
-    </>
-  );
-}
+  useEffect(()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.access_token){setSession(s);getSosUserId(s.user.id,s.access_token).then(u=>{if(u){setSosUser(u);setScreen(u.role==='hero'?'hero':'citizen')}else setScreen('auth')}).catch(()=>setScreen('auth'))}else setScreen('landing')}catch{setScreen('landing')}},[]);
 
-/* ═══ AUTH ═══ */
-function Auth({role,onBack,onOk}) {
-  const [mode,setMode]=useState('signin');
-  const [email,setEmail]=useState('');const [pw,setPw]=useState('');const [name,setName]=useState('');
-  const [t,setT]=useState({});const [loading,setLoading]=useState(false);const [err,setErr]=useState('');
-  const isDr=role==='driver'; const accent=isDr?C.primary:C.green;
-  const eErr=t.email&&!validEmail(email)?'Enter valid email':'';
-  const pErr=t.pw&&pw.length>0&&pw.length<8?'Min 8 characters':'';
-  const nErr=t.name&&mode==='signup'&&name.trim().length<2?'Name required':'';
-  const pi=pw.length>0?pwStr(pw):null;
-  const ok=validEmail(email)&&pw.length>=8&&(mode==='signin'||name.trim().length>=2);
-
-  const go = async () => {
-    if(!ok||loading)return; setLoading(true); setErr('');
-    try {
-      if(mode==='signup') {
-        await doSignUp(email,pw,name.trim(),isDr?'citizen':'hero');
-        const d = await doSignIn(email,pw);
-        storeSession(d); onOk(name.trim()||email.split('@')[0], d.user?.id||'', d.access_token||'');
-      } else {
-        const d = await doSignIn(email,pw);
-        storeSession(d); onOk(d.user?.user_metadata?.full_name||email.split('@')[0], d.user?.id||'', d.access_token||'');
+  const doAuth=async()=>{
+    if(loading)return;setLoading(true);setErr('');
+    try{
+      if(authMode==='signup'){
+        if(!name.trim()){setErr('Enter your name');setLoading(false);return;}
+        await sbAuth('signup',{email,password:pw,data:{full_name:name.trim(),role:authRole,app:'sos'}});
+        const d=await sbAuth('token?grant_type=password',{email,password:pw});
+        localStorage.setItem('sos_session',JSON.stringify(d));setSession(d);
+        const u=await getSosUserId(d.user.id,d.access_token);setSosUser(u);
+        setScreen(u?.role==='hero'?'hero':'citizen');
+      }else{
+        const d=await sbAuth('token?grant_type=password',{email,password:pw});
+        localStorage.setItem('sos_session',JSON.stringify(d));setSession(d);
+        const u=await getSosUserId(d.user.id,d.access_token);setSosUser(u);
+        setScreen(u?.role==='hero'?'hero':'citizen');
       }
-    } catch(e) {
-      let m=e.message||'Failed';
-      if(m.includes('Invalid login'))m='Invalid email or password';
-      if(m.includes('already registered'))m='Email registered. Try signing in.';
-      setErr(m);
-    } finally { setLoading(false); }
+    }catch(e){let m=e.message||'Failed';if(m.includes('Invalid login'))m='Wrong email or password';if(m.includes('already registered'))m='Email taken — try signing in';setErr(m);}
+    finally{setLoading(false);}
+  };
+  const signOut=()=>{localStorage.removeItem('sos_session');setSession(null);setSosUser(null);setScreen('landing');};
+  const requestService=(svc)=>{setSelectedService(svc);setDispatchPhase('confirm');};
+  const confirmDispatch=async()=>{
+    setDispatchPhase('finding');
+    if(session&&sosUser){
+      try{await fetch(`${SB}/rest/v1/sos_missions`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${session.access_token}`,Prefer:'return=minimal'},
+        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:'GPS Location',estimated_price:parseFloat((selectedService.price||'$0').replace(/[^0-9.]/g,''))||0,request_type:'now'})
+      });}catch{}
+    }
+    setTimeout(()=>{setDispatchPhase('matched');setEta(8);},3000);
+    setTimeout(()=>setDispatchPhase('tracking'),5000);
   };
 
-  return (
-    <div style={{minHeight:'100dvh',background:C.bg,...F('column','stretch','flex-start')}}>
-      <div style={{padding:'16px 20px',...F('row','center','space-between')}}>
-        <button onClick={onBack} style={{background:'transparent',border:'none',color:C.gray,fontSize:14,cursor:'pointer',fontWeight:600,fontFamily:'inherit'}}>← Back</button>
-        <div style={{fontWeight:900,fontSize:16,color:C.primary,letterSpacing:1,fontFamily:"'Outfit',sans-serif"}}>SOS</div>
-        <div style={{width:50}}/>
+  const S={fontFamily:ff,color:C.text,background:C.bg,minHeight:'100vh',overflowX:'hidden'};
+
+  /* ═══ LANDING PAGE ═══ */
+  if(screen==='landing')return(
+    <div style={S}>
+      <div style={{minHeight:'100vh',background:`radial-gradient(ellipse at 50% 20%, rgba(255,107,53,0.15) 0%, ${C.bg} 70%)`,display:'flex',flexDirection:'column',padding:'20px 24px'}}>
+        <div style={{...F('row','center','space-between'),padding:'16px 0'}}>
+          <div style={{fontWeight:900,fontSize:22,letterSpacing:-0.5}}>S.O.S <span style={{fontSize:10,color:C.accent,verticalAlign:'super'}}>{'\u2122'}</span></div>
+          <div style={F('row','center','flex-end',12)}>
+            <button onClick={()=>{setAuthRole('hero');setScreen('auth')}} style={{background:'transparent',border:`1px solid ${C.accent}40`,color:C.accent,borderRadius:10,padding:'8px 16px',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:ff}}>Hero Portal</button>
+            <button onClick={()=>setScreen('auth')} style={btn(C.accent,'#fff',{padding:'8px 20px',fontSize:13,borderRadius:10})}>Get Help</button>
+          </div>
+        </div>
+        <div style={{flex:1,...F('column','center','center'),textAlign:'center',maxWidth:440,margin:'0 auto',padding:'40px 0'}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:16}}>SUPERHEROES ON STANDBY</div>
+          <h1 style={{fontSize:38,fontWeight:900,lineHeight:1.1,margin:'0 0 16px',letterSpacing:-1}}>Your Rescue<br/>Is <span style={{color:C.accent}}>Moments</span> Away</h1>
+          <p style={{fontSize:15,color:C.sub,lineHeight:1.6,margin:'0 0 32px',maxWidth:360}}>Verified Heroes, transparent pricing, 24/7 rescue assistance. Help is always just one tap away.</p>
+          <button onClick={()=>setScreen('auth')} style={btn(`linear-gradient(135deg,${C.accent},${C.accentDark})`,'#fff',{padding:'18px 48px',fontSize:17,borderRadius:16,width:'100%',maxWidth:320,letterSpacing:0.5})}>{'\u{1F198}'} Get Help Now</button>
+          <button onClick={()=>{setAuthRole('hero');setScreen('auth')}} style={{background:'transparent',color:C.accent,border:'none',fontSize:14,fontWeight:600,cursor:'pointer',marginTop:16,fontFamily:ff}}>Join the Hero Network {'\u2192'}</button>
+        </div>
       </div>
-      <div style={{flex:1,...F('column','center','center'),padding:'40px 24px'}}>
-        <div style={{width:80,height:80,borderRadius:20,background:`${accent}15`,...F('row','center','center'),fontSize:40,marginBottom:20}}>{isDr?'🚗':'🦸'}</div>
-        <h1 style={{fontSize:24,fontWeight:800,color:C.text,margin:'0 0 4px'}}>{isDr?'Driver Account':'Hero Portal'}</h1>
-        <p style={{fontSize:14,color:C.muted,margin:'0 0 32px'}}>{isDr?'Roadside help in minutes':'Join the SOS network'}</p>
-        <div style={{...F('row','center','center',0),width:'100%',marginBottom:28,background:C.card2,borderRadius:12,padding:4,border:`1px solid ${C.border}`}}>
-          {['signin','signup'].map(m=>(
-            <button key={m} onClick={()=>{setMode(m);setT({});}} style={{flex:1,padding:'10px 0',borderRadius:10,border:'none',cursor:'pointer',fontSize:14,fontWeight:700,background:mode===m?accent:'transparent',color:mode===m?C.white:C.muted,transition:'all .2s',fontFamily:'inherit'}}>{m==='signin'?'Sign In':'Create Account'}</button>
+
+      {/* How It Works */}
+      <div style={{padding:'60px 24px',background:C.card}}>
+        <div style={{textAlign:'center',marginBottom:40}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:8}}>HOW S.O.S WORKS</div>
+          <h2 style={{fontSize:28,fontWeight:800,margin:0}}>Three Simple Steps</h2>
+        </div>
+        <div style={{...F('column','stretch','flex-start',16),maxWidth:440,margin:'0 auto'}}>
+          {HOW_STEPS.map((s,i)=>(
+            <div key={i} style={{...card,...F('row','flex-start','flex-start',16)}}>
+              <div style={{width:48,height:48,borderRadius:14,background:`${C.accent}15`,fontSize:24,...F('row','center','center'),flexShrink:0}}>{s.icon}</div>
+              <div><div style={{fontWeight:700,fontSize:16,marginBottom:4}}>{s.title}</div><div style={{fontSize:13,color:C.sub,lineHeight:1.5}}>{s.desc}</div></div>
+            </div>
           ))}
         </div>
-        <div style={{width:'100%',maxWidth:360}}>
-          {mode==='signup'&&<div style={{marginBottom:16}}><label style={{fontSize:12,color:C.gray,fontWeight:600,marginBottom:6,display:'block'}}>Full Name</label><input value={name} onChange={e=>setName(e.target.value)} onBlur={()=>setT(x=>({...x,name:true}))} placeholder="Your full name" style={{...inp,borderColor:nErr?C.red:C.border}}/>{nErr&&<div style={{fontSize:12,color:C.red,marginTop:4}}>{nErr}</div>}</div>}
-          <div style={{marginBottom:16}}><label style={{fontSize:12,color:C.gray,fontWeight:600,marginBottom:6,display:'block'}}>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} onBlur={()=>setT(x=>({...x,email:true}))} placeholder="you@example.com" style={{...inp,borderColor:eErr?C.red:C.border}}/>{eErr&&<div style={{fontSize:12,color:C.red,marginTop:4}}>{eErr}</div>}</div>
-          <div style={{marginBottom:8}}><label style={{fontSize:12,color:C.gray,fontWeight:600,marginBottom:6,display:'block'}}>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} onBlur={()=>setT(x=>({...x,pw:true}))} placeholder="••••••••" style={{...inp,borderColor:pErr?C.red:C.border}}/>{pErr&&<div style={{fontSize:12,color:C.red,marginTop:4}}>{pErr}</div>}</div>
-          {pi&&<div style={{marginBottom:20}}><div style={{height:4,background:C.grayLighter,borderRadius:2,overflow:'hidden',marginBottom:4}}><div style={{height:'100%',width:`${pi.w}%`,background:pi.c,borderRadius:2,transition:'all .3s'}}/></div><div style={{fontSize:11,color:pi.c,fontWeight:600}}>{pi.l}</div></div>}
-          {!pi&&<div style={{height:16,marginBottom:8}}/>}
-          {err&&<div style={{padding:'12px 16px',background:`${C.red}15`,border:`1px solid ${C.red}30`,borderRadius:12,marginBottom:16}}><div style={{fontSize:13,color:C.red,fontWeight:600}}>{err}</div></div>}
-          <button onClick={go} disabled={!ok||loading} style={{...btn(accent),width:'100%',fontSize:16,marginBottom:16,opacity:(ok&&!loading)?1:0.4,cursor:(ok&&!loading)?'pointer':'not-allowed'}}>{loading?'...':mode==='signin'?'Sign In':'Create Account'}</button>
+      </div>
+
+      {/* All 8 Service Categories */}
+      <div style={{padding:'60px 24px'}}>
+        <div style={{textAlign:'center',marginBottom:40}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:8}}>OUR SERVICES</div>
+          <h2 style={{fontSize:28,fontWeight:800,margin:'0 0 8px'}}>Everything Your Vehicle Needs</h2>
+          <p style={{fontSize:14,color:C.sub,margin:0}}>8 categories, 40+ services, transparent pricing</p>
         </div>
-        <div style={{...F('row','center','center',12),width:'100%',maxWidth:360,margin:'24px 0'}}><div style={{flex:1,height:1,background:C.border}}/><span style={{fontSize:12,color:C.muted}}>or continue with</span><div style={{flex:1,height:1,background:C.border}}/></div>
-        <div style={{...F('row','center','center',12),width:'100%',maxWidth:360}}>
-          {['Google','Apple'].map(p=><button key={p} onClick={()=>onOk(p+' User','','')} style={{flex:1,padding:'12px 0',background:C.card,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:'inherit'}}>{p==='Google'?'🔵':'🍎'} {p}</button>)}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,maxWidth:440,margin:'0 auto'}}>
+          {CATS.map(cat=>(
+            <div key={cat.id} onClick={()=>setSelectedCat(selectedCat===cat.id?null:cat.id)} style={{...card,cursor:'pointer',textAlign:'center',border:selectedCat===cat.id?`2px solid ${cat.color}`:`1px solid ${C.border}`,transition:'all .2s'}}>
+              <div style={{fontSize:28,marginBottom:8}}>{cat.icon}</div>
+              <div style={{fontWeight:700,fontSize:14,marginBottom:4}}>{cat.name}</div>
+              <div style={{fontSize:11,color:C.sub}}>{cat.services.length} services</div>
+            </div>
+          ))}
         </div>
-        <p style={{fontSize:11,color:C.grayLight,marginTop:32,textAlign:'center',maxWidth:300}}>By continuing, you agree to SOS Terms of Service and Privacy Policy.</p>
+        {selectedCat&&(()=>{const cat=CATS.find(c=>c.id===selectedCat);if(!cat)return null;return(
+          <div style={{maxWidth:440,margin:'20px auto 0',background:C.card,borderRadius:16,overflow:'hidden',border:`1px solid ${cat.color}30`}}>
+            <div style={{padding:'16px 20px',background:`${cat.color}10`,borderBottom:`1px solid ${cat.color}20`}}>
+              <div style={{fontWeight:700,fontSize:16}}>{cat.icon} {cat.name}</div>
+              <div style={{fontSize:12,color:C.sub,marginTop:2}}>{cat.desc}</div>
+            </div>
+            {cat.services.map((s,i)=>(
+              <div key={i} style={{padding:'14px 20px',borderBottom:i<cat.services.length-1?`1px solid ${C.border}`:'none',...F('row','center','space-between')}}>
+                <div><div style={{fontWeight:600,fontSize:14}}>{s.name}</div><div style={{fontSize:12,color:C.sub,marginTop:2}}>{s.desc}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>ETA: {s.eta}</div></div>
+                <div style={{fontWeight:700,fontSize:16,color:s.price==='Quote'?C.gold:C.accent,flexShrink:0,marginLeft:12}}>{s.price}</div>
+              </div>
+            ))}
+          </div>
+        );})()}
+      </div>
+
+      {/* Shield Plans */}
+      <div style={{padding:'60px 24px',background:C.card}}>
+        <div style={{textAlign:'center',marginBottom:40}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:8}}>SHIELD PLANS</div>
+          <h2 style={{fontSize:28,fontWeight:800,margin:'0 0 8px'}}>Choose Your Protection</h2>
+          <p style={{fontSize:14,color:C.sub,margin:0}}>Priority response, free tows, family coverage</p>
+        </div>
+        <div style={{...F('column','stretch','flex-start',16),maxWidth:440,margin:'0 auto'}}>
+          {PLANS.map((p,i)=>(
+            <div key={i} style={{...card,border:p.pop?`2px solid ${C.accent}`:`1px solid ${C.border}`,position:'relative'}}>
+              {p.pop&&<div style={{position:'absolute',top:-10,right:16,background:C.accent,color:'#fff',fontSize:10,fontWeight:800,padding:'3px 10px',borderRadius:8,letterSpacing:1}}>POPULAR</div>}
+              <div style={F('row','baseline','space-between')}>
+                <div style={{fontWeight:700,fontSize:18,color:p.pop?C.accent:C.text}}>{p.name}</div>
+                <div><span style={{fontWeight:800,fontSize:24}}>{p.price}</span><span style={{fontSize:12,color:C.sub}}>{p.per}</span></div>
+              </div>
+              <div style={{marginTop:12}}>
+                {p.feats.map((f,j)=><div key={j} style={{fontSize:13,color:C.sub,padding:'4px 0',...F('row','center','flex-start',8)}}>
+                  <span style={{color:C.green,fontSize:14}}>{'\u2713'}</span>{f}
+                </div>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust */}
+      <div style={{padding:'60px 24px'}}>
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:8}}>YOUR SAFETY</div>
+          <h2 style={{fontSize:28,fontWeight:800,margin:0}}>Verified Heroes Only</h2>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,maxWidth:440,margin:'0 auto'}}>
+          {TRUST.map((t,i)=>(<div key={i} style={{...card,textAlign:'center'}}><div style={{fontSize:24,marginBottom:8}}>{t.icon}</div><div style={{fontWeight:700,fontSize:13,marginBottom:4}}>{t.label}</div><div style={{fontSize:11,color:C.sub}}>{t.desc}</div></div>))}
+        </div>
+      </div>
+
+      {/* Testimonials */}
+      <div style={{padding:'60px 24px',background:C.card}}>
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <div style={{fontSize:11,letterSpacing:4,color:C.accent,fontWeight:800,marginBottom:8}}>WHAT CITIZENS SAY</div>
+          <h2 style={{fontSize:28,fontWeight:800,margin:0}}>Real Rescue Stories</h2>
+        </div>
+        <div style={{...F('column','stretch','flex-start',16),maxWidth:440,margin:'0 auto'}}>
+          {REVIEWS.map((r,i)=>(<div key={i} style={card}><div style={{fontSize:14,color:C.sub,lineHeight:1.6,fontStyle:'italic',marginBottom:12}}>"{r.text}"</div><div style={F('row','center','space-between')}><div><div style={{fontWeight:700,fontSize:14}}>{r.name}</div><div style={{fontSize:11,color:C.muted}}>{r.plan}</div></div><div style={{color:'#FFB347',fontSize:14}}>{'\u2605'.repeat(r.stars)}</div></div></div>))}
+        </div>
+      </div>
+
+      {/* Final CTA */}
+      <div style={{padding:'60px 24px',textAlign:'center'}}>
+        <h2 style={{fontSize:28,fontWeight:800,margin:'0 0 12px'}}>Ready for Your <span style={{color:C.accent}}>Rescue</span>?</h2>
+        <p style={{fontSize:14,color:C.sub,margin:'0 0 28px',maxWidth:300,marginLeft:'auto',marginRight:'auto'}}>Join thousands of citizens and heroes. Your safety net is one tap away.</p>
+        <button onClick={()=>setScreen('auth')} style={btn(`linear-gradient(135deg,${C.accent},${C.accentDark})`,'#fff',{padding:'18px 48px',fontSize:17,borderRadius:16,width:'100%',maxWidth:320})}>Get Started Free</button>
+      </div>
+      <div style={{padding:'24px',textAlign:'center',borderTop:`1px solid ${C.border}`}}>
+        <div style={{fontSize:11,color:C.muted}}>S.O.S {'\u2014'} Superheroes On Standby{'\u2122'} {'\u00B7'} The Kollective Hospitality Group</div>
       </div>
     </div>
   );
-}
 
-/* ═══ LANDING ═══ */
-function Landing({onHelp,onHero}) {
-  return (
-    <div>
-      <nav style={{position:'sticky',top:0,zIndex:50,background:'rgba(10,10,10,0.95)',backdropFilter:'blur(12px)',borderBottom:`1px solid ${C.border}`,padding:'12px 20px',...F('row','center','space-between')}}>
-        <div style={F('row','center','flex-start',8)}>
-          <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${C.primary},${C.red})`,...F('row','center','center'),fontWeight:900,fontSize:11,color:C.white,fontFamily:"'Outfit',sans-serif"}}>SOS</div>
-          <div><div style={{fontWeight:800,fontSize:16,color:C.text,fontFamily:"'Outfit',sans-serif"}}>SOS</div><div style={{fontSize:9,color:C.muted,letterSpacing:0.5}}>Superheroes On Standby</div></div>
+  /* ═══ AUTH ═══ */
+  if(screen==='auth'){
+    const validEmail=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const canSubmit=validEmail&&pw.length>=8&&(authMode==='signin'||name.trim().length>=2);
+    return(
+    <div style={{...S,...F('column','center','flex-start'),padding:24}}>
+      <div style={{width:'100%',maxWidth:400}}>
+        <div style={{...F('row','center','space-between'),marginBottom:32}}>
+          <button onClick={()=>setScreen('landing')} style={{background:'none',border:'none',color:C.sub,fontSize:14,cursor:'pointer',fontFamily:ff}}>{'\u2190'} Back</button>
+          <div style={{fontWeight:900,fontSize:18}}>S.O.S</div>
+          <div style={{width:50}}/>
         </div>
-        <div style={F('row','center','flex-end',8)}>
-          <button onClick={onHelp} style={{background:'transparent',border:`1px solid ${C.border}`,color:C.gray,borderRadius:10,padding:'8px 14px',fontSize:12,cursor:'pointer',fontWeight:600,fontFamily:'inherit'}}>Sign In</button>
-          <button onClick={onHero} style={{background:C.card,border:`1px solid ${C.border}`,color:C.green,borderRadius:10,padding:'8px 14px',fontSize:12,cursor:'pointer',fontWeight:600,fontFamily:'inherit'}}>Hero Portal</button>
+        <div style={{textAlign:'center',marginBottom:28}}>
+          <div style={{width:60,height:60,borderRadius:16,background:`${authRole==='hero'?C.green:C.accent}15`,fontSize:28,...F('row','center','center'),margin:'0 auto 12px'}}>{authRole==='hero'?'\u{1F9B8}':'\u{1F198}'}</div>
+          <h2 style={{fontSize:24,fontWeight:800,margin:'0 0 4px'}}>{authRole==='hero'?'Hero Portal':'Citizen Portal'}</h2>
+          <p style={{fontSize:13,color:C.sub,margin:0}}>{authMode==='signup'?'Create your account':'Welcome back'}</p>
         </div>
-      </nav>
-      <section className="rise" style={{padding:'60px 24px 40px',textAlign:'center',background:`radial-gradient(ellipse at 50% 0%,rgba(255,107,53,0.08) 0%,transparent 60%)`}}>
-        <div style={{display:'inline-block',fontSize:10,color:C.primary,fontWeight:700,letterSpacing:3,marginBottom:12,background:`${C.primary}12`,padding:'6px 16px',borderRadius:20}}>ROADSIDE ASSISTANCE SUPER APP</div>
-        <h1 style={{fontSize:48,fontWeight:900,color:C.text,margin:'12px 0 0',letterSpacing:-1,lineHeight:1.05,fontFamily:"'Outfit',sans-serif"}}>SOS</h1>
-        <p style={{fontSize:14,color:C.primary,margin:'4px 0',fontWeight:600,letterSpacing:2}}>SUPERHEROES ON STANDBY</p>
-        <p style={{fontSize:15,color:C.muted,margin:'8px 0 32px'}}>Stranded? Locked out? One tap. Help arrives.</p>
-        <div className="slideUp" style={{...F('column','center','center',12)}}>
-          <button onClick={onHelp} style={{...btn(`linear-gradient(135deg,${C.primary},${C.red})`),width:'100%',maxWidth:280,fontSize:18,padding:'16px 32px',boxShadow:`0 8px 30px ${C.primary}30`,borderRadius:16,animation:'pulseGlow 3s ease-in-out infinite'}}>🚨 Get Help Now</button>
-          <button onClick={onHero} style={{...btn('transparent',C.text,{border:`2px solid ${C.border}`,width:'100%',maxWidth:280,borderRadius:16})}}>🦸 Become a Hero</button>
+        <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:4,marginBottom:20}}>
+          <button onClick={()=>setAuthRole('citizen')} style={{flex:1,padding:'10px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authRole==='citizen'?C.accent:'transparent',color:authRole==='citizen'?'#fff':C.sub}}>{'\u{1F198}'} Citizen</button>
+          <button onClick={()=>setAuthRole('hero')} style={{flex:1,padding:'10px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authRole==='hero'?C.green:'transparent',color:authRole==='hero'?'#fff':C.sub}}>{'\u{1F9B8}'} Hero</button>
         </div>
-        <div style={{...F('row','center','center',20),marginTop:32,flexWrap:'wrap'}}>
-          {[['⚡','Avg 22min'],['⭐','4.9 Rating'],['🛡️','Vetted Heroes']].map(([i,l])=><div key={l} style={{...F('row','center','center',6),fontSize:12,color:C.gray}}><span style={{color:C.green}}>{i}</span>{l}</div>)}
+        <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:4,marginBottom:24}}>
+          <button onClick={()=>{setAuthMode('signup');setErr('')}} style={{flex:1,padding:'10px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authMode==='signup'?C.card:'transparent',color:authMode==='signup'?C.text:C.sub}}>Sign Up</button>
+          <button onClick={()=>{setAuthMode('signin');setErr('')}} style={{flex:1,padding:'10px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authMode==='signin'?C.card:'transparent',color:authMode==='signin'?C.text:C.sub}}>Sign In</button>
         </div>
-      </section>
-      <section style={{padding:'48px 24px',borderTop:`1px solid ${C.border}`}}>
-        <h2 style={{fontSize:24,fontWeight:800,textAlign:'center',margin:'0 0 32px'}}>Roadside Services</h2>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
-          {QUICK.map((s,i)=><div key={s.name} className="pop" style={{...card,textAlign:'center',padding:20,animationDelay:`${i*.08}s`}}><div style={{fontSize:32,marginBottom:8}}>{s.emoji}</div><div style={{fontSize:14,fontWeight:700,marginBottom:2}}>{s.name}</div><div style={{fontSize:11,color:C.muted,marginBottom:6}}>{s.desc}</div><div style={{fontSize:18,fontWeight:800,color:C.primary}}>${s.price}</div><div style={{fontSize:11,color:C.muted,marginTop:4}}>~{s.eta}</div></div>)}
+        {authMode==='signup'&&<div style={{marginBottom:14}}><label style={{fontSize:12,color:C.sub,display:'block',marginBottom:6}}>Full Name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" style={inp}/></div>}
+        <div style={{marginBottom:14}}><label style={{fontSize:12,color:C.sub,display:'block',marginBottom:6}}>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com" style={inp}/></div>
+        <div style={{marginBottom:20}}><label style={{fontSize:12,color:C.sub,display:'block',marginBottom:6}}>Password</label><input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Min 8 characters" style={inp}/></div>
+        {err&&<div style={{padding:'12px',background:'rgba(239,68,68,0.12)',border:'1px solid rgba(239,68,68,0.3)',borderRadius:12,marginBottom:16,fontSize:13,color:C.red,fontWeight:600}}>{err}</div>}
+        <button onClick={doAuth} disabled={!canSubmit||loading} style={btn(canSubmit&&!loading?(authRole==='hero'?C.green:`linear-gradient(135deg,${C.accent},${C.accentDark})`):'rgba(255,255,255,0.08)',canSubmit?'#fff':C.muted,{width:'100%',padding:'16px',fontSize:16,borderRadius:14,cursor:canSubmit&&!loading?'pointer':'not-allowed'})}>{loading?'...':(authMode==='signup'?'Create Account':'Sign In')}</button>
+      </div>
+    </div>
+  );}
+
+  /* ═══ CITIZEN DASHBOARD ═══ */
+  if(screen==='citizen')return(
+    <div style={{...S,padding:24}}>
+      <div style={{...F('row','center','space-between'),marginBottom:24}}>
+        <div><div style={{fontWeight:900,fontSize:20}}>S.O.S</div><div style={{fontSize:11,color:C.sub}}>Hi {session?.user?.user_metadata?.full_name?.split(' ')[0]||'Citizen'} {'\u{1F44B}'}</div></div>
+        <button onClick={signOut} style={{background:'none',border:`1px solid ${C.border}`,color:C.sub,borderRadius:10,padding:'6px 14px',fontSize:12,cursor:'pointer',fontFamily:ff}}>Sign Out</button>
+      </div>
+      <div style={{textAlign:'center',marginBottom:28}}>
+        <div onClick={()=>requestService(QUICK[0])} style={{width:100,height:100,borderRadius:'50%',background:`linear-gradient(135deg,${C.accent},${C.accentDark})`,margin:'0 auto 12px',cursor:'pointer',...F('row','center','center'),boxShadow:`0 0 40px ${C.accent}40`,fontSize:28,fontWeight:900,color:'#fff'}}>SOS</div>
+        <div style={{fontSize:12,color:C.sub}}>Tap for Emergency Rescue</div>
+      </div>
+      <div style={{marginBottom:28}}>
+        <div style={{fontWeight:700,fontSize:16,marginBottom:12}}>Quick Rescue</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+          {QUICK.map((s,i)=>(<div key={i} onClick={()=>requestService(s)} style={{...card,textAlign:'center',cursor:'pointer',padding:14}}><div style={{fontSize:24,marginBottom:4}}>{s.emoji}</div><div style={{fontWeight:600,fontSize:12}}>{s.name}</div><div style={{fontSize:14,fontWeight:700,color:C.accent,marginTop:4}}>${s.price}</div></div>))}
         </div>
-      </section>
-      <section style={{padding:'48px 24px',borderTop:`1px solid ${C.border}`}}>
-        <h2 style={{fontSize:24,fontWeight:800,textAlign:'center',margin:'0 0 32px'}}>Plans</h2>
-        {PLANS.map(p=><div key={p.name} style={{...card,marginBottom:16,border:`1px solid ${p.pop?C.primary:C.border}`,position:'relative',overflow:'hidden'}}>
-          {p.pop&&<div style={{position:'absolute',top:12,right:-30,background:`linear-gradient(135deg,${C.primary},${C.red})`,color:C.white,fontSize:10,fontWeight:800,padding:'4px 36px',transform:'rotate(45deg)',letterSpacing:1}}>POPULAR</div>}
-          <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>{p.name}</div>
-          <div style={{...F('row','baseline','flex-start',4),marginBottom:12}}><span style={{fontSize:32,fontWeight:900,color:p.pop?C.primary:C.text}}>{p.price}</span><span style={{fontSize:13,color:C.muted}}>{p.per}</span></div>
-          {p.feats.map(f=><div key={f} style={{...F('row','center','flex-start',8),marginBottom:8}}><span style={{color:C.green,fontSize:14}}>✓</span><span style={{fontSize:13,color:C.gray}}>{f}</span></div>)}
-          <button onClick={onHelp} style={{...btn(p.pop?`linear-gradient(135deg,${C.primary},${C.red})`:C.card2,p.pop?C.white:C.text,{width:'100%',marginTop:12,border:p.pop?'none':`1px solid ${C.border}`})}}>{p.price==='$0'?'Get Started Free':'Subscribe'}</button>
+      </div>
+      <div style={{marginBottom:28}}>
+        <div style={{fontWeight:700,fontSize:16,marginBottom:12}}>All Services</div>
+        {CATS.map(cat=>(<div key={cat.id} style={{marginBottom:12}}>
+          <div onClick={()=>setSelectedCat(selectedCat===cat.id?null:cat.id)} style={{...card,cursor:'pointer',...F('row','center','space-between')}}>
+            <div style={F('row','center','flex-start',12)}>
+              <div style={{width:40,height:40,borderRadius:12,background:`${cat.color}15`,fontSize:20,...F('row','center','center')}}>{cat.icon}</div>
+              <div><div style={{fontWeight:700,fontSize:14}}>{cat.name}</div><div style={{fontSize:11,color:C.sub}}>{cat.services.length} services</div></div>
+            </div>
+            <span style={{color:C.sub,fontSize:16}}>{selectedCat===cat.id?'\u25BE':'\u25B8'}</span>
+          </div>
+          {selectedCat===cat.id&&(<div style={{background:C.card2,borderRadius:12,marginTop:4,overflow:'hidden'}}>
+            {cat.services.map((s,i)=>(<div key={i} onClick={()=>requestService(s)} style={{padding:'12px 16px',borderBottom:i<cat.services.length-1?`1px solid ${C.border}`:'none',cursor:'pointer',...F('row','center','space-between')}}><div><div style={{fontWeight:600,fontSize:13}}>{s.name}</div><div style={{fontSize:11,color:C.sub}}>{s.desc} {'\u00B7'} {s.eta}</div></div><div style={{fontWeight:700,fontSize:14,color:s.price==='Quote'?C.gold:C.accent,flexShrink:0}}>{s.price}</div></div>))}
+          </div>)}
+        </div>))}
+      </div>
+
+      {dispatchPhase&&(<div style={{position:'fixed',inset:0,background:C.overlay,zIndex:999,...F('column','center','center'),padding:24}}>
+        {dispatchPhase==='confirm'&&(<div style={{...card,width:'100%',maxWidth:360,textAlign:'center'}}>
+          <div style={{fontSize:20,fontWeight:800,marginBottom:8}}>Confirm Service</div>
+          <div style={{fontSize:16,fontWeight:600,color:C.accent,marginBottom:4}}>{selectedService?.name}</div>
+          <div style={{fontSize:13,color:C.sub,marginBottom:4}}>{selectedService?.desc}</div>
+          <div style={{fontSize:28,fontWeight:800,color:C.accent,margin:'16px 0'}}>{typeof selectedService?.price==='number'?`$${selectedService.price}`:selectedService?.price}</div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:20}}>ETA: {selectedService?.eta}</div>
+          <button onClick={confirmDispatch} style={btn(`linear-gradient(135deg,${C.accent},${C.accentDark})`,'#fff',{width:'100%',padding:'16px',fontSize:16,borderRadius:14})}>{'\u{1F198}'} Dispatch Hero</button>
+          <button onClick={()=>{setDispatchPhase(null);setSelectedService(null)}} style={{background:'none',border:'none',color:C.sub,marginTop:12,cursor:'pointer',fontSize:13,fontFamily:ff}}>Cancel</button>
         </div>)}
-      </section>
-      <section style={{padding:'48px 24px',borderTop:`1px solid ${C.border}`,textAlign:'center',background:`radial-gradient(ellipse at 50% 100%,rgba(16,185,129,0.06) 0%,transparent 60%)`}}>
-        <div style={{fontSize:48,marginBottom:16}}>🦸</div>
-        <h2 style={{fontSize:24,fontWeight:800,margin:'0 0 8px'}}>Become an SOS Hero</h2>
-        <p style={{fontSize:14,color:C.gray,margin:'0 0 24px',maxWidth:320,marginLeft:'auto',marginRight:'auto',lineHeight:1.6}}>Earn money helping stranded drivers. Flexible hours, instant payouts.</p>
-        <button onClick={onHero} style={{...btn(C.green),fontSize:16,padding:'14px 40px',borderRadius:16}}>Apply Now</button>
-      </section>
-      <footer style={{padding:'32px 24px',borderTop:`1px solid ${C.border}`,textAlign:'center'}}>
-        <div style={{fontWeight:900,fontSize:18,color:C.primary,fontFamily:"'Outfit',sans-serif"}}>SOS</div>
-        <div style={{fontSize:11,color:C.muted,marginBottom:4}}>Superheroes On Standby</div>
-        <div style={{fontSize:11,color:C.grayLight}}>© 2026 SOS · KHG</div>
-      </footer>
-    </div>
-  );
-}
-
-/* ═══ DRIVER APP ═══ */
-function DriverApp({userName,userId,token,onBack}) {
-  const [tab,setTab]=useState('home');
-  const [selSvc,setSelSvc]=useState(null);
-  const [step,setStep]=useState(null);
-  const [eta,setEta]=useState(1320);
-
-  useEffect(()=>{if(step!=='tracking')return;const t=setInterval(()=>setEta(p=>Math.max(0,p-1)),1000);return()=>clearInterval(t);},[step]);
-
-  const startReq=s=>{setSelSvc(s);setStep('confirm');};
-  const dispatch=()=>{
-    setStep('finding');
-    if(userId&&selSvc)createBooking({customer_id:userId,service_name:selSvc.name,address:'GPS',total_price:selSvc.price||0},token).catch(()=>{});
-    setTimeout(()=>setStep('found'),3000);
-  };
-  const track=()=>{setEta(1320);setStep('tracking');};
-  const cancel=()=>{setStep(null);setSelSvc(null);};
-  const fmtEta=s=>`${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-
-  if(step==='confirm'&&selSvc)return(
-    <div style={{minHeight:'100dvh',background:C.bg,...F('column','stretch','flex-start')}}>
-      <div style={{padding:'16px 20px',...F('row','center','space-between')}}><button onClick={cancel} style={{background:'transparent',border:'none',color:C.gray,fontSize:14,cursor:'pointer',fontWeight:600,fontFamily:'inherit'}}>← Cancel</button><div style={{fontSize:14,fontWeight:700}}>Confirm</div><div style={{width:50}}/></div>
-      <div style={{flex:1,...F('column','center','center'),padding:'40px 24px'}}>
-        <div style={{fontSize:64,marginBottom:20}}>{selSvc.emoji}</div>
-        <h2 style={{fontSize:28,fontWeight:900,margin:'0 0 8px'}}>{selSvc.name}</h2>
-        <p style={{fontSize:13,color:C.muted,margin:'0 0 24px'}}>{selSvc.desc}</p>
-        <div style={{...card,width:'100%',marginBottom:24}}>
-          <div style={{...F('row','center','space-between'),marginBottom:12}}><span style={{color:C.gray}}>Price</span><span style={{fontSize:20,fontWeight:900,color:C.primary}}>${selSvc.price}</span></div>
-          <div style={{...F('row','center','space-between'),marginBottom:12}}><span style={{color:C.gray}}>ETA</span><span style={{fontWeight:700}}>~{selSvc.eta}</span></div>
-          <div style={{...F('row','center','space-between')}}><span style={{color:C.gray}}>Fee</span><span style={{color:C.muted}}>$0.00</span></div>
-        </div>
-        <div style={{width:'100%',padding:'16px 20px',background:`${C.primary}10`,borderRadius:14,marginBottom:24,...F('row','center','flex-start',10)}}><span style={{fontSize:18}}>📍</span><div><div style={{fontSize:13,fontWeight:600}}>Your location</div><div style={{fontSize:11,color:C.muted}}>GPS auto-detected</div></div></div>
-        <button onClick={dispatch} style={{...btn(`linear-gradient(135deg,${C.primary},${C.red})`),width:'100%',fontSize:18,padding:'18px',boxShadow:`0 8px 30px ${C.primary}25`,borderRadius:16}}>🚨 Dispatch Hero</button>
-      </div>
-    </div>
-  );
-
-  if(step==='finding')return(
-    <div style={{minHeight:'100dvh',background:C.bg,...F('column','center','center'),padding:40}}>
-      <div style={{position:'relative',width:160,height:160,marginBottom:40}}>
-        {[0,20,40].map((ins,i)=><div key={i} style={{position:'absolute',inset:ins,borderRadius:'50%',border:`2px solid ${C.primary}${30+i*20}`,animation:`pulseRing 2s ease-out infinite ${i*.5}s`}}/>)}
-        <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:40,height:40,borderRadius:'50%',background:`linear-gradient(135deg,${C.primary},${C.red})`,boxShadow:`0 0 30px ${C.primary}40`,...F('row','center','center')}}><span style={{fontSize:20}}>🚨</span></div>
-      </div>
-      <div style={{fontSize:22,fontWeight:800,marginBottom:8}}>Dispatching Hero...</div>
-      <div style={{fontSize:14,color:C.gray}}>Finding nearest roadside hero</div>
-    </div>
-  );
-
-  if(step==='found')return(
-    <div style={{minHeight:'100dvh',background:C.bg,...F('column','center','center'),padding:24}}>
-      <div style={{fontSize:48,marginBottom:16,animation:'bounceIn .5s ease'}}>🦸</div>
-      <h2 style={{fontSize:24,fontWeight:900,margin:'0 0 8px'}}>Hero Matched!</h2>
-      <p style={{fontSize:14,color:C.gray,margin:'0 0 24px'}}>On the way to you</p>
-      <div style={{...card,width:'100%',maxWidth:360}}>
-        <div style={{...F('row','center','flex-start',16),marginBottom:20}}>
-          <div style={{width:64,height:64,borderRadius:16,background:`${C.primary}15`,...F('row','center','center'),fontSize:32}}>🦸</div>
-          <div><div style={{fontSize:20,fontWeight:800}}>Marcus T.</div><div style={{fontSize:13,color:C.yellow}}>⭐ 4.9 · 478 rescues</div></div>
-        </div>
-        {[['ETA','~22 min'],['Vehicle','Ford F-150 · White'],['Service',selSvc?.name]].map(([l,v])=><div key={l} style={{...F('row','center','space-between'),padding:'12px 0',borderTop:`1px solid ${C.border}`}}><span style={{fontSize:13,color:C.gray}}>{l}</span><span style={{fontSize:13,fontWeight:600}}>{v}</span></div>)}
-      </div>
-      <button onClick={track} style={{...btn(C.primary),width:'100%',maxWidth:360,fontSize:16,marginTop:24,borderRadius:16}}>Track My Hero →</button>
-    </div>
-  );
-
-  if(step==='tracking')return(
-    <div style={{minHeight:'100dvh',background:C.bg,...F('column','stretch','flex-start')}}>
-      <div style={{padding:'16px 20px',...F('row','center','space-between')}}><button onClick={cancel} style={{background:'transparent',border:'none',color:C.gray,fontSize:14,cursor:'pointer',fontFamily:'inherit'}}>✕</button><div style={{fontSize:14,fontWeight:700,color:C.primary}}>Hero En Route</div><div style={{width:40}}/></div>
-      <div style={{flex:1,minHeight:300,background:C.card,margin:'0 20px',borderRadius:20,position:'relative',overflow:'hidden',...F('column','center','center'),border:`1px solid ${C.border}`}}>
-        <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(${C.grayLighter} 1px,transparent 1px),linear-gradient(90deg,${C.grayLighter} 1px,transparent 1px)`,backgroundSize:'40px 40px',opacity:0.3}}/>
-        <div style={{width:200,height:200,borderRadius:'50%',border:`2px dashed ${C.grayLighter}`,position:'absolute',...F('column','center','center')}}><div style={{width:120,height:120,borderRadius:'50%',border:`2px dashed ${C.grayLighter}`,position:'absolute',...F('column','center','center')}}><div style={{width:16,height:16,borderRadius:'50%',background:C.primary,boxShadow:`0 0 20px ${C.primary}60`}}/></div></div>
-        <div style={{position:'absolute',top:20,right:20,width:12,height:12,borderRadius:'50%',background:C.green,boxShadow:`0 0 12px ${C.green}`}}/>
-        <div style={{position:'absolute',bottom:16,left:16,background:'rgba(10,10,10,0.9)',borderRadius:10,padding:'8px 12px',fontSize:11,color:C.gray,border:`1px solid ${C.border}`}}>📍 Live GPS</div>
-      </div>
-      <div style={{padding:20}}>
-        <div style={{...card,...F('row','center','space-between'),marginBottom:16}}>
-          <div style={F('row','center','flex-start',12)}><div style={{width:48,height:48,borderRadius:14,background:`${C.primary}15`,...F('row','center','center'),fontSize:24}}>🦸</div><div><div style={{fontSize:16,fontWeight:700}}>Marcus T.</div><div style={{fontSize:12,color:C.muted}}>⭐ 4.9</div></div></div>
-          <div style={{textAlign:'right'}}><div style={{fontSize:24,fontWeight:900,color:C.primary,fontVariantNumeric:'tabular-nums'}}>{fmtEta(eta)}</div><div style={{fontSize:10,color:C.muted}}>ETA</div></div>
-        </div>
-        <div style={F('row','center','center',12)}>
-          <button style={{...btn(C.card,C.text,{flex:1,border:`1px solid ${C.border}`})}}>📞 Call</button>
-          <button style={{...btn(C.card,C.text,{flex:1,border:`1px solid ${C.border}`})}}>💬 Msg</button>
-          <button onClick={cancel} style={{...btn(C.card,C.red,{flex:1,border:`1px solid ${C.red}30`})}}>Cancel</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  /* ── Services drill-down ── */
-  const Svcs=()=>{
-    const[ac,setAc]=useState(null);const[ss,setSs]=useState(null);
-    const ct=ac?CATS.find(c=>c.id===ac):null;
-    if(ct)return(<div style={{padding:20}}><button onClick={()=>{setAc(null);setSs(null);}} style={{background:'none',border:'none',color:C.gray,cursor:'pointer',fontSize:14,fontFamily:'inherit',marginBottom:16}}>‹ All Services</button>
-      <div style={{...F('row','center','flex-start',10),marginBottom:20}}><div style={{width:44,height:44,borderRadius:14,background:`${ct.color}15`,...F('row','center','center'),fontSize:24}}>{ct.icon}</div><div><div style={{fontSize:18,fontWeight:800}}>{ct.name}</div><div style={{fontSize:12,color:C.muted}}>{ct.services.length} services</div></div></div>
-      {ct.services.map((s,i)=>{const sel=ss===s.name;return(
-        <button key={s.name} onClick={()=>setSs(sel?null:s.name)} style={{...card,width:'100%',textAlign:'left',cursor:'pointer',border:sel?`2px solid ${ct.color}`:`1px solid ${C.border}`,marginBottom:10,fontFamily:'inherit',transition:'all .2s'}}>
-          <div style={F('row','center','space-between')}><div style={{flex:1}}><div style={{fontSize:14,fontWeight:700}}>{s.name}</div><div style={{fontSize:12,color:C.muted,marginTop:2}}>{s.desc}</div></div><div style={{textAlign:'right',marginLeft:12}}><div style={{fontSize:14,fontWeight:800,color:s.price==='Quote'?'#f59e0b':C.primary}}>{s.price}</div><div style={{fontSize:11,color:C.muted}}>⏱ {s.eta}</div></div></div>
-        </button>);})}
-      {ss&&<button onClick={()=>{const svc=ct.services.find(x=>x.name===ss);startReq({name:svc.name,emoji:ct.icon,price:parseInt((svc.price||'0').replace(/\D/g,''))||0,eta:svc.eta,desc:svc.desc});}} style={{...btn(`linear-gradient(135deg,${C.primary},${C.red})`),width:'100%',marginTop:20,padding:'16px',fontSize:15,borderRadius:16,boxShadow:`0 8px 30px ${C.primary}25`}}>🚨 REQUEST NOW</button>}
-    </div>);
-    return(<div style={{padding:20}}><h2 style={{fontSize:20,fontWeight:800,marginBottom:4}}>All Services</h2><p style={{fontSize:13,color:C.muted,marginBottom:20}}>50+ roadside & car services</p>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-        {CATS.map((c,i)=><button key={c.id} className="pop" onClick={()=>setAc(c.id)} style={{...card,textAlign:'left',cursor:'pointer',borderLeft:`3px solid ${c.color}`,animationDelay:`${i*.06}s`,fontFamily:'inherit'}}><div style={{fontSize:28,marginBottom:8}}>{c.icon}</div><div style={{fontSize:13,fontWeight:700}}>{c.name}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{c.services.length} services</div></button>)}
-      </div>
-    </div>);
-  };
-
-  return(
-    <div style={{minHeight:'100dvh',background:C.bg,paddingBottom:80}}>
-      <div style={{padding:'16px 20px',...F('row','center','space-between')}}>
-        <div style={F('row','center','flex-start',10)}>
-          <div style={{width:32,height:32,borderRadius:8,background:`linear-gradient(135deg,${C.primary},${C.red})`,...F('row','center','center'),fontWeight:900,fontSize:9,color:C.white,fontFamily:"'Outfit',sans-serif"}}>SOS</div>
-          <div><div style={{fontSize:14,fontWeight:700}}>Hi, {userName||'Driver'} 👋</div><div style={{fontSize:11,color:C.muted}}>Basic Member</div></div>
-        </div>
-        <div style={{width:40,height:40,borderRadius:12,background:C.card,border:`1px solid ${C.border}`,...F('row','center','center'),fontSize:18}}>🔔</div>
-      </div>
-
-      {tab==='home'&&<div>
-        <div style={{margin:'0 20px',height:200,background:C.card,borderRadius:20,position:'relative',overflow:'hidden',...F('column','center','center'),border:`1px solid ${C.border}`}}>
-          <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(${C.grayLighter} 1px,transparent 1px),linear-gradient(90deg,${C.grayLighter} 1px,transparent 1px)`,backgroundSize:'40px 40px',opacity:0.3}}/>
-          <div style={{position:'relative',width:16,height:16,borderRadius:'50%',background:C.primary,boxShadow:`0 0 20px ${C.primary}60`}}/>
-          <div style={{position:'absolute',bottom:12,left:12,background:'rgba(10,10,10,0.9)',borderRadius:10,padding:'6px 10px',fontSize:11,color:C.gray,border:`1px solid ${C.border}`}}>📍 Your location</div>
-        </div>
-        <div style={{...F('column','center','center'),padding:'20px 20px 12px'}}>
-          <button onClick={()=>startReq(QUICK[0])} style={{width:140,height:140,borderRadius:'50%',background:`linear-gradient(135deg,${C.primary},${C.red})`,border:'none',color:C.white,fontSize:15,fontWeight:900,cursor:'pointer',boxShadow:`0 8px 40px ${C.primary}35`,animation:'pulseGlow 3s ease-in-out infinite',fontFamily:"'Outfit',sans-serif"}}>🚨<br/>SOS<br/><span style={{fontSize:11,fontWeight:600}}>Get Help</span></button>
-        </div>
-        <div style={{padding:'8px 20px'}}><div style={{fontSize:15,fontWeight:700,marginBottom:12}}>Quick Services</div>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10}}>
-            {QUICK.map((s,i)=><button key={s.name} className="pop" onClick={()=>startReq(s)} style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:'14px 8px',cursor:'pointer',textAlign:'center',animationDelay:`${i*.07}s`,fontFamily:'inherit'}}><div style={{fontSize:28,marginBottom:4}}>{s.emoji}</div><div style={{fontSize:11,fontWeight:600}}>{s.name}</div><div style={{fontSize:12,color:C.primary,fontWeight:800}}>${s.price}</div></button>)}
+        {dispatchPhase==='finding'&&(<div style={{textAlign:'center'}}><div style={{width:80,height:80,borderRadius:'50%',background:`${C.accent}20`,margin:'0 auto 16px',...F('row','center','center'),fontSize:36}}>{'\u{1F9B8}'}</div><div style={{fontSize:20,fontWeight:800,marginBottom:8}}>Finding Your Hero...</div><div style={{fontSize:14,color:C.sub}}>Locating verified Heroes nearby</div></div>)}
+        {dispatchPhase==='matched'&&(<div style={{textAlign:'center'}}><div style={{width:80,height:80,borderRadius:'50%',background:`${C.green}20`,margin:'0 auto 16px',...F('row','center','center'),fontSize:36}}>{'\u2705'}</div><div style={{fontSize:20,fontWeight:800,marginBottom:8,color:C.green}}>Hero Found!</div><div style={{fontSize:14,color:C.sub}}>Your hero is preparing to depart</div></div>)}
+        {dispatchPhase==='tracking'&&(<div style={{...card,width:'100%',maxWidth:360,textAlign:'center'}}>
+          <div style={{fontSize:18,fontWeight:800,marginBottom:4}}>Hero En Route {'\u{1F9B8}'}</div>
+          <div style={{fontSize:14,color:C.sub,marginBottom:16}}>{selectedService?.name}</div>
+          <div style={{width:120,height:120,borderRadius:'50%',background:`linear-gradient(135deg,${C.accent}20,${C.green}20)`,margin:'0 auto 16px',...F('row','center','center')}}>
+            <div><div style={{fontSize:32,fontWeight:900,color:C.accent}}>{eta}</div><div style={{fontSize:11,color:C.sub}}>min ETA</div></div>
           </div>
-        </div>
-        <div style={{padding:'20px 20px 0'}}><div style={{fontSize:15,fontWeight:700,marginBottom:12}}>Recent</div>
-          {[{s:'Jump Start',h:'Marcus T.',d:'Today',c:55},{s:'Flat Tire',h:'Darnell K.',d:'Mar 28',c:75}].map((x,i)=><div key={i} style={{...F('row','center','space-between'),padding:'12px 0',borderBottom:i<1?`1px solid ${C.border}`:'none'}}><div><div style={{fontSize:14,fontWeight:600}}>{x.s}</div><div style={{fontSize:11,color:C.muted}}>{x.h} · {x.d}</div></div><div style={{fontSize:14,fontWeight:700}}>${x.c}</div></div>)}
-        </div>
-      </div>}
-
-      {tab==='services'&&<Svcs/>}
-
-      {tab==='history'&&<div style={{padding:20}}><h2 style={{fontSize:20,fontWeight:800,marginBottom:16}}>History</h2>
-        {[{s:'Jump Start',h:'Marcus T.',d:'Today',c:55},{s:'Flat Tire',h:'Darnell K.',d:'Mar 28',c:75},{s:'Lockout',h:'Keisha M.',d:'Mar 15',c:65}].map((x,i)=><div key={i} style={{...card,...F('row','center','space-between'),marginBottom:12}}><div><div style={{fontSize:15,fontWeight:700}}>{x.s}</div><div style={{fontSize:12,color:C.muted}}>{x.h} · {x.d}</div><div style={{fontSize:11,color:C.green,marginTop:4}}>✓ Completed</div></div><div style={{fontSize:18,fontWeight:800}}>${x.c}</div></div>)}
-      </div>}
-
-      {tab==='wallet'&&<div style={{padding:20}}><h2 style={{fontSize:20,fontWeight:800,marginBottom:16}}>Wallet</h2>
-        <div style={{...card,textAlign:'center',marginBottom:20}}><div style={{fontSize:11,color:C.muted,marginBottom:4}}>Balance</div><div style={{fontSize:36,fontWeight:900,color:C.primary}}>$0.00</div></div>
-        <div style={{...card,marginBottom:12}}><div style={{fontSize:14,fontWeight:700,marginBottom:12}}>Payment</div><div style={{...F('row','center','space-between'),padding:'12px 0',borderBottom:`1px solid ${C.border}`}}><span style={{color:C.gray}}>💳 •••• 4242</span><span style={{fontSize:12,color:C.green}}>Default</span></div><button style={{...btn('transparent',C.primary,{border:'none',padding:'12px 0',fontSize:13,fontWeight:600})}}>+ Add Method</button></div>
-      </div>}
-
-      {tab==='profile'&&<div style={{padding:20,...F('column','center','center'),minHeight:'60vh'}}>
-        <div style={{width:80,height:80,borderRadius:20,background:C.card2,...F('row','center','center'),fontSize:36,marginBottom:16,border:`1px solid ${C.border}`}}>🚗</div>
-        <div style={{fontSize:18,fontWeight:700,marginBottom:4}}>{userName||'Driver'}</div><div style={{fontSize:13,color:C.muted,marginBottom:24}}>Basic Member</div>
-        {['My Profile','My Vehicles','SOS Plans','Payment Methods','Help & Support'].map(x=><div key={x} style={{...card,width:'100%',marginBottom:8,...F('row','center','space-between'),padding:'16px 20px',cursor:'pointer'}}><span>{x}</span><span style={{color:C.muted}}>→</span></div>)}
-        <button onClick={onBack} style={{...btn('transparent',C.red,{border:'none',marginTop:16})}}>Sign Out</button>
-      </div>}
-
-      <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:430,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 env(safe-area-inset-bottom,8px)',...F('row','center','space-around'),zIndex:40}}>
-        {[['home','🏠','Home'],['services','🔧','Services'],['history','📂','History'],['wallet','💳','Wallet'],['profile','👤','Profile']].map(([id,ic,l])=><button key={id} onClick={()=>setTab(id)} style={{background:'none',border:'none',cursor:'pointer',...F('column','center','center',2),padding:'6px 12px',fontFamily:'inherit'}}><span style={{fontSize:20}}>{ic}</span><span style={{fontSize:10,color:tab===id?C.primary:C.muted,fontWeight:tab===id?700:500}}>{l}</span></button>)}
-      </div>
-    </div>
-  );
-}
-
-/* ═══ HERO DASHBOARD ═══ */
-function HeroDash({userName,onBack}) {
-  const [tab,setTab]=useState('dash');
-  const [on,setOn]=useState(false);
-  const [alert,setAlert]=useState(false);
-  const [timer,setTimer]=useState(15);
-
-  useEffect(()=>{if(!on)return;const t=setTimeout(()=>setAlert(true),3000);return()=>clearTimeout(t);},[on]);
-  useEffect(()=>{if(!alert)return;setTimer(15);const t=setInterval(()=>setTimer(p=>{if(p<=1){setAlert(false);return 0;}return p-1;}),1000);return()=>clearInterval(t);},[alert]);
-
-  return(
-    <div style={{minHeight:'100dvh',background:C.bg,paddingBottom:80}}>
-      <div style={{padding:'16px 20px',...F('row','center','space-between')}}>
-        <div style={F('row','center','flex-start',10)}>
-          <div style={{width:32,height:32,borderRadius:8,background:C.green,...F('row','center','center'),fontWeight:900,fontSize:9,color:C.white,fontFamily:"'Outfit',sans-serif"}}>SOS</div>
-          <div><div style={{fontSize:14,fontWeight:700}}>{userName||'Hero'} 🦸</div><div style={{fontSize:11,color:on?C.green:C.muted}}>{on?'● On Patrol':'○ Off Duty'}</div></div>
-        </div>
-        <button onClick={()=>{setOn(!on);if(on)setAlert(false);}} style={{...F('row','center','center',8),background:on?`${C.green}10`:C.card2,border:`1px solid ${on?C.green:C.border}`,borderRadius:20,padding:'8px 16px',cursor:'pointer',fontFamily:'inherit'}}>
-          <div style={{width:10,height:10,borderRadius:'50%',background:on?C.green:C.grayLight}}/><span style={{fontSize:12,fontWeight:700,color:on?C.green:C.gray}}>{on?'ON PATROL':'OFF DUTY'}</span>
-        </button>
-      </div>
-
-      {alert&&<div style={{position:'fixed',inset:0,zIndex:60,background:'rgba(0,0,0,0.6)',backdropFilter:'blur(8px)',...F('column','center','center'),padding:20}}>
-        <div style={{...card,width:'100%',maxWidth:380,border:`2px solid ${C.primary}`,position:'relative',boxShadow:`0 20px 60px rgba(255,107,53,0.2)`}}>
-          <div style={{position:'absolute',top:12,right:12}}><div style={{width:44,height:44,borderRadius:'50%',border:`3px solid ${timer<=5?C.red:C.green}`,...F('row','center','center')}}><span style={{fontSize:18,fontWeight:900,color:timer<=5?C.red:C.green}}>{timer}</span></div></div>
-          <div style={{fontSize:12,color:C.primary,fontWeight:700,letterSpacing:2,marginBottom:8}}>🚨 RESCUE REQUEST</div>
-          <div style={{fontSize:20,fontWeight:800,marginBottom:4}}>Flat Tire Change</div>
-          <div style={{fontSize:13,color:C.gray,marginBottom:16}}>Jasmine R. · 2019 Honda Civic</div>
-          <div style={{...F('row','center','flex-start',8),marginBottom:8}}><span style={{color:C.primary}}>📍</span><span style={{fontSize:13,color:C.gray}}>I-285 Exit 42 · 2.3 mi</span></div>
-          <div style={{...F('row','center','flex-start',8),marginBottom:16}}><span style={{color:C.green}}>💰</span><span style={{fontSize:20,fontWeight:900,color:C.green}}>$75.00</span></div>
-          <div style={F('row','center','center',12)}>
-            <button onClick={()=>setAlert(false)} style={{...btn(C.card2,C.gray,{flex:1,border:`1px solid ${C.border}`})}}>Decline</button>
-            <button onClick={()=>{setAlert(false);setTab('rescues');}} style={{...btn(`linear-gradient(135deg,${C.primary},${C.red})`,C.white,{flex:2})}}>Accept Rescue</button>
+          <div style={{background:C.card2,borderRadius:12,padding:14,marginBottom:16}}>
+            <div style={{...F('row','center','space-between'),marginBottom:8}}><span style={{fontSize:12,color:C.sub}}>Live GPS tracking</span><span style={{fontSize:12,color:C.green}}>{'\u25CF'} Active</span></div>
+            <div style={{height:4,background:C.border,borderRadius:2,overflow:'hidden'}}><div style={{width:'65%',height:'100%',background:`linear-gradient(90deg,${C.accent},${C.green})`,borderRadius:2}}/></div>
           </div>
-        </div>
-      </div>}
-
-      {tab==='dash'&&<div style={{padding:20}}>
-        <div style={{...card,marginBottom:16}}><div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:12,textAlign:'center'}}>
-          <div><div style={{fontSize:11,color:C.muted}}>Today</div><div style={{fontSize:24,fontWeight:900,color:C.green}}>$310</div></div>
-          <div><div style={{fontSize:11,color:C.muted}}>Week</div><div style={{fontSize:24,fontWeight:900}}>$1,450</div></div>
-          <div><div style={{fontSize:11,color:C.muted}}>Rating</div><div style={{fontSize:24,fontWeight:900,color:C.yellow}}>⭐4.9</div></div>
-        </div></div>
-        <div style={{...card,...F('row','center','space-between'),marginBottom:16,border:`1px solid ${on?`${C.green}40`:C.border}`}}>
-          <div><div style={{fontSize:16,fontWeight:700}}>Patrol Status</div><div style={{fontSize:12,color:on?C.green:C.muted}}>{on?'Receiving rescue requests':'Go on patrol'}</div></div>
-          <button onClick={()=>{setOn(!on);if(on)setAlert(false);}} style={{width:56,height:32,borderRadius:16,background:on?C.green:C.grayLighter,border:'none',cursor:'pointer',position:'relative',transition:'all .3s'}}><div style={{width:26,height:26,borderRadius:'50%',background:C.white,position:'absolute',top:3,left:on?27:3,transition:'left .3s',boxShadow:'0 2px 4px rgba(0,0,0,0.3)'}}/></button>
-        </div>
-        <div style={{height:200,background:C.card,borderRadius:20,marginBottom:16,position:'relative',overflow:'hidden',...F('column','center','center'),border:`1px solid ${C.border}`}}>
-          <div style={{position:'absolute',inset:0,backgroundImage:`linear-gradient(${C.grayLighter} 1px,transparent 1px),linear-gradient(90deg,${C.grayLighter} 1px,transparent 1px)`,backgroundSize:'40px 40px',opacity:0.3}}/>
-          <div style={{position:'relative',width:14,height:14,borderRadius:'50%',background:on?C.green:C.grayLight,boxShadow:on?`0 0 20px ${C.green}80`:'none'}}/>
-          <div style={{position:'absolute',bottom:12,left:12,background:'rgba(10,10,10,0.9)',borderRadius:10,padding:'6px 10px',fontSize:11,color:C.gray,border:`1px solid ${C.border}`}}>{on?'🟢 On Patrol':'⚫ Off Duty'}</div>
-        </div>
-        <div style={card}><div style={{fontSize:14,fontWeight:700,marginBottom:12}}>Incoming</div>
-          {!on?<div style={{textAlign:'center',padding:'20px 0'}}><div style={{fontSize:28,marginBottom:8}}>💤</div><div style={{fontSize:13,color:C.muted}}>Go on patrol for rescues</div></div>
-          :<div style={{textAlign:'center',padding:'20px 0'}}><div style={{fontSize:28,marginBottom:8}}>📡</div><div style={{fontSize:13,color:C.green}}>Scanning for stranded drivers...</div></div>}
-        </div>
-      </div>}
-
-      {tab==='rescues'&&<div style={{padding:20}}><h2 style={{fontSize:20,fontWeight:800,marginBottom:16}}>Recent Rescues</h2>
-        {[{c:'Jasmine R.',s:'Flat Tire',e:75,t:'2:15 PM',r:5},{c:'Kevin D.',s:'Jump Start',e:55,t:'11:30 AM',r:5},{c:'Tanya W.',s:'Lockout',e:65,t:'9:45 AM',r:4},{c:'Andre P.',s:'Tow Truck',e:125,t:'Yesterday',r:5}].map((m,i)=><div key={i} style={{...card,...F('row','center','space-between'),marginBottom:12}}><div><div style={{fontSize:15,fontWeight:700}}>{m.s}</div><div style={{fontSize:12,color:C.muted}}>{m.c} · {m.t}</div><div style={{fontSize:11,color:C.yellow}}>{'⭐'.repeat(m.r)}</div></div><div style={{fontSize:20,fontWeight:800,color:C.green}}>+${m.e}</div></div>)}
-      </div>}
-
-      {tab==='earnings'&&<div style={{padding:20}}><h2 style={{fontSize:20,fontWeight:800,marginBottom:16}}>Earnings</h2>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:24}}>
-          <div style={{...card,textAlign:'center'}}><div style={{fontSize:11,color:C.muted}}>Today</div><div style={{fontSize:32,fontWeight:900,color:C.green}}>$310</div></div>
-          <div style={{...card,textAlign:'center'}}><div style={{fontSize:11,color:C.muted}}>Week</div><div style={{fontSize:32,fontWeight:900}}>$1,450</div></div>
-        </div>
-        <div style={card}>{[['Base','$1,220'],['Tips','$165'],['Bonuses','$85'],['Fee','-$122']].map(([l,v])=><div key={l} style={{...F('row','center','space-between'),padding:'10px 0',borderBottom:`1px solid ${C.border}`}}><span style={{color:C.gray}}>{l}</span><span style={{fontWeight:700,color:v.startsWith('-')?C.red:C.text}}>{v}</span></div>)}
-          <div style={{...F('row','center','space-between'),padding:'12px 0 0'}}><span style={{fontSize:16,fontWeight:800}}>Net</span><span style={{fontSize:20,fontWeight:900,color:C.green}}>$1,348</span></div>
-        </div>
-      </div>}
-
-      {tab==='profile'&&<div style={{padding:20,...F('column','center','center'),minHeight:'60vh'}}>
-        <div style={{width:80,height:80,borderRadius:20,background:`${C.green}12`,...F('row','center','center'),fontSize:36,marginBottom:16}}>🦸</div>
-        <div style={{fontSize:18,fontWeight:700,marginBottom:4}}>{userName||'Hero'}</div><div style={{fontSize:13,color:C.green,marginBottom:24}}>⭐ 4.9 · 478 Rescues</div>
-        {['My Profile','Skills','My Vehicle','Documents','Payouts','Help'].map(x=><div key={x} style={{...card,width:'100%',marginBottom:8,...F('row','center','space-between'),padding:'16px 20px',cursor:'pointer'}}><span>{x}</span><span style={{color:C.muted}}>→</span></div>)}
-        <button onClick={onBack} style={{...btn('transparent',C.red,{border:'none',marginTop:16})}}>Sign Out</button>
-      </div>}
-
-      <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:430,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 env(safe-area-inset-bottom,8px)',...F('row','center','space-around'),zIndex:40}}>
-        {[['dash','📊','Dashboard'],['rescues','🚨','Rescues'],['earnings','💰','Earnings'],['profile','👤','Profile']].map(([id,ic,l])=><button key={id} onClick={()=>setTab(id)} style={{background:'none',border:'none',cursor:'pointer',...F('column','center','center',2),padding:'6px 12px',fontFamily:'inherit'}}><span style={{fontSize:20}}>{ic}</span><span style={{fontSize:10,color:tab===id?C.green:C.muted,fontWeight:tab===id?700:500}}>{l}</span></button>)}
-      </div>
+          <button onClick={()=>{setDispatchPhase(null);setSelectedService(null);setSelectedCat(null)}} style={btn(C.green,'#fff',{width:'100%',padding:'14px',fontSize:14,borderRadius:12})}>Mission Complete {'\u2705'}</button>
+        </div>)}
+      </div>)}
     </div>
   );
+
+  /* ═══ HERO DASHBOARD ═══ */
+  if(screen==='hero')return(
+    <div style={{...S,padding:24}}>
+      <div style={{...F('row','center','space-between'),marginBottom:24}}>
+        <div><div style={{fontWeight:900,fontSize:20}}>{'\u{1F9B8}'} Hero Portal</div><div style={{fontSize:11,color:C.sub}}>{session?.user?.user_metadata?.full_name||'Hero'}</div></div>
+        <button onClick={signOut} style={{background:'none',border:`1px solid ${C.border}`,color:C.sub,borderRadius:10,padding:'6px 14px',fontSize:12,cursor:'pointer',fontFamily:ff}}>Sign Out</button>
+      </div>
+      <div style={{...card,marginBottom:20,...F('row','center','space-between')}}>
+        <div><div style={{fontWeight:700,fontSize:15}}>On Patrol</div><div style={{fontSize:12,color:heroOnPatrol?C.green:C.sub}}>{heroOnPatrol?'Accepting missions':'Off duty'}</div></div>
+        <div onClick={()=>setHeroOnPatrol(!heroOnPatrol)} style={{width:52,height:28,borderRadius:14,background:heroOnPatrol?C.green:C.border,cursor:'pointer',padding:2,transition:'all .3s'}}><div style={{width:24,height:24,borderRadius:12,background:'#fff',transform:heroOnPatrol?'translateX(24px)':'translateX(0)',transition:'all .3s'}}/></div>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:20}}>
+        {[{l:'Missions',v:'0',c:C.accent},{l:'Rating',v:'5.0',c:C.gold},{l:'Earned',v:'$0',c:C.green}].map((s,i)=>(<div key={i} style={{...card,textAlign:'center',padding:14}}><div style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:11,color:C.sub}}>{s.l}</div></div>))}
+      </div>
+      <div style={{...F('row','center','flex-start',8),marginBottom:20,flexWrap:'wrap'}}>
+        {['dashboard','history','earnings','profile'].map(t=>(<button key={t} onClick={()=>setHeroTab(t)} style={{background:heroTab===t?`${C.accent}20`:'transparent',border:heroTab===t?`1px solid ${C.accent}40`:`1px solid ${C.border}`,color:heroTab===t?C.accent:C.sub,borderRadius:10,padding:'8px 14px',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:ff,textTransform:'capitalize'}}>{t}</button>))}
+      </div>
+      {heroTab==='dashboard'&&(<div style={{...card,textAlign:'center',padding:32}}>{heroOnPatrol?<><div style={{fontSize:36,marginBottom:12}}>{'\u{1F4E1}'}</div><div style={{fontWeight:700,fontSize:16,marginBottom:8}}>Scanning for Missions</div><div style={{fontSize:13,color:C.sub}}>You'll be notified when a citizen needs help nearby</div></>:<><div style={{fontSize:36,marginBottom:12}}>{'\u{1F634}'}</div><div style={{fontWeight:700,fontSize:16,marginBottom:8}}>Off Patrol</div><div style={{fontSize:13,color:C.sub}}>Toggle "On Patrol" to start accepting missions</div></>}</div>)}
+      {heroTab==='history'&&<div style={{...card,textAlign:'center',padding:32}}><div style={{fontSize:36,marginBottom:8}}>{'\u{1F4CB}'}</div><div style={{fontWeight:700,fontSize:15}}>Mission History</div><div style={{fontSize:13,color:C.sub,marginTop:4}}>Completed missions appear here</div></div>}
+      {heroTab==='earnings'&&<div style={{...card,textAlign:'center',padding:32}}><div style={{fontSize:36,marginBottom:8}}>{'\u{1F4B0}'}</div><div style={{fontWeight:700,fontSize:15}}>Earnings</div><div style={{fontSize:13,color:C.sub,marginTop:4}}>Track your earnings and payouts</div></div>}
+      {heroTab==='profile'&&<div style={{...card,textAlign:'center',padding:32}}><div style={{fontSize:36,marginBottom:8}}>{'\u{1F9B8}'}</div><div style={{fontWeight:700,fontSize:15}}>{session?.user?.user_metadata?.full_name||'Hero'}</div><div style={{fontSize:13,color:C.sub,marginTop:4}}>{session?.user?.email}</div></div>}
+    </div>
+  );
+
+  return null;
 }
