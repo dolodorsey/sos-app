@@ -1,5 +1,10 @@
 import React,{useState,useEffect}from'react';
 
+// Haptic feedback for native iOS
+const tap=async(style='Medium')=>{try{const{Haptics,ImpactStyle}=await import('@capacitor/haptics');await Haptics.impact({style:ImpactStyle[style]||ImpactStyle.Medium});}catch{}};
+const tapHeavy=()=>tap('Heavy');
+const tapLight=()=>tap('Light');
+
 /* ═══════════════════════════════════════════
    S.O.S — SUPERHEROES ON STANDBY — MOBILE APP
    8 categories, 40 services, citizen/hero portals
@@ -165,8 +170,8 @@ function SOSAppInner(){
 
   const signOut=()=>{localStorage.removeItem('sos_session');setSession(null);setSosUser(null);setScreen('auth');setTab('home');setHeroTab('home');};
 
-  const request=(svc)=>setDispatch({phase:'confirm',service:svc});
-  const confirmReq=async()=>{
+  const request=(svc)=>{tapLight();setDispatch({phase:'confirm',service:svc});};
+  const confirmReq=async()=>{tapHeavy();
     setDispatch(p=>({...p,phase:'finding'}));
     const loc=await getLocation();
     if(session&&sosUser){
@@ -176,7 +181,7 @@ function SOSAppInner(){
     setTimeout(()=>setDispatch(p=>({...p,phase:'matched'})),3000);
     setTimeout(()=>setDispatch(p=>({...p,phase:'tracking',eta:7})),5500);
   };
-  const finishMission=()=>{setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
+  const finishMission=()=>{tap();setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
 
   const W={fontFamily:ff,color:C.text,background:C.bg,minHeight:'100vh',position:'relative'};
   const safeTop=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat')||'0')||44;
@@ -279,7 +284,7 @@ function SOSAppInner(){
             </div>
             {/* SOS Button */}
             <div style={{textAlign:'center',margin:'20px 0 28px'}}>
-              <div onClick={()=>request(QUICK[0])} style={{width:110,height:110,borderRadius:'50%',background:`linear-gradient(135deg,${C.accent},${C.accentDk})`,margin:'0 auto 10px',cursor:'pointer',...F('row','center','center'),boxShadow:`0 0 50px ${C.accent}30`,fontSize:30,fontWeight:900,color:'#fff'}}>SOS</div>
+              <div onClick={()=>{tapHeavy();request(QUICK[0])}} style={{width:110,height:110,borderRadius:'50%',background:`linear-gradient(135deg,${C.accent},${C.accentDk})`,margin:'0 auto 10px',cursor:'pointer',...F('row','center','center'),boxShadow:`0 0 50px ${C.accent}30`,fontSize:30,fontWeight:900,color:'#fff'}}>SOS</div>
               <div style={{fontSize:12,color:C.sub}}>Tap for Emergency Rescue</div>
             </div>
             {/* Quick */}
