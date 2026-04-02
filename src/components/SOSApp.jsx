@@ -121,6 +121,8 @@ function SOSAppInner(){
   const[heroOn,setHeroOn]=useState(false);
   const[heroTab,setHeroTab]=useState('home');
   const[legalView,setLegalView]=useState(null);
+  const[isOffline,setIsOffline]=useState(!navigator.onLine);
+  useEffect(()=>{const on=()=>setIsOffline(false);const off=()=>setIsOffline(true);window.addEventListener('online',on);window.addEventListener('offline',off);return()=>{window.removeEventListener('online',on);window.removeEventListener('offline',off)}},[]);
   const[missions,setMissions]=useState([]);
   const[forgotMode,setForgotMode]=useState(false);
   const[resetSent,setResetSent]=useState(false);
@@ -254,7 +256,7 @@ function SOSAppInner(){
   // ═══ CITIZEN APP ═══
   if(screen==='citizen'){
     const NavBar=()=>(
-      <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 20px',...F('row','center','space-around'),zIndex:100}}>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 calc(20px + env(safe-area-inset-bottom, 0px))',...F('row','center','space-around'),zIndex:100}}>
         {[{id:'home',icon:'\u{1F3E0}',l:'Home'},{id:'services',icon:'\u{1F527}',l:'Services'},{id:'history',icon:'\u{1F4CB}',l:'History'},{id:'shield',icon:'\u{1F6E1}\uFE0F',l:'Shield'},{id:'profile',icon:'\u{1F464}',l:'Profile'}].map(n=>(
           <button key={n.id} onClick={()=>{setTab(n.id);setOpenCat(null)}} style={{background:'none',border:'none',cursor:'pointer',fontFamily:ff,...F('column','center','center',2),padding:'4px 8px'}}>
             <span style={{fontSize:20}}>{n.icon}</span>
@@ -266,6 +268,7 @@ function SOSAppInner(){
 
     return(
       <div style={W}>
+        {isOffline&&<div style={{position:'fixed',top:0,left:0,right:0,zIndex:200,background:C.red,color:'#fff',textAlign:'center',padding:'6px',fontSize:11,fontWeight:700,fontFamily:ff}}>No internet connection</div>}
         <DispatchOverlay/>
         <div style={{paddingBottom:80}}>
           {/* ── HOME TAB ── */}
@@ -384,7 +387,7 @@ function SOSAppInner(){
   // ═══ HERO APP ═══
   if(screen==='hero'){
     const HeroNav=()=>(
-      <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 20px',...F('row','center','space-around'),zIndex:100}}>
+      <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 calc(20px + env(safe-area-inset-bottom, 0px))',...F('row','center','space-around'),zIndex:100}}>
         {[{id:'home',icon:'\u{1F3E0}',l:'Home'},{id:'missions',icon:'\u{1F4CB}',l:'Missions'},{id:'earnings',icon:'\u{1F4B0}',l:'Earnings'},{id:'profile',icon:'\u{1F464}',l:'Profile'}].map(n=>(
           <button key={n.id} onClick={()=>setHeroTab(n.id)} style={{background:'none',border:'none',cursor:'pointer',fontFamily:ff,...F('column','center','center',2),padding:'4px 8px'}}>
             <span style={{fontSize:20}}>{n.icon}</span>
