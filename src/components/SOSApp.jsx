@@ -1,4 +1,4 @@
-import{useState,useEffect}from'react';
+import React,{useState,useEffect}from'react';
 
 /* ═══════════════════════════════════════════
    S.O.S — SUPERHEROES ON STANDBY — MOBILE APP
@@ -9,6 +9,24 @@ const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
 const getSosUserId=async(authId,token)=>{const d=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${authId}&select=id,role,full_name,referral_code`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}}).then(r=>r.json());return d?.[0]||null;};
 const sbAuth=async(ep,body)=>{const r=await fetch(`${SB}/auth/v1/${ep}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${SK}`},body:JSON.stringify(body)});const d=await r.json();if(d.error||d.msg)throw new Error(d.error_description||d.msg||d.error);return d;};
+const sbResetPw=async(email)=>{const r=await fetch(`${SB}/auth/v1/recover`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK},body:JSON.stringify({email})});if(!r.ok)throw new Error('Failed to send reset email');};
+const getSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.expires_at&&Date.now()/1000>s.expires_at)return null;return s;}catch{return null;}};
+const getMissions=async(userId,token)=>{try{const r=await fetch(`${SB}/rest/v1/sos_missions?citizen_id=eq.${userId}&select=id,status,pickup_address,estimated_price,request_type,created_at&order=created_at.desc&limit=20`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}});return await r.json();}catch{return[];}};
+const getLocation=async()=>{try{if(navigator.geolocation){return new Promise((res,rej)=>{navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude,address:`${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`}),()=>res({lat:null,lng:null,address:'GPS Location'}),{timeout:10000});});}return{lat:null,lng:null,address:'GPS Location'};}catch{return{lat:null,lng:null,address:'GPS Location'};}};
+
+/* Error Boundary */
+class SOSErrorBoundary extends React.Component{
+  constructor(p){super(p);this.state={hasError:false};}
+  static getDerivedStateFromError(){return{hasError:true};}
+  render(){
+    if(this.state.hasError)return React.createElement('div',{style:{minHeight:'100vh',background:'#080c14',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:"'Inter',sans-serif",color:'#fff',padding:24,textAlign:'center'}},
+      React.createElement('div',{style:{fontSize:40,marginBottom:16}},'\u26A0\uFE0F'),
+      React.createElement('h2',{style:{fontSize:20,fontWeight:700,marginBottom:8}},'Something went wrong'),
+      React.createElement('button',{onClick:()=>{this.setState({hasError:false});window.location.reload()},style:{background:'#FF6B35',color:'#fff',border:'none',borderRadius:14,padding:'14px 32px',fontSize:16,fontWeight:700,cursor:'pointer'}},'Reload App')
+    );
+    return this.props.children;
+  }
+}
 
 const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#FF6B35',accentDk:'#E55A2B',gold:'#FFB347',green:'#10B981',red:'#EF4444',text:'#fff',sub:'rgba(255,255,255,.6)',muted:'rgba(255,255,255,.35)',border:'rgba(255,255,255,.08)'};
 const ff="'Inter',-apple-system,BlinkMacSystemFont,sans-serif";
@@ -89,7 +107,8 @@ const SHIELD=[
   {name:'Shield Pro',price:14.99,per:'/mo',tag:'BEST',feats:['VIP priority response','24/7 Command Center','Free tow under 25mi','25% off all services','Family coverage (up to 4)','Dedicated concierge']},
 ];
 
-export default function SOSApp(){
+export default function SOSAppWrapper(){return React.createElement(SOSErrorBoundary,null,React.createElement(SOSAppInner));}
+function SOSAppInner(){
   const[screen,setScreen]=useState('loading');
   const[authMode,setAuthMode]=useState('signup');
   const[authRole,setAuthRole]=useState('citizen');
@@ -101,15 +120,21 @@ export default function SOSApp(){
   const[dispatch,setDispatch]=useState(null);// null | {phase,service}
   const[heroOn,setHeroOn]=useState(false);
   const[heroTab,setHeroTab]=useState('home');
+  const[missions,setMissions]=useState([]);
+  const[forgotMode,setForgotMode]=useState(false);
+  const[resetSent,setResetSent]=useState(false);
 
   // Restore session
   useEffect(()=>{
     try{
-      const s=JSON.parse(localStorage.getItem('sos_session'));
+      const s=getSession();
       if(s?.access_token){
         setSession(s);
         getSosUserId(s.user.id,s.access_token).then(u=>{
-          if(u){setSosUser(u);setScreen(u.role==='hero'?'hero':'citizen')}
+          if(u){setSosUser(u);setScreen(u.role==='hero'?'hero':'citizen');
+            // Load mission history
+            getMissions(u.id,s.access_token).then(m=>setMissions(m||[]));
+          }
           else setScreen('auth');
         }).catch(()=>setScreen('auth'));
       }else setScreen('auth');
@@ -140,14 +165,15 @@ export default function SOSApp(){
   const request=(svc)=>setDispatch({phase:'confirm',service:svc});
   const confirmReq=async()=>{
     setDispatch(p=>({...p,phase:'finding'}));
+    const loc=await getLocation();
     if(session&&sosUser){
       try{await fetch(`${SB}/rest/v1/sos_missions`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${session.access_token}`,Prefer:'return=minimal'},
-        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:'GPS Location',estimated_price:dispatch.service.price||0,request_type:'now'})});}catch{}
+        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:loc.address,estimated_price:dispatch.service.price||0,request_type:'now'})});}catch{}
     }
     setTimeout(()=>setDispatch(p=>({...p,phase:'matched'})),3000);
     setTimeout(()=>setDispatch(p=>({...p,phase:'tracking',eta:7})),5500);
   };
-  const finishMission=()=>{setDispatch(null);setOpenCat(null);};
+  const finishMission=()=>{setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
 
   const W={fontFamily:ff,color:C.text,background:C.bg,minHeight:'100vh',position:'relative'};
   const safeTop=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat')||'0')||44;
@@ -177,6 +203,17 @@ export default function SOSApp(){
       <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password (8+ chars)" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:16}}/>
       {err&&<div style={{padding:'10px 14px',background:'rgba(239,68,68,.12)',border:'1px solid rgba(239,68,68,.3)',borderRadius:12,marginBottom:14,fontSize:13,color:C.red,fontWeight:600}}>{err}</div>}
       <button onClick={doAuth} disabled={!ok||loading} style={{width:'100%',padding:'16px',background:ok&&!loading?`linear-gradient(135deg,${authRole==='hero'?C.green:C.accent},${authRole==='hero'?'#059669':C.accentDk})`:'rgba(255,255,255,.08)',color:ok?'#fff':C.muted,border:'none',borderRadius:14,fontSize:16,fontWeight:700,cursor:ok&&!loading?'pointer':'not-allowed',fontFamily:ff}}>{loading?'\u00B7\u00B7\u00B7':(authMode==='signup'?'Create Account':'Sign In')}</button>
+      {authMode==='signin'&&!forgotMode&&<button onClick={()=>{setForgotMode(true);setErr('');setResetSent(false)}} style={{background:'none',border:'none',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:ff,marginTop:12,width:'100%',textAlign:'center'}}>Forgot password?</button>}
+      {forgotMode&&!resetSent&&<div style={{marginTop:16,padding:16,background:C.card2,borderRadius:14,border:`1px solid ${C.border}`}}>
+        <div style={{fontSize:14,fontWeight:700,marginBottom:8}}>Reset Password</div>
+        <div style={{fontSize:12,color:C.sub,marginBottom:12}}>Enter your email to receive a reset link</div>
+        <button onClick={async()=>{if(!email)return;setLoading(true);setErr('');try{await sbResetPw(email);setResetSent(true);}catch(e){setErr(e.message);}finally{setLoading(false);}}} style={{width:'100%',padding:'12px',background:C.accent,color:'#fff',border:'none',borderRadius:10,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:ff}}>{loading?'...':'Send Reset Link'}</button>
+      </div>}
+      {resetSent&&<div style={{marginTop:16,padding:16,background:`${C.green}15`,borderRadius:14,textAlign:'center'}}>
+        <div style={{fontSize:14,fontWeight:700,color:C.green,marginBottom:4}}>{'\u2709\uFE0F'} Check your email</div>
+        <div style={{fontSize:12,color:C.sub}}>Reset link sent to {email}</div>
+        <button onClick={()=>{setForgotMode(false);setResetSent(false)}} style={{background:'none',border:'none',color:C.accent,fontSize:12,cursor:'pointer',fontFamily:ff,marginTop:8}}>Back to Sign In</button>
+      </div>}
     </div>
   );}
 
@@ -283,11 +320,22 @@ export default function SOSApp(){
           {/* ── HISTORY TAB ── */}
           {tab==='history'&&(<div style={{padding:'20px 20px 0'}}>
             <div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Mission History</div>
-            <div style={{background:C.card,borderRadius:16,padding:32,textAlign:'center',border:`1px solid ${C.border}`}}>
+            {missions.length===0?<div style={{background:C.card,borderRadius:16,padding:32,textAlign:'center',border:`1px solid ${C.border}`}}>
               <div style={{fontSize:32,marginBottom:8}}>{'\u{1F4CB}'}</div>
               <div style={{fontWeight:700,fontSize:15}}>No missions yet</div>
               <div style={{fontSize:13,color:C.sub,marginTop:4}}>Your completed rescues will appear here</div>
-            </div>
+            </div>:missions.map((m,i)=>(
+              <div key={m.id} style={{background:C.card,borderRadius:14,padding:14,marginBottom:8,border:`1px solid ${C.border}`}}>
+                <div style={{...F('row','center','space-between'),marginBottom:4}}>
+                  <div style={{fontWeight:700,fontSize:14}}>{m.pickup_address||'Service Request'}</div>
+                  <div style={{fontSize:11,fontWeight:600,color:m.status==='completed'?C.green:m.status==='requested'?C.accent:C.gold,background:m.status==='completed'?`${C.green}15`:m.status==='requested'?`${C.accent}15`:`${C.gold}15`,padding:'2px 8px',borderRadius:6}}>{m.status}</div>
+                </div>
+                <div style={{...F('row','center','space-between')}}>
+                  <div style={{fontSize:12,color:C.sub}}>{new Date(m.created_at).toLocaleDateString()} {'\u00B7'} {m.request_type}</div>
+                  <div style={{fontSize:13,fontWeight:700,color:C.accent}}>{m.estimated_price>0?('$'+m.estimated_price):'Quote'}</div>
+                </div>
+              </div>
+            ))}
           </div>)}
 
           {/* ── SHIELD TAB ── */}
