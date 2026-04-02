@@ -368,6 +368,10 @@ function SOSAppInner(){
                 <span style={{color:C.muted}}>{'\u25B8'}</span>
               </div>
             ))}
+            <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:12}}>
+              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/terms','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
+              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/privacy','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
+            </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
           </div>)}
         </div>
@@ -415,6 +419,10 @@ function SOSAppInner(){
               <div style={{width:64,height:64,borderRadius:'50%',background:`${C.green}15`,margin:'0 auto 10px',...F('row','center','center'),fontSize:28}}>{'\u{1F9B8}'}</div>
               <div style={{fontWeight:700,fontSize:16}}>{sosUser?.full_name||session?.user?.user_metadata?.full_name||'Hero'}</div>
               <div style={{fontSize:13,color:C.sub,marginTop:2}}>{session?.user?.email}</div>
+            </div>
+            <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:12}}>
+              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/terms','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
+              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/privacy','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
             </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
           </div>)}
