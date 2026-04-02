@@ -120,6 +120,7 @@ function SOSAppInner(){
   const[dispatch,setDispatch]=useState(null);// null | {phase,service}
   const[heroOn,setHeroOn]=useState(false);
   const[heroTab,setHeroTab]=useState('home');
+  const[legalView,setLegalView]=useState(null);
   const[missions,setMissions]=useState([]);
   const[forgotMode,setForgotMode]=useState(false);
   const[resetSent,setResetSent]=useState(false);
@@ -369,8 +370,8 @@ function SOSAppInner(){
               </div>
             ))}
             <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:12}}>
-              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/terms','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
-              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/privacy','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
+              <button onClick={()=>setLegalView('terms')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
+              <button onClick={()=>setLegalView('privacy')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
             </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
           </div>)}
@@ -421,8 +422,8 @@ function SOSAppInner(){
               <div style={{fontSize:13,color:C.sub,marginTop:2}}>{session?.user?.email}</div>
             </div>
             <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:12}}>
-              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/terms','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
-              <button onClick={()=>window.open('https://thekollectivehospitalitygroup.com/privacy','_blank')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
+              <button onClick={()=>setLegalView('terms')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Terms of Service</button>
+              <button onClick={()=>setLegalView('privacy')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
             </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
           </div>)}
@@ -431,5 +432,21 @@ function SOSAppInner(){
       </div>
     );
   }
+  // ═══ LEGAL MODAL (renders on top of any screen) ═══
+  const LegalOverlay=legalView?(
+    <div style={{position:'fixed',inset:0,zIndex:999,background:'rgba(8,12,20,0.97)',overflowY:'auto',padding:'50px 16px 40px'}} onClick={()=>setLegalView(null)}>
+      <div onClick={e=>e.stopPropagation()} style={{maxWidth:420,margin:'0 auto',background:C.card,borderRadius:20,padding:'20px 16px',border:`1px solid ${C.border}`}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+          <div style={{fontWeight:800,fontSize:17}}>{legalView==='terms'?'Terms of Service':'Privacy Policy'}</div>
+          <button onClick={()=>setLegalView(null)} style={{background:'none',border:'none',color:C.sub,fontSize:18,cursor:'pointer',fontFamily:ff}}>{'\u2715'}</button>
+        </div>
+        <div style={{fontSize:11,color:C.sub,lineHeight:1.8,whiteSpace:'pre-wrap'}}>{legalView==='terms'?'TERMS OF SERVICE \u2014 The Kollective Hospitality Group\nLast Updated: April 2, 2026\n\n1. ACCEPTANCE OF TERMS\nBy using any application provided by The Kollective Hospitality Group ("KHG"), including Good Times, SOS, On Call, and Help 911, you agree to these Terms.\n\n2. ELIGIBILITY\nYou must be at least 18 years old.\n\n3. ACCOUNT REGISTRATION\nYou are responsible for maintaining the confidentiality of your credentials.\n\n4. USE OF SERVICES\nSOS provides roadside assistance dispatch connecting citizens with verified Heroes. Services include emergency roadside, mobile maintenance, glass & body, car wash & detailing, convenience add-ons, fleet services, seasonal & specialty, and premium concierge.\n\n5. PAYMENTS\nCertain services require payment. All fees are non-refundable except as required by law. Shield plan subscriptions may be canceled at any time.\n\n6. SERVICE PROVIDER DISCLAIMER\nKHG connects users with independent service providers ("Heroes"). We are not liable for services provided by third parties.\n\n7. INTELLECTUAL PROPERTY\nAll content and technology are owned by KHG.\n\n8. LIMITATION OF LIABILITY\nKHG shall not be liable for indirect, incidental, or consequential damages.\n\n9. GOVERNING LAW\nGoverned by the laws of Georgia, United States.\n\n10. CONTACT\nThe Kollective Hospitality Group\nAtlanta, Georgia\nthedoctordorsey@gmail.com':'PRIVACY POLICY \u2014 The Kollective Hospitality Group\nLast Updated: April 2, 2026\n\n1. INFORMATION WE COLLECT\nAccount info (name, email, phone), location data for dispatch, payment info via third-party processors.\n\n2. HOW WE USE IT\nTo provide services, dispatch Heroes, process payments, improve the app, and comply with legal obligations.\n\n3. SHARING\nWe do not sell your data. We share with Heroes (name, location for dispatch), payment processors, analytics (anonymized), and law enforcement when required.\n\n4. SECURITY\nEncryption in transit, secure database storage, access controls.\n\n5. RETENTION\nData retained while your account is active. Request deletion by contacting us.\n\n6. YOUR RIGHTS\nAccess, correct, or delete your data. Opt out of non-essential communications.\n\n7. CHILDREN\nNot intended for users under 18.\n\n8. CONTACT\nThe Kollective Hospitality Group\nAtlanta, Georgia\nthedoctordorsey@gmail.com'}</div>
+      </div>
+    </div>
+  ):null;
+
+  // Render legal overlay on top of whatever screen is active
+  if(legalView)return(<div style={W}>{LegalOverlay}</div>);
+
   return null;
 }
