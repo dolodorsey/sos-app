@@ -2,8 +2,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /* ─── Supabase direct (avoid import issues with Next.js client) ─── */
-const SB_URL = 'https://bpnaqrjhxsompkdskepi.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwbmFxcmpoeHNvbXBrZHNrZXBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5OTkxNDUsImV4cCI6MjA4NzU3NTE0NX0.H16WVF7Vbu6SUQ3h7s1xdARvSj7PIyNGz5dDSGhRlQg';
+const SB_URL = 'https://cxdqkjvtpilvouwtbgdy.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
 const N8N = 'https://dorsey.app.n8n.cloud/webhook';
 
 const sbAuth = async (endpoint, body) => {
@@ -26,12 +26,24 @@ const getStoredSession = () => {
 const storeSession = (s) => { try { localStorage.setItem('sos_session', JSON.stringify(s)); } catch {} };
 const clearSession = () => { try { localStorage.removeItem('sos_session'); } catch {} };
 
+const getSosUserId = async (authId, token) => {
+  try {
+    const h = { apikey: SB_KEY, Authorization: `Bearer ${token || SB_KEY}` };
+    const r = await fetch(`${SB_URL}/rest/v1/sos_users?auth_id=eq.${authId}&select=id&limit=1`, { headers: h });
+    const d = await r.json();
+    return d?.[0]?.id || null;
+  } catch { return null; }
+};
+
 const createBooking = async (b, token) => {
-  const r = await fetch(`${SB_URL}/rest/v1/bookings`, {
+  // sos_missions.citizen_id FK → sos_users.id (not auth.users.id)
+  const sosId = await getSosUserId(b.customer_id, token);
+  if (!sosId) { console.error('No sos_users record for auth_id', b.customer_id); return false; }
+  const r = await fetch(`${SB_URL}/rest/v1/sos_missions`, {
     method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${token || SB_KEY}`, Prefer: 'return=representation' },
-    body: JSON.stringify({ customer_id: b.customer_id, status: 'pending', address: b.address || 'GPS', total_price: b.total_price || 0 }),
+    body: JSON.stringify({ citizen_id: sosId, status: 'requested', pickup_address: b.address || 'GPS Location', estimated_price: b.total_price || 0, request_type: 'now' }),
   });
-  fetch(`${N8N}/sos-service-request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...b, app: 'sos' }) }).catch(() => {});
+  fetch(`${N8N}/sos-service-request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...b, sos_user_id: sosId, app: 'sos' }) }).catch(() => {});
   return r.ok;
 };
 
@@ -118,7 +130,7 @@ export default function SOSApp() {
     if (s?.access_token && s?.user) {
       setUserName(s.user.user_metadata?.full_name || s.user.email?.split('@')[0] || 'Driver');
       setUserId(s.user.id); setToken(s.access_token);
-      setScreen(s.user.user_metadata?.role === 'provider' ? 'hero' : 'driver');
+      setScreen(s.user.user_metadata?.role === 'hero' ? 'hero' : 'driver');
     }
   }, []);
 
@@ -166,7 +178,7 @@ function Auth({role,onBack,onOk}) {
     if(!ok||loading)return; setLoading(true); setErr('');
     try {
       if(mode==='signup') {
-        await doSignUp(email,pw,name.trim(),isDr?'customer':'provider');
+        await doSignUp(email,pw,name.trim(),isDr?'citizen':'hero');
         const d = await doSignIn(email,pw);
         storeSession(d); onOk(name.trim()||email.split('@')[0], d.user?.id||'', d.access_token||'');
       } else {
