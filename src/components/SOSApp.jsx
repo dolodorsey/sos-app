@@ -33,7 +33,7 @@ class SOSErrorBoundary extends React.Component{
   }
 }
 
-const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#FF6B35',accentDk:'#E55A2B',gold:'#FFB347',green:'#10B981',red:'#EF4444',text:'#fff',sub:'rgba(255,255,255,.6)',muted:'rgba(255,255,255,.35)',border:'rgba(255,255,255,.08)'};
+const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#FF6B35',accentDk:'#E55A2B',gold:'#FFB347',green:'#10B981',red:'#EF4444',text:'#fff',sub:'rgba(255,255,255,.75)',muted:'rgba(255,255,255,.55)',border:'rgba(255,255,255,.12)'};
 const ff="'Inter',-apple-system,BlinkMacSystemFont,sans-serif";
 const F=(d='row',a='center',j='center',g=0)=>({display:'flex',flexDirection:d,alignItems:a,justifyContent:j,gap:g});
 
