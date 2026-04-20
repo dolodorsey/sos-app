@@ -1,4 +1,5 @@
 import React,{useState,useEffect}from'react';
+import NotNineOneOneGate,{hasAcknowledgedNot911}from'./NotNineOneOneGate';
 
 // Haptic feedback for native iOS
 const tap=async(style='Medium')=>{try{const{Haptics,ImpactStyle}=await import('@capacitor/haptics');await Haptics.impact({style:ImpactStyle[style]||ImpactStyle.Medium});}catch{}};
@@ -112,7 +113,11 @@ const SHIELD=[
   {name:'Shield Pro',price:14.99,per:'/mo',tag:'BEST',feats:['VIP priority response','24/7 Command Center','Free tow under 25mi','25% off all services','Family coverage (up to 4)','Dedicated concierge']},
 ];
 
-export default function SOSAppWrapper(){return React.createElement(SOSErrorBoundary,null,React.createElement(SOSAppInner));}
+export default function SOSAppWrapper(){
+  const[gateAcked,setGateAcked]=useState(()=>typeof window==='undefined'?true:hasAcknowledgedNot911());
+  if(!gateAcked)return React.createElement(NotNineOneOneGate,{onAccept:()=>setGateAcked(true)});
+  return React.createElement(SOSErrorBoundary,null,React.createElement(SOSAppInner));
+}
 function SOSAppInner(){
   const[screen,setScreen]=useState('loading');
   const[authMode,setAuthMode]=useState('signup');
