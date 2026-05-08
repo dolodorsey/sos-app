@@ -13,7 +13,12 @@ const tapLight=()=>tap('Light');
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
-const getSosUserId=async(authId,token)=>{const d=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${authId}&select=id,role,full_name,referral_code`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}}).then(r=>r.json());return d?.[0]||null;};
+const getSosUserId=async(authId,token)=>{
+  const d=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${authId}&select=id,role,first_name,last_name,referral_code`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}}).then(r=>r.json());
+  const u=d?.[0];
+  if(!u)return null;
+  return{...u,full_name:[u.first_name,u.last_name].filter(Boolean).join(' ')||null};
+};
 const sbAuth=async(ep,body)=>{const r=await fetch(`${SB}/auth/v1/${ep}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${SK}`},body:JSON.stringify(body)});const d=await r.json();if(d.error||d.msg)throw new Error(d.error_description||d.msg||d.error);return d;};
 const sbResetPw=async(email)=>{const r=await fetch(`${SB}/auth/v1/recover`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK},body:JSON.stringify({email})});if(!r.ok)throw new Error('Failed to send reset email');};
 const getSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.expires_at&&Date.now()/1000>s.expires_at)return null;return s;}catch{return null;}};
