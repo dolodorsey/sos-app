@@ -23,7 +23,7 @@ export default function Privacy() {
         </p>
         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 28, fontWeight: 400, marginTop: 40 }}>Contact</h2>
         <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: 14, marginTop: 12 }}>
-          For privacy inquiries, contact us at info@thekollectivehospitalitygroup.com
+          For privacy inquiries, contact us at thedoctordorsey@gmail.com
         </p>
       </div>
     </main>

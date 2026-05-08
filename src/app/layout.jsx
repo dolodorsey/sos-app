@@ -15,7 +15,13 @@ export const metadata = {
     title: 'SOS — Superheroes On Standby',
     description: 'Roadside rescue dispatched in minutes. 40+ services.',
   },
-  viewport: { width: 'device-width', initialScale: 1, viewportFit: 'cover', userScalable: false },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  userScalable: false,
   themeColor: '#080c14',
 };
 

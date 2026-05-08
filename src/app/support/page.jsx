@@ -9,7 +9,7 @@ export default function Support() {
         <div style={{ marginTop: 40, padding: 24, background: 'rgba(255,255,255,0.03)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
           <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: 22, fontWeight: 400, marginBottom: 12 }}>Contact Support</h3>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, lineHeight: 1.6 }}>
-            Email: info@thekollectivehospitalitygroup.com
+            Email: thedoctordorsey@gmail.com
           </p>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, lineHeight: 1.6, marginTop: 8 }}>
             Response time: Within 24 hours
