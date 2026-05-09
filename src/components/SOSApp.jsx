@@ -24,6 +24,8 @@ const sbResetPw=async(email)=>{const r=await fetch(`${SB}/auth/v1/recover`,{meth
 const getSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.expires_at&&Date.now()/1000>s.expires_at)return null;return s;}catch{return null;}};
 const getMissions=async(userId,token)=>{try{const r=await fetch(`${SB}/rest/v1/sos_missions?citizen_id=eq.${userId}&select=id,status,pickup_address,estimated_price,request_type,created_at&order=created_at.desc&limit=20`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}});return await r.json();}catch{return[];}};
 const getLocation=async()=>{try{if(navigator.geolocation){return new Promise((res,rej)=>{navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude,address:`${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`}),()=>res({lat:null,lng:null,address:'GPS Location'}),{timeout:10000});});}return{lat:null,lng:null,address:'GPS Location'};}catch{return{lat:null,lng:null,address:'GPS Location'};}};
+const SOS_STRIPE_PAYMENT_URL='https://buy.stripe.com/cNi00kcddgZy8lG61HdUY07';
+const openPaymentUrl=async(url)=>{try{const{Native}=await import('../lib/native');await Native.openUrl(url);}catch{window.open(url,'_blank');}};
 
 /* Error Boundary */
 class SOSErrorBoundary extends React.Component{
@@ -347,6 +349,7 @@ function SOSAppInner(){
                   <div style={{fontSize:12,color:C.sub}}>{new Date(m.created_at).toLocaleDateString()} {'\u00B7'} {m.request_type}</div>
                   <div style={{fontSize:13,fontWeight:700,color:C.accent}}>{m.estimated_price>0?('$'+m.estimated_price):'Quote'}</div>
                 </div>
+                <button onClick={()=>openPaymentUrl(SOS_STRIPE_PAYMENT_URL)} style={{width:'100%',marginTop:12,padding:'12px',background:C.card2,color:C.accent,border:`1px solid ${C.border}`,borderRadius:10,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Pay with Card</button>
               </div>
             ))}
           </div>)}
