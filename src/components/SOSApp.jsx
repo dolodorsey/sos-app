@@ -112,12 +112,6 @@ const QUICK=[
   {name:'Battery',emoji:'\u{1F50B}',price:95,eta:'10-20 min',desc:'Deliver & install'},
 ];
 
-const SHIELD=[
-  {name:'Shield Free',price:0,per:'',tag:'',feats:['Pay-as-you-go','Standard response','GPS tracking','Email support']},
-  {name:'Shield',price:7.99,per:'/mo',tag:'POPULAR',feats:['Priority response','24/7 Command Center','Free tow under 10mi','15% off services','Live GPS + ETA']},
-  {name:'Shield Pro',price:14.99,per:'/mo',tag:'BEST',feats:['VIP priority response','24/7 Command Center','Free tow under 25mi','25% off all services','Family coverage (up to 4)','Dedicated concierge']},
-];
-
 export default function SOSAppWrapper(){
   const[gateAcked,setGateAcked]=useState(()=>typeof window==='undefined'?true:hasAcknowledgedNot911());
   if(!gateAcked)return React.createElement(NotNineOneOneGate,{onAccept:()=>setGateAcked(true)});
@@ -272,7 +266,7 @@ function SOSAppInner(){
   if(screen==='citizen'){
     const NavBar=()=>(
       <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 calc(20px + env(safe-area-inset-bottom, 0px))',...F('row','center','space-around'),zIndex:100}}>
-        {[{id:'home',icon:'\u{1F3E0}',l:'Home'},{id:'services',icon:'\u{1F527}',l:'Services'},{id:'history',icon:'\u{1F4CB}',l:'History'},{id:'shield',icon:'\u{1F6E1}\uFE0F',l:'Shield'},{id:'profile',icon:'\u{1F464}',l:'Profile'}].map(n=>(
+        {[{id:'home',icon:'\u{1F3E0}',l:'Home'},{id:'services',icon:'\u{1F527}',l:'Services'},{id:'history',icon:'\u{1F4CB}',l:'History'},{id:'profile',icon:'\u{1F464}',l:'Profile'}].map(n=>(
           <button key={n.id} onClick={()=>{setTab(n.id);setOpenCat(null)}} style={{background:'none',border:'none',cursor:'pointer',fontFamily:ff,...F('column','center','center',2),padding:'4px 8px'}}>
             <span style={{fontSize:20}}>{n.icon}</span>
             <span style={{fontSize:10,fontWeight:600,color:tab===n.id?C.accent:C.muted}}>{n.l}</span>
@@ -355,21 +349,6 @@ function SOSAppInner(){
                 </div>
               </div>
             ))}
-          </div>)}
-
-          {/* ── SHIELD TAB ── */}
-          {tab==='shield'&&(<div style={{padding:'20px 20px 0'}}>
-            <div style={{fontWeight:800,fontSize:20,marginBottom:4}}>Shield Plans</div>
-            <div style={{fontSize:13,color:C.sub,marginBottom:16}}>Priority response, free tows, family coverage</div>
-            {SHIELD.map((p,i)=>(<div key={i} style={{background:C.card,borderRadius:16,padding:18,marginBottom:10,border:p.tag==='POPULAR'?`2px solid ${C.accent}`:`1px solid ${C.border}`,position:'relative'}}>
-              {p.tag&&<div style={{position:'absolute',top:-9,right:14,background:p.tag==='POPULAR'?C.accent:C.gold,color:p.tag==='POPULAR'?'#fff':'#000',fontSize:9,fontWeight:800,padding:'2px 8px',borderRadius:6,letterSpacing:1}}>{p.tag}</div>}
-              <div style={{...F('row','baseline','space-between'),marginBottom:10}}>
-                <div style={{fontWeight:700,fontSize:16}}>{p.name}</div>
-                <div><span style={{fontWeight:800,fontSize:22}}>{p.price===0?'Free':('$'+p.price)}</span><span style={{fontSize:11,color:C.sub}}>{p.per}</span></div>
-              </div>
-              {p.feats.map((f,j)=><div key={j} style={{fontSize:12,color:C.sub,padding:'3px 0',...F('row','center','flex-start',6)}}><span style={{color:C.green,fontSize:13}}>{'\u2713'}</span>{f}</div>)}
-              {i>0&&<button style={{width:'100%',marginTop:12,padding:'12px',background:i===1?C.accent:`${C.gold}20`,color:i===1?'#fff':C.gold,border:'none',borderRadius:10,fontSize:13,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Subscribe Now</button>}
-            </div>))}
           </div>)}
 
           {/* ── PROFILE TAB ── */}
