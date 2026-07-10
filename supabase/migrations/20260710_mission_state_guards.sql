@@ -19,6 +19,7 @@ declare
   v_mission public.sos_missions%rowtype;
   v_hero_id uuid := public.sos_current_hero_id();
   v_status text := lower(trim(p_new_status));
+  v_old_status text;
 begin
   if auth.uid() is null or v_hero_id is null then
     raise exception 'Authenticated Hero required' using errcode = '42501';
@@ -33,13 +34,15 @@ begin
     raise exception 'Assigned mission not found' using errcode = 'P0002';
   end if;
 
+  v_old_status := v_mission.status;
+
   if not (
-    (v_mission.status = 'accepted' and v_status = 'en_route')
-    or (v_mission.status = 'en_route' and v_status = 'arrived')
-    or (v_mission.status = 'arrived' and v_status = 'in_progress')
-    or (v_mission.status = 'in_progress' and v_status = 'completed')
+    (v_old_status = 'accepted' and v_status = 'en_route')
+    or (v_old_status = 'en_route' and v_status = 'arrived')
+    or (v_old_status = 'arrived' and v_status = 'in_progress')
+    or (v_old_status = 'in_progress' and v_status = 'completed')
   ) then
-    raise exception 'Invalid mission transition: % -> %', v_mission.status, v_status;
+    raise exception 'Invalid mission transition: % -> %', v_old_status, v_status;
   end if;
 
   update public.sos_missions
@@ -58,12 +61,7 @@ begin
   values (
     p_mission_id,
     'status_changed',
-    case
-      when v_status = 'en_route' then 'accepted'
-      when v_status = 'arrived' then 'en_route'
-      when v_status = 'in_progress' then 'arrived'
-      when v_status = 'completed' then 'in_progress'
-    end,
+    v_old_status,
     v_status,
     coalesce(p_payload, '{}'::jsonb),
     p_lat,
@@ -89,6 +87,7 @@ declare
   v_user_id uuid := public.sos_current_user_id();
   v_hero_id uuid := public.sos_current_hero_id();
   v_actor text;
+  v_old_status text;
 begin
   if auth.uid() is null or v_user_id is null then
     raise exception 'Authentication required' using errcode = '42501';
@@ -118,6 +117,8 @@ begin
     raise exception 'Mission cannot be canceled from status %', v_mission.status;
   end if;
 
+  v_old_status := v_mission.status;
+
   update public.sos_missions
   set status = 'canceled',
       canceled_at = now(),
@@ -134,7 +135,7 @@ begin
     mission_id, event_type, old_status, new_status, payload, actor
   )
   values (
-    p_mission_id, 'mission_canceled', v_mission.status, 'canceled',
+    p_mission_id, 'mission_canceled', v_old_status, 'canceled',
     jsonb_build_object('reason', trim(p_reason), 'canceled_by', v_actor), v_actor
   );
 
