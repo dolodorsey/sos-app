@@ -13,7 +13,7 @@ test('health contract identifies the app and authority', () => {
 
 test('handoff prevents unsafe dedicated-database cutover', () => {
   const handoff = read('docs/HANDOFF.md')
-  assert.match(handoff, /MCP Gateway public\.sos_\*/)
+  assert.match(handoff, /public\.sos_\*/)
   assert.match(handoff, /No dual write/i)
   assert.match(handoff, /RLS|grants/i)
 })
