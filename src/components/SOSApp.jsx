@@ -194,12 +194,15 @@ function SOSAppInner(){
   const confirmReq=async()=>{tapHeavy();
     setDispatch(p=>({...p,phase:'finding'}));
     const loc=await getLocation();
+    let saved=false;
     if(session&&sosUser){
-      try{await fetch(`${SB}/rest/v1/sos_missions`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${session.access_token}`,Prefer:'return=minimal'},
-        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:loc.address,estimated_price:dispatch.service.price||0,request_type:'now'})});}catch{}
+      try{const r=await fetch(`${SB}/rest/v1/sos_missions`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${session.access_token}`,Prefer:'return=minimal'},
+        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:loc.address,estimated_price:dispatch.service.price||0,request_type:'now'})});saved=r.ok;}catch{saved=false;}
     }
-    setTimeout(()=>setDispatch(p=>({...p,phase:'matched'})),3000);
-    setTimeout(()=>setDispatch(p=>({...p,phase:'tracking',eta:7})),5500);
+    // Truthful flow: the request is recorded server-side, but no Hero is
+    // matched in real time yet. Do NOT fabricate "Hero Found / En Route /
+    // live GPS / ETA" — show an honest "request received" state instead.
+    setDispatch(p=>({...p,phase:saved?'requested':'error'}));
   };
   const finishMission=()=>{tap();setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
 
@@ -260,19 +263,22 @@ function SOSAppInner(){
           <button onClick={confirmReq} style={{width:'100%',padding:'16px',background:`linear-gradient(135deg,${C.accent},${C.accentDk})`,color:'#fff',border:'none',borderRadius:14,fontSize:16,fontWeight:700,cursor:'pointer',fontFamily:ff}}>{'\u{1F198}'} Dispatch Hero</button>
           <button onClick={()=>setDispatch(null)} style={{background:'none',border:'none',color:C.sub,marginTop:14,cursor:'pointer',fontSize:13,fontFamily:ff}}>Cancel</button>
         </div>)}
-        {dispatch.phase==='finding'&&(<div style={{textAlign:'center'}}><div style={{width:80,height:80,borderRadius:'50%',border:`3px solid ${C.accent}`,margin:'0 auto 20px',...F('row','center','center'),fontSize:36}}>{'\u{1F9B8}'}</div><div style={{fontSize:20,fontWeight:800}}>Finding Your Hero...</div><div style={{fontSize:14,color:C.sub,marginTop:8}}>Locating verified Heroes nearby</div></div>)}
-        {dispatch.phase==='matched'&&(<div style={{textAlign:'center'}}><div style={{width:80,height:80,borderRadius:'50%',background:`${C.green}20`,margin:'0 auto 20px',...F('row','center','center'),fontSize:36}}>{'\u2705'}</div><div style={{fontSize:20,fontWeight:800,color:C.green}}>Hero Found!</div><div style={{fontSize:14,color:C.sub,marginTop:8}}>Preparing to depart</div></div>)}
-        {dispatch.phase==='tracking'&&(<div style={{background:C.card,borderRadius:20,padding:24,width:'100%',maxWidth:340,textAlign:'center',border:`1px solid ${C.border}`}}>
-          <div style={{fontSize:16,fontWeight:800}}>Hero En Route {'\u{1F9B8}'}</div>
-          <div style={{fontSize:13,color:C.sub,marginBottom:16}}>{s.name}</div>
-          <div style={{width:110,height:110,borderRadius:'50%',background:`linear-gradient(135deg,${C.accent}15,${C.green}15)`,margin:'0 auto 16px',...F('row','center','center')}}>
-            <div><div style={{fontSize:30,fontWeight:900,color:C.accent}}>{dispatch.eta||7}</div><div style={{fontSize:11,color:C.sub}}>min</div></div>
+        {dispatch.phase==='finding'&&(<div style={{textAlign:'center'}}><div style={{width:80,height:80,borderRadius:'50%',border:`3px solid ${C.accent}`,margin:'0 auto 20px',...F('row','center','center'),fontSize:36}}>{'\u{1F9B8}'}</div><div style={{fontSize:20,fontWeight:800}}>Sending Your Request...</div><div style={{fontSize:14,color:C.sub,marginTop:8}}>Logging your request securely</div></div>)}
+        {dispatch.phase==='requested'&&(<div style={{background:C.card,borderRadius:20,padding:24,width:'100%',maxWidth:340,textAlign:'center',border:`1px solid ${C.border}`}}>
+          <div style={{width:80,height:80,borderRadius:'50%',background:`${C.green}20`,margin:'0 auto 16px',...F('row','center','center'),fontSize:36}}>{'\u2705'}</div>
+          <div style={{fontSize:20,fontWeight:800,color:C.green}}>Request Received</div>
+          <div style={{fontSize:13,color:C.sub,margin:'8px 0 16px'}}>We've logged your {s.name} request. A verified Hero will be assigned and our team will contact you to confirm. Track it under History.</div>
+          <div style={{background:C.card2,borderRadius:12,padding:12,marginBottom:16,...F('row','center','space-between')}}>
+            <span style={{fontSize:12,color:C.sub}}>Status</span><span style={{fontSize:12,fontWeight:700,color:C.gold}}>Pending assignment</span>
           </div>
-          <div style={{background:C.card2,borderRadius:12,padding:12,marginBottom:16}}>
-            <div style={{...F('row','center','space-between'),marginBottom:6}}><span style={{fontSize:11,color:C.sub}}>GPS Tracking</span><span style={{fontSize:11,color:C.green}}>{'\u25CF'} Live</span></div>
-            <div style={{height:4,background:C.border,borderRadius:2}}><div style={{width:'60%',height:'100%',background:`linear-gradient(90deg,${C.accent},${C.green})`,borderRadius:2}}/></div>
-          </div>
-          <button onClick={finishMission} style={{width:'100%',padding:'14px',background:C.green,color:'#fff',border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Mission Complete {'\u2705'}</button>
+          <button onClick={finishMission} style={{width:'100%',padding:'14px',background:C.green,color:'#fff',border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Done</button>
+        </div>)}
+        {dispatch.phase==='error'&&(<div style={{background:C.card,borderRadius:20,padding:24,width:'100%',maxWidth:340,textAlign:'center',border:`1px solid ${C.border}`}}>
+          <div style={{width:80,height:80,borderRadius:'50%',background:`${C.red}20`,margin:'0 auto 16px',...F('row','center','center'),fontSize:36}}>{'\u26A0\uFE0F'}</div>
+          <div style={{fontSize:20,fontWeight:800,color:C.red}}>Couldn't Send Request</div>
+          <div style={{fontSize:13,color:C.sub,margin:'8px 0 16px'}}>We couldn't reach the network. Please check your connection and try again. For a life-threatening emergency, call 911.</div>
+          <button onClick={()=>setDispatch(p=>({...p,phase:'confirm'}))} style={{width:'100%',padding:'14px',background:C.accent,color:'#fff',border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Try Again</button>
+          <button onClick={()=>setDispatch(null)} style={{background:'none',border:'none',color:C.sub,marginTop:10,cursor:'pointer',fontSize:13,fontFamily:ff}}>Cancel</button>
         </div>)}
       </div>
     );
