@@ -10,7 +10,7 @@ const SERVICES = [
   { cat: "Fleet Services", items: ["Fleet Maintenance","Fleet Detailing","Fleet Inspection"] },
 ];
 const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DC","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
-const FORM_ENDPOINT = "/api/forms/submit";
+const FORM_ENDPOINT = "https://dzlmtvodpyhetvektfuo.supabase.co/functions/v1/sos-provider-application";\nconst SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6bG10dm9kcHloZXR2ZWt0ZnVvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1ODQ4NjQsImV4cCI6MjA4NTE2MDg2NH0.qmnWB4aWdb7U8Iod9Hv8PQAOJO3AG0vYEGnPS--kfAo";
 
 export default function ApplyPage() {
   const [step, setStep] = useState(0);
@@ -32,7 +32,7 @@ export default function ApplyPage() {
   const submit = async () => {
     setSubmitting(true); setError(null);
     try {
-      const res = await fetch(WEBHOOK, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({...form, brand:"sos", state_code:form.state}) });
+      const res = await fetch(WEBHOOK, { method:"POST", headers:{"Content-Type":"application/json",apikey:SUPABASE_ANON_KEY,Authorization:`Bearer ${SUPABASE_ANON_KEY}`}, body: JSON.stringify({...form, brand:"sos", state_code:form.state}) });
       const data = await res.json();
       if (data.success) { setResult(data); setStep(4); } else setError(data.error||"Failed");
     } catch(e) { setError("Network error"); }
