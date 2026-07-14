@@ -21,6 +21,9 @@ const getSosUserId=async(authId,token)=>{
 };
 const sbAuth=async(ep,body)=>{const r=await fetch(`${SB}/auth/v1/${ep}`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${SK}`},body:JSON.stringify(body)});const d=await r.json();if(d.error||d.msg)throw new Error(d.error_description||d.msg||d.error);return d;};
 const sbResetPw=async(email)=>{const r=await fetch(`${SB}/auth/v1/recover`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK},body:JSON.stringify({email})});if(!r.ok)throw new Error('Failed to send reset email');};
+// Account deletion (Apple Guideline 5.1.1(v)) — server-side delete-account
+// Edge Function purges the user's data + auth account using the service_role key.
+const sbDeleteAccount=async(token)=>{if(!token)throw new Error('You are not signed in');const r=await fetch(`${SB}/functions/v1/delete-account`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${token}`}});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||'Delete failed');return d;};
 const getSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.expires_at&&Date.now()/1000>s.expires_at)return null;return s;}catch{return null;}};
 const getMissions=async(userId,token)=>{try{const r=await fetch(`${SB}/rest/v1/sos_missions?citizen_id=eq.${userId}&select=id,status,pickup_address,estimated_price,request_type,created_at&order=created_at.desc&limit=20`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}});return await r.json();}catch{return[];}};
 const getLocation=async()=>{try{if(navigator.geolocation){return new Promise((res,rej)=>{navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude,address:`${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`}),()=>res({lat:null,lng:null,address:'GPS Location'}),{timeout:10000});});}return{lat:null,lng:null,address:'GPS Location'};}catch{return{lat:null,lng:null,address:'GPS Location'};}};
@@ -394,6 +397,7 @@ function SOSAppInner(){
               <button onClick={()=>setLegalView('privacy')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
             </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
+            <button onClick={async()=>{if(!window.confirm('Delete your SOS account? This permanently removes your profile and history and cannot be undone.'))return;try{await sbDeleteAccount(session?.access_token);window.alert('Your account has been permanently deleted.');signOut();}catch(e){window.alert('Could not delete your account: '+(e?.message||'please try again.'));}}} style={{width:'100%',padding:'12px',background:'none',border:'none',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:ff,marginTop:4,textDecoration:'underline'}}>Delete Account</button>
           </div>)}
         </div>
         <NavBar/>
@@ -446,6 +450,7 @@ function SOSAppInner(){
               <button onClick={()=>setLegalView('privacy')} style={{background:'none',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:ff,textDecoration:'underline'}}>Privacy Policy</button>
             </div>
             <button onClick={signOut} style={{width:'100%',padding:'14px',background:'transparent',border:`1px solid ${C.red}30`,color:C.red,borderRadius:12,fontSize:14,fontWeight:600,cursor:'pointer',fontFamily:ff,marginTop:8}}>Sign Out</button>
+            <button onClick={async()=>{if(!window.confirm('Delete your SOS account? This permanently removes your profile and history and cannot be undone.'))return;try{await sbDeleteAccount(session?.access_token);window.alert('Your account has been permanently deleted.');signOut();}catch(e){window.alert('Could not delete your account: '+(e?.message||'please try again.'));}}} style={{width:'100%',padding:'12px',background:'none',border:'none',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:ff,marginTop:4,textDecoration:'underline'}}>Delete Account</button>
           </div>)}
         </div>
         <HeroNav/>
