@@ -10,7 +10,7 @@ const SERVICES = [
   { cat: "Fleet Services", items: ["Fleet Maintenance","Fleet Detailing","Fleet Inspection"] },
 ];
 const STATES = ["AL","AK","AZ","AR","CA","CO","CT","DC","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
-const WEBHOOK = "https://dorsey.app.n8n.cloud/webhook/provider-application";
+const FORM_ENDPOINT = "/api/forms/submit";
 
 export default function ApplyPage() {
   const [step, setStep] = useState(0);
