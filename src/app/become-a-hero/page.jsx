@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const PROVIDER_INTAKE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 const SERVICES = [
   'Towing',
@@ -36,6 +37,7 @@ export default function BecomeAHeroPage() {
 
   const canSubmit = useMemo(() => {
     return (
+      PROVIDER_INTAKE_CONFIGURED &&
       form.full_name.trim().length >= 2 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
       form.phone.replace(/\D/g, '').length >= 10 &&
@@ -57,6 +59,13 @@ export default function BecomeAHeroPage() {
 
   const submit = async (event) => {
     event.preventDefault();
+
+    if (!PROVIDER_INTAKE_CONFIGURED) {
+      setStatus('error');
+      setMessage('Provider applications are temporarily unavailable while the secure intake connection is being verified.');
+      return;
+    }
+
     if (!canSubmit) return;
 
     setStatus('submitting');
@@ -104,6 +113,12 @@ export default function BecomeAHeroPage() {
         <p className="intro">
           Apply to receive nearby roadside and vehicle-service missions. This application does not activate a provider account or guarantee work.
         </p>
+
+        {!PROVIDER_INTAKE_CONFIGURED && (
+          <div className="configuration-message" role="status">
+            Provider intake is temporarily paused while the secure database connection is verified. The roadside-assistance app remains available.
+          </div>
+        )}
 
         {status === 'success' ? (
           <div className="success-card">
@@ -187,7 +202,8 @@ export default function BecomeAHeroPage() {
         .back-link { color: rgba(255,255,255,.72); text-decoration: none; font-size: 14px; }
         .eyebrow { margin-top: 42px; color: #10b981; letter-spacing: .18em; font-size: 12px; font-weight: 800; }
         h1 { margin: 8px 0 12px; font-size: clamp(40px, 8vw, 72px); line-height: .95; letter-spacing: -.05em; }
-        .intro { max-width: 690px; margin: 0 0 34px; color: rgba(255,255,255,.72); line-height: 1.65; }
+        .intro { max-width: 690px; margin: 0 0 20px; color: rgba(255,255,255,.72); line-height: 1.65; }
+        .configuration-message { margin: 0 0 20px; padding: 14px 16px; border: 1px solid rgba(245,158,11,.35); border-radius: 14px; background: rgba(245,158,11,.10); color: #fcd34d; line-height: 1.5; }
         form, .success-card { padding: clamp(22px, 5vw, 40px); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(13,19,32,.94); box-shadow: 0 24px 80px rgba(0,0,0,.32); }
         .grid.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
         label, legend { display: block; font-size: 13px; font-weight: 750; color: rgba(255,255,255,.9); }
