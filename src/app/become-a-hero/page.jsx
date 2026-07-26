@@ -1,10 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const PROVIDER_INTAKE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+import { supabase } from '../../lib/supabase';
 
 const SERVICES = [
   'Towing',
@@ -37,7 +34,6 @@ export default function BecomeAHeroPage() {
 
   const canSubmit = useMemo(() => {
     return (
-      PROVIDER_INTAKE_CONFIGURED &&
       form.full_name.trim().length >= 2 &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
       form.phone.replace(/\D/g, '').length >= 10 &&
@@ -59,40 +55,23 @@ export default function BecomeAHeroPage() {
 
   const submit = async (event) => {
     event.preventDefault();
-
-    if (!PROVIDER_INTAKE_CONFIGURED) {
-      setStatus('error');
-      setMessage('Provider applications are temporarily unavailable while the secure intake connection is being verified.');
-      return;
-    }
-
     if (!canSubmit) return;
 
     setStatus('submitting');
     setMessage('');
 
     try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/sos_provider_applications`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal',
-        },
-        body: JSON.stringify({
+      const { error } = await supabase
+        .from('sos_provider_applications')
+        .insert({
           ...form,
           years_experience: form.years_experience === '' ? null : Number(form.years_experience),
           service_types: serviceTypes,
           status: 'new',
           source: 'sos-app',
-        }),
-      });
+        });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => null);
-        throw new Error(error?.message || 'Your application could not be submitted.');
-      }
+      if (error) throw error;
 
       setStatus('success');
       setMessage('Application received. The S.O.S. provider team will review your service area, credentials and coverage.');
@@ -113,12 +92,6 @@ export default function BecomeAHeroPage() {
         <p className="intro">
           Apply to receive nearby roadside and vehicle-service missions. This application does not activate a provider account or guarantee work.
         </p>
-
-        {!PROVIDER_INTAKE_CONFIGURED && (
-          <div className="configuration-message" role="status">
-            Provider intake is temporarily paused while the secure database connection is verified. The roadside-assistance app remains available.
-          </div>
-        )}
 
         {status === 'success' ? (
           <div className="success-card">
@@ -203,7 +176,6 @@ export default function BecomeAHeroPage() {
         .eyebrow { margin-top: 42px; color: #10b981; letter-spacing: .18em; font-size: 12px; font-weight: 800; }
         h1 { margin: 8px 0 12px; font-size: clamp(40px, 8vw, 72px); line-height: .95; letter-spacing: -.05em; }
         .intro { max-width: 690px; margin: 0 0 20px; color: rgba(255,255,255,.72); line-height: 1.65; }
-        .configuration-message { margin: 0 0 20px; padding: 14px 16px; border: 1px solid rgba(245,158,11,.35); border-radius: 14px; background: rgba(245,158,11,.10); color: #fcd34d; line-height: 1.5; }
         form, .success-card { padding: clamp(22px, 5vw, 40px); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(13,19,32,.94); box-shadow: 0 24px 80px rgba(0,0,0,.32); }
         .grid.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
         label, legend { display: block; font-size: 13px; font-weight: 750; color: rgba(255,255,255,.9); }
