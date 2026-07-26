@@ -18,8 +18,9 @@ create table if not exists public.sos_provider_applications (
 
 alter table public.sos_provider_applications enable row level security;
 
-grant insert on public.sos_provider_applications to anon, authenticated;
-grant select, update on public.sos_provider_applications to service_role;
+revoke all on table public.sos_provider_applications from anon, authenticated;
+grant insert on table public.sos_provider_applications to anon, authenticated;
+grant select, insert, update, delete on table public.sos_provider_applications to service_role;
 
 create index if not exists sos_provider_applications_status_created_idx
   on public.sos_provider_applications (status, created_at desc);
