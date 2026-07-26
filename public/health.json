@@ -1,0 +1,10 @@
+{
+  "app": "sos-app",
+  "brand": "S.O.S.",
+  "service": "real-time-roadside-assistance",
+  "status": "ok",
+  "schema_version": 1,
+  "release_gate": "enterprise-control-plane",
+  "authority": "MCP Gateway public.sos_*",
+  "generated_at": "2026-07-10T00:00:00-04:00"
+}
