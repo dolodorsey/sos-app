@@ -114,8 +114,22 @@ const QUICK=[
   {name:'Battery',emoji:'\u{1F50B}',price:95,eta:'10-20 min',desc:'Deliver & install'},
 ];
 
+/* The full not-911 disclaimer is an App Store compliance requirement for NATIVE
+   builds only. On the web it was a wall standing in front of the brand, so web
+   visitors go straight into the app and the full text lives at /legal. */
+const isNativePlatform=()=>{
+  try{
+    const c=typeof window!=='undefined'&&window.Capacitor;
+    return !!(c&&typeof c.isNativePlatform==='function'&&c.isNativePlatform());
+  }catch{return false;}
+};
+
 export default function SOSAppWrapper(){
-  const[gateAcked,setGateAcked]=useState(()=>typeof window==='undefined'?true:hasAcknowledgedNot911());
+  const[gateAcked,setGateAcked]=useState(()=>{
+    if(typeof window==='undefined')return true;
+    if(!isNativePlatform())return true;     // web — never wall the user
+    return hasAcknowledgedNot911();         // native — Apple compliance gate stays
+  });
   if(!gateAcked)return React.createElement(NotNineOneOneGate,{onAccept:()=>setGateAcked(true)});
   return React.createElement(SOSErrorBoundary,null,React.createElement(SOSAppInner));
 }
