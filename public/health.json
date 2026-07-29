@@ -4,8 +4,8 @@
   "service": "real-time-roadside-assistance",
   "status": "ok",
   "schema_version": 2,
-  "commit": "testsha123",
+  "commit": "local",
   "branch": "local",
-  "environment": "production",
-  "built_at": "2026-07-29T01:29:22.623Z"
+  "environment": "development",
+  "built_at": "2026-07-29T01:44:42.128Z"
 }

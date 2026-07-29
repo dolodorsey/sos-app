@@ -33,14 +33,14 @@ const CATS=[
 
 const STEPS=[
   {n:'01',t:'Tap',d:'Open SOS, pick what went wrong. Price and ETA are on screen before you confirm. No hold music, no call center, no surprise invoice.'},
-  {n:'02',t:'Track',d:'Your GPS goes out to verified Heroes nearby. You watch your Hero move toward you in real time — the same way you track a ride.'},
+  {n:'02',t:'Confirm',d:'Your request is logged with your location and the service you picked, then enters the dispatch queue as pending assignment. You see its real status — never an invented countdown.'},
   {n:'03',t:'Done',d:'Hero arrives, handles it, you pay in app at the price you already agreed to. Every mission logged to your history.'},
 ];
 
 const STATS=[
   {k:'40+',v:'Services on demand'},
   {k:'8',v:'Service categories'},
-  {k:'~8 min',v:'Target dispatch window'},
+  {k:'Flat',v:'Upfront pricing'},
   {k:'24/7',v:'Standby, every night'},
 ];
 
@@ -137,7 +137,7 @@ export default function SOSLanding(){
         </h1>
         <p className="lede" data-rv style={{'--d':'.14s'}}>
           Flat on the shoulder of 285. Dead battery in a deck at midnight. Keys locked in with the engine running.
-          Verified Heroes dispatched to your GPS in minutes — price and ETA on screen before you confirm.
+          One button puts your location and the service you need in front of verified Heroes — with the price on screen before you confirm.
         </p>
         <div className="cta-row" data-rv style={{'--d':'.2s'}}>
           <a href={APP} className="btn btn-lg">
@@ -147,9 +147,9 @@ export default function SOSLanding(){
           <a href={HERO_APPLY} className="btn btn-ghost btn-lg">BECOME A HERO</a>
         </div>
         <div className="live" data-rv style={{'--d':'.26s'}}>
-          <span className="live-dot"/> Heroes on standby now
+          <span className="live-dot"/> Verified Heroes
           <span className="sep"/> Upfront pricing
-          <span className="sep"/> Live mission tracking
+          <span className="sep"/> Honest request status
         </div>
       </div>
       <div className="scroll-cue" aria-hidden="true"><span/>SCROLL</div>
@@ -189,15 +189,14 @@ export default function SOSLanding(){
             next to traffic with no name, no ETA you can trust, and no idea what it will cost.
           </p>
           <p data-rv style={{'--d':'.12s'}}>
-            S.O.S. flips it. One button. Your location goes out to verified Heroes already near you.
-            You see the price before you confirm and you watch them come to you on the map.
-            Forty-plus services across eight categories — because the thing that stops your night
-            isn't always a tow.
+            S.O.S. flips it. One button. Your location and the service you need go into the
+            dispatch queue, and you see the price before you confirm. Forty-plus services across
+            eight categories — because the thing that stops your night isn't always a tow.
           </p>
           <div className="th-marks" data-rv style={{'--d':'.18s'}}>
             <div><strong>Verified Heroes</strong><span>Background-checked, rated, tracked</span></div>
             <div><strong>Upfront price</strong><span>Quoted before you confirm</span></div>
-            <div><strong>Live tracking</strong><span>Watch your Hero approach</span></div>
+            <div><strong>Honest status</strong><span>Real request state, never a fake ETA</span></div>
           </div>
         </div>
       </div>
