@@ -1,3 +1,51 @@
 *, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; padding: 0; background: #080808; color: #fff; }
-:root { --accent: #FF6B35; --font-heading: 'Cormorant Garamond', serif; --font-body: 'DM Sans', sans-serif; }
+
+:root {
+  --accent: #FF6B35;
+  --font-heading: 'Cormorant Garamond', serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+html {
+  min-height: 100%;
+  background: #02050a;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background: radial-gradient(circle at 50% 0%, #182233 0%, #080c14 44%, #02050a 100%);
+  color: #fff;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0);
+  background: #080c14;
+  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.18), 0 28px 90px rgba(0, 0, 0, 0.68);
+}
+
+@media (min-width: 521px) {
+  body { padding: 24px; }
+  .app-shell {
+    min-height: calc(100dvh - 48px);
+    border-radius: 30px;
+  }
+}
+
+@media (max-width: 520px) {
+  .app-shell {
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
