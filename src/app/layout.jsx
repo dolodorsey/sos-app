@@ -1,3 +1,5 @@
+import './globals.css';
+
 export const metadata = {
   title: 'SOS — Superheroes On Standby | Roadside Rescue',
   description: 'Roadside assistance when you need it most. Flat tires, dead batteries, lockouts, towing — verified Heroes dispatched in minutes. 8 service categories, 40+ services.',
@@ -48,8 +50,8 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body style={{ margin: 0, background: '#080808', color: '#fff', fontFamily: '"DM Sans", sans-serif' }}>
-        {children}
+      <body>
+        <div className="app-shell">{children}</div>
       </body>
     </html>
   );
