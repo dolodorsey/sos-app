@@ -12,12 +12,12 @@ const HERO_APPLY='/become-a-hero/';
 const DOWNLOAD='/download/';
 
 const QUICK=[
-  {name:'Flat Tire',emoji:'\u{1F6DE}',price:55,eta:'5-10 min',desc:'Spare install or patch'},
-  {name:'Jump Start',emoji:'\u{1F50B}',price:45,eta:'5-10 min',desc:'Battery boost on site'},
-  {name:'Lockout',emoji:'\u{1F511}',price:50,eta:'5-10 min',desc:'Non-destructive unlock'},
-  {name:'Towing',emoji:'\u{1F69B}',price:75,eta:'5-10 min',desc:'Secure tow, your call'},
-  {name:'Fuel',emoji:'⛽',price:55,eta:'5-10 min',desc:'Gas, diesel or EV'},
-  {name:'Battery',emoji:'\u{1F50B}',price:95,eta:'10-20 min',desc:'Delivered & installed'},
+  {name:'Flat Tire',emoji:'\u{1F6DE}',price:55,eta:'Availability varies',desc:'Spare install or patch'},
+  {name:'Jump Start',emoji:'\u{1F50B}',price:45,eta:'Availability varies',desc:'Battery boost on site'},
+  {name:'Lockout',emoji:'\u{1F511}',price:50,eta:'Availability varies',desc:'Non-destructive unlock'},
+  {name:'Towing',emoji:'\u{1F69B}',price:75,eta:'Availability varies',desc:'Secure tow, your call'},
+  {name:'Fuel',emoji:'⛽',price:55,eta:'Availability varies',desc:'Gas, diesel or EV'},
+  {name:'Battery',emoji:'\u{1F50B}',price:95,eta:'Availability varies',desc:'Delivered & installed'},
 ];
 
 const CATS=[
@@ -32,7 +32,7 @@ const CATS=[
 ];
 
 const STEPS=[
-  {n:'01',t:'Tap',d:'Open SOS, pick what went wrong. Price and ETA are on screen before you confirm. No hold music, no call center, no surprise invoice.'},
+  {n:'01',t:'Tap',d:'Open SOS and pick what went wrong. You see the starting estimate before submitting; availability, timing, and final price are confirmed after review.'},
   {n:'02',t:'Confirm',d:'Your request is logged with your location and the service you picked, then enters the dispatch queue as pending assignment. You see its real status — never an invented countdown.'},
   {n:'03',t:'Done',d:'Hero arrives, handles it, you pay in app at the price you already agreed to. Every mission logged to your history.'},
 ];
@@ -41,7 +41,7 @@ const STATS=[
   {k:'40+',v:'Services on demand'},
   {k:'8',v:'Service categories'},
   {k:'Flat',v:'Upfront pricing'},
-  {k:'24/7',v:'Standby, every night'},
+  {k:'24/7',v:'Request intake'},
 ];
 
 /* ── grain overlay ── */
@@ -129,7 +129,7 @@ export default function SOSLanding(){
       </div>
       <div className="hero-inner">
         <div className="eyebrow" data-rv style={{'--d':'0s'}}>
-          <span className="dot"/> ATLANTA &amp; METRO &nbsp;·&nbsp; DISPATCHING 24/7
+          <span className="dot"/> ATLANTA &amp; METRO &nbsp;·&nbsp; REQUESTS ACCEPTED 24/7
         </div>
         <h1 className="h1" data-rv style={{'--d':'.06s'}}>
           <span className="l1">SUPERHEROES</span>
@@ -137,7 +137,7 @@ export default function SOSLanding(){
         </h1>
         <p className="lede" data-rv style={{'--d':'.14s'}}>
           Flat on the shoulder of 285. Dead battery in a deck at midnight. Keys locked in with the engine running.
-          One button puts your location and the service you need in front of verified Heroes — with the price on screen before you confirm.
+          One button logs your location and service need for approved Heroes and operations review. Assignment, timing, and final price are confirmed before payment authorization.
         </p>
         <div className="cta-row" data-rv style={{'--d':'.2s'}}>
           <a href={APP} className="btn btn-lg">
@@ -147,8 +147,8 @@ export default function SOSLanding(){
           <a href={HERO_APPLY} className="btn btn-ghost btn-lg">BECOME A HERO</a>
         </div>
         <div className="live" data-rv style={{'--d':'.26s'}}>
-          <span className="live-dot"/> Verified Heroes
-          <span className="sep"/> Upfront pricing
+          <span className="live-dot"/> Identity-gated Hero access
+          <span className="sep"/> Confirmed pricing
           <span className="sep"/> Honest request status
         </div>
       </div>
@@ -164,7 +164,7 @@ export default function SOSLanding(){
             <div className="q-emoji" aria-hidden="true">{q.emoji}</div>
             <div className="q-name">{q.name}</div>
             <div className="q-desc">{q.desc}</div>
-            <div className="q-meta"><span className="q-price">${q.price}</span><span className="q-eta">{q.eta}</span></div>
+            <div className="q-meta"><span className="q-price">From ${q.price}</span><span className="q-eta">{q.eta}</span></div>
             <div className="q-go">REQUEST →</div>
           </a>
         ))}
@@ -194,8 +194,8 @@ export default function SOSLanding(){
             eight categories — because the thing that stops your night isn't always a tow.
           </p>
           <div className="th-marks" data-rv style={{'--d':'.18s'}}>
-            <div><strong>Verified Heroes</strong><span>Background-checked, rated, tracked</span></div>
-            <div><strong>Upfront price</strong><span>Quoted before you confirm</span></div>
+            <div><strong>Controlled Hero access</strong><span>Authenticated, approved, and location-fresh</span></div>
+            <div><strong>Confirmed price</strong><span>Locked before payment authorization</span></div>
             <div><strong>Honest status</strong><span>Real request state, never a fake ETA</span></div>
           </div>
         </div>

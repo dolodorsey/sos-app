@@ -2,7 +2,7 @@
  *
  * SOS is statically exported for web and Capacitor. The health file identifies
  * the exact deployed build and truthfully states the currently enabled service
- * model. It does not claim that provider dispatch is live.
+ * model. It does not claim that a Hero is assigned before acceptance.
  */
 const { writeFileSync, mkdirSync } = require('node:fs');
 const { join } = require('node:path');
@@ -17,8 +17,8 @@ try {
         app: 'sos-app',
         brand: 'S.O.S.',
         authority: 'Supabase cxdqkjvtpilvouwtbgdy public.sos_*',
-        service: 'roadside-request-intake',
-        fulfillment_mode: 'pending-confirmed-assignment',
+        service: 'roadside-dispatch-marketplace',
+        fulfillment_mode: 'operator-offer-and-hero-acceptance',
         status: 'ok',
         schema_version: 3,
         commit: process.env.VERCEL_GIT_COMMIT_SHA || 'local',
@@ -38,6 +38,9 @@ try {
 const nextConfig = {
   output: 'export',
   distDir: 'out',
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     unoptimized: true,
   },

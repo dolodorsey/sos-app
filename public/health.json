@@ -2,12 +2,12 @@
   "app": "sos-app",
   "brand": "S.O.S.",
   "authority": "Supabase cxdqkjvtpilvouwtbgdy public.sos_*",
-  "service": "roadside-request-intake",
-  "fulfillment_mode": "pending-confirmed-assignment",
+  "service": "roadside-dispatch-marketplace",
+  "fulfillment_mode": "operator-offer-and-hero-acceptance",
   "status": "ok",
   "schema_version": 3,
   "commit": "local",
   "branch": "local",
   "environment": "development",
-  "built_at": "2026-08-03T04:34:01.186Z"
+  "built_at": "2026-08-03T10:46:12.596Z"
 }
