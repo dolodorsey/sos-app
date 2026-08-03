@@ -15,6 +15,7 @@ test('mission payments require manual capture, verified completion, and idempote
   const checkout = read('supabase/functions/create-mission-checkout/index.ts')
   const operations = read('supabase/functions/manage-mission-payment/index.ts')
   const webhook = read('supabase/functions/stripe-webhook/index.ts')
+  const states = read('supabase/migrations/20260803043736_sos_payment_state_constraint.sql')
   assert.match(checkout, /capture_method:'manual'/)
   assert.match(checkout, /pricing_status!==?'confirmed'/)
   assert.match(operations, /mission\.status!==?'completed'/)
@@ -22,6 +23,7 @@ test('mission payments require manual capture, verified completion, and idempote
   assert.match(operations, /idempotencyKey:`sos-release-/)
   assert.match(webhook, /constructEventAsync/)
   assert.match(webhook, /code==='23505'/)
+  for (const state of ['pending_authorization','authorized_hold','held_for_release','released_to_hero','released_to_customer','partially_refunded','refunded','failed','disputed']) assert.match(states, new RegExp(state))
 })
 
 test('handoff prevents unsafe dedicated-database cutover', () => {
