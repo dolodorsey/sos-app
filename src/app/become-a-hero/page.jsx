@@ -24,6 +24,7 @@ const initialForm = {
   license_number: '',
   insured: false,
   notes: '',
+  website: '',
 };
 
 export default function BecomeAHeroPage() {
@@ -61,25 +62,28 @@ export default function BecomeAHeroPage() {
     setMessage('');
 
     try {
-      const { error } = await supabase
-        .from('sos_provider_applications')
-        .insert({
+      const { data, error } = await supabase.functions.invoke('submit-provider-application', {
+        body: {
           ...form,
           years_experience: form.years_experience === '' ? null : Number(form.years_experience),
           service_types: serviceTypes,
-          status: 'new',
-          source: 'sos-app',
-        });
+        },
+      });
 
       if (error) throw error;
+      if (!data?.accepted) throw new Error('Your application could not be submitted.');
 
       setStatus('success');
-      setMessage('Application received. The S.O.S. provider team will review your service area, credentials and coverage.');
+      setMessage(
+        data.duplicate
+          ? 'Your application is already in the provider review queue. The S.O.S. team will contact you after reviewing your service area, credentials and coverage.'
+          : 'Application received. The S.O.S. provider team will review your service area, credentials and coverage.'
+      );
       setForm(initialForm);
       setServiceTypes([]);
     } catch (error) {
       setStatus('error');
-      setMessage(error.message || 'Your application could not be submitted.');
+      setMessage(error?.context?.error || error?.message || 'Your application could not be submitted.');
     }
   };
 
@@ -102,26 +106,33 @@ export default function BecomeAHeroPage() {
           </div>
         ) : (
           <form onSubmit={submit} noValidate>
+            <div className="honeypot" aria-hidden="true">
+              <label>
+                Website
+                <input tabIndex="-1" autoComplete="off" value={form.website} onChange={(e) => update('website', e.target.value)} />
+              </label>
+            </div>
+
             <div className="grid two">
               <label>
                 Full name
-                <input value={form.full_name} onChange={(e) => update('full_name', e.target.value)} autoComplete="name" required />
+                <input maxLength="120" value={form.full_name} onChange={(e) => update('full_name', e.target.value)} autoComplete="name" required />
               </label>
               <label>
                 Company name <span>optional</span>
-                <input value={form.company_name} onChange={(e) => update('company_name', e.target.value)} autoComplete="organization" />
+                <input maxLength="160" value={form.company_name} onChange={(e) => update('company_name', e.target.value)} autoComplete="organization" />
               </label>
               <label>
                 Email
-                <input type="email" value={form.email} onChange={(e) => update('email', e.target.value)} autoComplete="email" required />
+                <input type="email" maxLength="254" value={form.email} onChange={(e) => update('email', e.target.value)} autoComplete="email" required />
               </label>
               <label>
                 Mobile phone
-                <input type="tel" value={form.phone} onChange={(e) => update('phone', e.target.value)} autoComplete="tel" required />
+                <input type="tel" maxLength="30" value={form.phone} onChange={(e) => update('phone', e.target.value)} autoComplete="tel" required />
               </label>
               <label>
                 Primary service area
-                <input value={form.service_area} onChange={(e) => update('service_area', e.target.value)} placeholder="City, state or counties" required />
+                <input maxLength="160" value={form.service_area} onChange={(e) => update('service_area', e.target.value)} placeholder="City, state or counties" required />
               </label>
               <label>
                 Years of experience
@@ -129,7 +140,7 @@ export default function BecomeAHeroPage() {
               </label>
               <label>
                 License or certification number <span>optional</span>
-                <input value={form.license_number} onChange={(e) => update('license_number', e.target.value)} />
+                <input maxLength="120" value={form.license_number} onChange={(e) => update('license_number', e.target.value)} />
               </label>
               <label className="checkbox insured">
                 <input type="checkbox" checked={form.insured} onChange={(e) => update('insured', e.target.checked)} />
@@ -154,7 +165,7 @@ export default function BecomeAHeroPage() {
               <textarea rows="5" maxLength="2000" value={form.notes} onChange={(e) => update('notes', e.target.value)} />
             </label>
 
-            {status === 'error' && <div className="error-message">{message}</div>}
+            {status === 'error' && <div className="error-message" role="alert">{message}</div>}
 
             <button type="submit" disabled={!canSubmit}>
               {status === 'submitting' ? 'Submitting…' : 'Submit provider application'}
@@ -176,7 +187,8 @@ export default function BecomeAHeroPage() {
         .eyebrow { margin-top: 42px; color: #10b981; letter-spacing: .18em; font-size: 12px; font-weight: 800; }
         h1 { margin: 8px 0 12px; font-size: clamp(40px, 8vw, 72px); line-height: .95; letter-spacing: -.05em; }
         .intro { max-width: 690px; margin: 0 0 20px; color: rgba(255,255,255,.72); line-height: 1.65; }
-        form, .success-card { padding: clamp(22px, 5vw, 40px); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(13,19,32,.94); box-shadow: 0 24px 80px rgba(0,0,0,.32); }
+        form, .success-card { position: relative; padding: clamp(22px, 5vw, 40px); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; background: rgba(13,19,32,.94); box-shadow: 0 24px 80px rgba(0,0,0,.32); }
+        .honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
         .grid.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
         label, legend { display: block; font-size: 13px; font-weight: 750; color: rgba(255,255,255,.9); }
         label span { color: rgba(255,255,255,.45); font-weight: 500; }
