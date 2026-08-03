@@ -33,10 +33,14 @@
 - Webhook endpoint fails closed with HTTP 503 while Stripe is unconfigured; once configured, its raw-body signature verification rejects invalid signatures.
 - Protected payment functions require a valid JWT.
 - Database currently contains zero missions, offers, payments, or ratings, so no fabricated end-to-end production success is claimed.
+- Capacitor and all native plugins are upgraded to the 8.5 release line; the CLI is development-only and production dependencies remain at zero vulnerabilities.
+- Added the previously missing complete Android project and synchronized the production web bundle plus Browser, Geolocation, Haptics, Share, Splash, and Status Bar plugins.
+- Replaced the broken hybrid CocoaPods/Swift Package Manager iOS shell with a clean Capacitor 8.5 Swift Package Manager project while preserving the approved S.O.S. icon and splash artwork, `com.superherosonstandby.app` identity, and fastlane files.
+- Added the required iOS foreground-location disclosure and verified the complete iOS Simulator build (`** BUILD SUCCEEDED **`).
 
 ## Remaining release gates
 
 - Rotate the Stripe secret previously exposed in chat, configure the new live secret plus webhook signing secret, and verify the production webhook endpoint in Stripe.
 - Approve and authenticate at least one real Hero account; there are currently zero dispatch-eligible authenticated Heroes.
 - Run a controlled customer → operator offer → Hero acceptance → confirmed price → authorization → job states → capture → transfer → rating test.
-- Complete signed iOS/Android archives and store-review checks.
+- Compile Android on a release machine with Java 21 and the Android SDK, then complete signed iOS/Android archives and store-review checks.
