@@ -1,5 +1,5 @@
-import SOSLanding from '@/components/SOSLanding';
+import SOSRequestLanding from '@/components/SOSRequestLanding';
 
 export default function Home() {
-  return <SOSLanding />;
+  return <SOSRequestLanding />;
 }
