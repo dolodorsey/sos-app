@@ -1,9 +1,9 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'SOS — Superheroes On Standby | Roadside Rescue',
-  description: 'Roadside assistance when you need it most. Flat tires, dead batteries, lockouts, towing — verified Heroes dispatched in minutes. 8 service categories, 40+ services.',
-  keywords: 'roadside assistance, towing, flat tire help, dead battery, lockout, mobile mechanic, car wash, roadside rescue, Atlanta roadside',
+  title: 'S.O.S. — Superheroes On Standby | Roadside Request Intake',
+  description: 'Submit a roadside-support request, review the starting estimate, and track confirmed assignment status. S.O.S. is not 911 and does not replace emergency services.',
+  keywords: 'roadside assistance request, towing request, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support Atlanta',
   authors: [{ name: 'The Kollective Hospitality Group' }],
   metadataBase: new URL('https://thesuperherosonstandby.com'),
   icons: {
@@ -14,16 +14,16 @@ export const metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'SOS — Superheroes On Standby',
-    description: 'Roadside assistance dispatched in minutes. Flat tires, lockouts, towing & more.',
+    title: 'S.O.S. — Superheroes On Standby',
+    description: 'Log a roadside request and see the real assignment status. Timing and payment are confirmed after an approved provider accepts the request.',
     type: 'website',
     url: 'https://thesuperherosonstandby.com',
-    siteName: 'SOS — Superheroes On Standby',
+    siteName: 'S.O.S. — Superheroes On Standby',
   },
   twitter: {
     card: 'summary',
-    title: 'SOS — Superheroes On Standby',
-    description: 'Roadside rescue dispatched in minutes. 40+ services.',
+    title: 'S.O.S. — Superheroes On Standby',
+    description: 'Roadside request intake with honest pending and confirmed assignment states.',
   },
 };
 
@@ -42,7 +42,7 @@ export default function RootLayout({ children }) {
         <link rel="manifest" href="/manifest.json" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-        {/* Native (Capacitor) builds open the app shell directly, never the marketing page */}
+        <script src="/sos-safety-guard.js" defer />
         <script
           dangerouslySetInnerHTML={{
             __html:
