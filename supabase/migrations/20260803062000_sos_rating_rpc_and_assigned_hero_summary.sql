@@ -34,15 +34,19 @@ begin
     raise exception 'Rating must be between 1 and 5';
   end if;
 
-  select m.*, h.user_id
-  into v_mission, v_assigned_hero_user_id
-  from public.sos_missions m
-  left join public.sos_heroes h on h.id=m.hero_id
-  where m.id=p_mission_id
-  for share of m;
+  select * into v_mission
+  from public.sos_missions
+  where id=p_mission_id
+  for share;
 
   if not found then raise exception 'Mission not found' using errcode='P0002'; end if;
   if v_mission.status <> 'completed' then raise exception 'Only completed missions can be rated'; end if;
+
+  if v_mission.hero_id is not null then
+    select user_id into v_assigned_hero_user_id
+    from public.sos_heroes
+    where id=v_mission.hero_id;
+  end if;
 
   if v_mission.citizen_id=v_user_id then
     if v_assigned_hero_user_id is null then raise exception 'Completed mission has no assigned Hero'; end if;
