@@ -32,7 +32,7 @@ export const viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   userScalable: false,
-  themeColor: '#080c14',
+  themeColor: '#05080d',
 };
 
 export default function RootLayout({ children }) {
@@ -51,7 +51,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
-        <div className="app-shell">{children}</div>
+        <div className="app-shell sos-premium" data-app="sos">{children}</div>
       </body>
     </html>
   );
