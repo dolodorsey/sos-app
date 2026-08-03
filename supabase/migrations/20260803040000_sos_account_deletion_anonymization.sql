@@ -94,7 +94,7 @@ begin
   where user_id=v_user_id;
 
   update public.sos_fleet_accounts
-  set company_name='Deleted account',stripe_subscription_id=null,status='inactive'
+  set company_name='Deleted account',stripe_subscription_id=null,status='canceled'
   where owner_id=v_user_id;
 
   if v_hero_id is not null then
