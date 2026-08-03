@@ -1,11 +1,13 @@
 {
   "app": "sos-app",
   "brand": "S.O.S.",
-  "service": "real-time-roadside-assistance",
+  "authority": "Supabase cxdqkjvtpilvouwtbgdy public.sos_*",
+  "service": "roadside-request-intake",
+  "fulfillment_mode": "pending-confirmed-assignment",
   "status": "ok",
-  "schema_version": 2,
+  "schema_version": 3,
   "commit": "local",
   "branch": "local",
   "environment": "development",
-  "built_at": "2026-07-29T01:44:42.128Z"
+  "built_at": "2026-08-03T04:28:58.930Z"
 }

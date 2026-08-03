@@ -16,6 +16,7 @@ try {
       {
         app: 'sos-app',
         brand: 'S.O.S.',
+        authority: 'Supabase cxdqkjvtpilvouwtbgdy public.sos_*',
         service: 'roadside-request-intake',
         fulfillment_mode: 'pending-confirmed-assignment',
         status: 'ok',

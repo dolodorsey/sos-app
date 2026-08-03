@@ -4,8 +4,7 @@
 
 - Repository: `dolodorsey/sos-app`
 - Production: `https://superherosonstandby.com`
-- Current operational authority: MCP Gateway `public.sos_*`
-- Dedicated SOS Supabase `cxdqkjvtpilvouwtbgdy`: controlled cutover target only
+- Current operational authority: dedicated SOS Supabase `cxdqkjvtpilvouwtbgdy`, `public.sos_*`
 
 ## Release rule
 
@@ -23,7 +22,7 @@ S.O.S. is blocked from unrestricted release until the dedicated database's grant
 
 ## Data rules
 
-- MCP `sos_missions` and `sos_heroes` remain authoritative.
+- Dedicated-project `sos_missions` and `sos_heroes` remain authoritative.
 - No dual write without an idempotency key, reconciliation report, and rollback procedure.
 - Do not migrate production traffic to the dedicated database until the security gate passes.
 - Never expose service-role credentials to client code.
