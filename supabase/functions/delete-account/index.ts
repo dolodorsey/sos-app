@@ -1,74 +1,92 @@
-// SOS — Account deletion (Apple App Store Guideline 5.1.1(v))
-// Deletes the authenticated user's data and their auth account.
-// service_role key is injected by Supabase at runtime and is NOT in the bundle.
-//
-// Deploy:  supabase functions deploy delete-account --project-ref cxdqkjvtpilvouwtbgdy
+// S.O.S. — Account deletion (Apple App Store Guideline 5.1.1(v))
+// Personal data is erased transactionally in Postgres before the Auth identity
+// is deleted. Financial and safety records remain only as anonymized tombstones.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2.97.0";
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const ALLOWED_ORIGINS = new Set([
+  "https://thesuperherosonstandby.com",
+  "https://www.thesuperherosonstandby.com",
+  "https://superherosonstandby.com",
+  "https://www.superherosonstandby.com",
+  "capacitor://localhost",
+  "http://localhost",
+  "https://localhost",
+]);
+
+function corsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") ?? "";
+  return {
+    "Access-Control-Allow-Origin": ALLOWED_ORIGINS.has(origin)
+      ? origin
+      : "https://thesuperherosonstandby.com",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+function json(req: Request, body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders(req), "Content-Type": "application/json; charset=utf-8" },
+  });
+}
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
-  if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405, headers: { ...cors, "Content-Type": "application/json" },
-    });
-  }
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
-  const url = Deno.env.get("SUPABASE_URL")!;
-  const anon = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const url = Deno.env.get("SUPABASE_URL");
+  const anon = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !anon || !serviceRole) {
+    console.error("delete-account missing required Supabase runtime configuration");
+    return json(req, { error: "Account deletion is temporarily unavailable" }, 503);
+  }
 
   const jwt = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (!jwt) {
-    return new Response(JSON.stringify({ error: "Missing Authorization bearer token" }), {
-      status: 401, headers: { ...cors, "Content-Type": "application/json" },
+  if (!jwt) return json(req, { error: "Missing Authorization bearer token" }, 401);
+
+  const userClient = createClient(url, anon, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${jwt}` } },
+  });
+  const { data: { user }, error: userError } = await userClient.auth.getUser();
+  if (userError || !user) return json(req, { error: "Invalid or expired session" }, 401);
+
+  const admin = createClient(url, serviceRole, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const { data: erasure, error: erasureError } = await admin.rpc(
+    "sos_anonymize_account",
+    { p_auth_id: user.id },
+  );
+  if (erasureError) {
+    console.error("delete-account anonymization failed", {
+      authUserId: user.id,
+      code: erasureError.code,
+      message: erasureError.message,
     });
+    return json(req, { error: "Account data could not be erased safely" }, 500);
   }
 
-  // 1) Verify caller.
-  const userClient = createClient(url, anon, { global: { headers: { Authorization: `Bearer ${jwt}` } } });
-  const { data: { user }, error: userErr } = await userClient.auth.getUser();
-  if (userErr || !user) {
-    return new Response(JSON.stringify({ error: "Invalid or expired session" }), {
-      status: 401, headers: { ...cors, "Content-Type": "application/json" },
+  const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
+  if (deleteError) {
+    console.error("delete-account auth deletion failed", {
+      authUserId: user.id,
+      message: deleteError.message,
     });
+    return json(req, {
+      error: "Personal data was anonymized, but the sign-in identity could not be removed",
+      profile_anonymized: true,
+    }, 500);
   }
 
-  const admin = createClient(url, serviceRole, { auth: { persistSession: false } });
-  const purged: string[] = [];
-  const skipped: string[] = [];
-  const tryDelete = async (label: string, fn: () => Promise<{ error: unknown }>) => {
-    try { const { error } = await fn(); if (error) skipped.push(`${label}(${(error as any).message})`); else purged.push(label); }
-    catch (e) { skipped.push(`${label}(${(e as Error).message})`); }
-  };
-
-  // 2) Resolve the SOS-internal user id (sos_users.auth_id -> id), purge
-  //    missions (as citizen and as hero), then the profile row. All best-effort.
-  const { data: sosUser } = await admin.from("sos_users").select("id").eq("auth_id", user.id).maybeSingle();
-  const internalId = sosUser?.id;
-  if (internalId) {
-    await tryDelete("sos_missions.citizen", () => admin.from("sos_missions").delete().eq("citizen_id", internalId));
-    await tryDelete("sos_missions.hero", () => admin.from("sos_missions").delete().eq("hero_id", internalId));
-    await tryDelete("sos_users", () => admin.from("sos_users").delete().eq("id", internalId));
-  }
-  // bookings table keyed directly on auth id (older schema)
-  await tryDelete("bookings", () => admin.from("bookings").delete().eq("customer_id", user.id));
-
-  // 3) Delete the auth account.
-  const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
-  if (delErr) {
-    return new Response(JSON.stringify({ error: `Account data removed but auth deletion failed: ${delErr.message}`, purged, skipped }), {
-      status: 500, headers: { ...cors, "Content-Type": "application/json" },
-    });
-  }
-
-  return new Response(JSON.stringify({ ok: true, deleted: user.id, purged, skipped }), {
-    status: 200, headers: { ...cors, "Content-Type": "application/json" },
+  return json(req, {
+    ok: true,
+    account_deleted: true,
+    profile_anonymized: Boolean(erasure?.profile_anonymized ?? erasure?.found),
   });
 });
