@@ -86,7 +86,10 @@ begin
   delete from public.sos_fleet_members where user_id=v_user_id;
   delete from public.sos_provider_applications where v_email is not null and lower(email)=lower(v_email);
   delete from public.sos_waitlist where v_email is not null and lower(email)=lower(v_email);
-  delete from public.bookings where customer_id=p_auth_id;
+
+  if to_regclass('public.bookings') is not null then
+    execute 'delete from public.bookings where customer_id=$1' using p_auth_id;
+  end if;
 
   update public.sos_subscriptions
   set status='canceled',stripe_subscription_id=null,stripe_price_id=null,
