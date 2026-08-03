@@ -13,7 +13,8 @@ Deno.serve(async(req)=>{
   const missionId=object?.metadata?.mission_id
   if(missionId){
     const patch:any={updated_at:new Date().toISOString()}
-    if(event.type==='payment_intent.amount_capturable_updated'){patch.payment_status='authorized';patch.escrow_status='authorized_hold';patch.authorized_at=new Date().toISOString();patch.stripe_charge_id=typeof object.latest_charge==='string'?object.latest_charge:null}
+    if(event.type==='checkout.session.completed'){patch.stripe_checkout_session_id=object.id;patch.stripe_payment_intent_id=typeof object.payment_intent==='string'?object.payment_intent:null}
+    else if(event.type==='payment_intent.amount_capturable_updated'){patch.payment_status='authorized';patch.escrow_status='authorized_hold';patch.authorized_at=new Date().toISOString();patch.stripe_payment_intent_id=object.id;patch.stripe_charge_id=typeof object.latest_charge==='string'?object.latest_charge:object.latest_charge?.id||null;const captureBefore=object.latest_charge?.payment_method_details?.card?.capture_before;if(captureBefore)patch.authorization_expires_at=new Date(captureBefore*1000).toISOString()}
     else if(event.type==='payment_intent.succeeded'){patch.payment_status='captured';patch.escrow_status='held_for_release';patch.captured_at=new Date().toISOString();patch.stripe_charge_id=typeof object.latest_charge==='string'?object.latest_charge:null}
     else if(event.type==='payment_intent.payment_failed'){patch.payment_status='failed';patch.escrow_status='failed';patch.failed_at=new Date().toISOString()}
     else if(event.type==='payment_intent.canceled'){patch.payment_status='canceled';patch.escrow_status='released_to_customer'}

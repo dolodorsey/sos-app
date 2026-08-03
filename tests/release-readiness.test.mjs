@@ -30,3 +30,14 @@ test('handoff prevents unsafe dedicated-database cutover', () => {
   assert.match(handoff, /No dual write/i)
   assert.match(handoff, /RLS|grants/i)
 })
+
+test('Hero and customer portals use the secured mission lifecycle', () => {
+  const app = read('src/components/SOSApp.jsx')
+  assert.match(app, /sos_accept_mission_offer/)
+  assert.match(app, /sos_decline_mission_offer/)
+  assert.match(app, /sos_transition_assigned_mission/)
+  assert.match(app, /last_gps_at:new Date/)
+  assert.match(app, /create-mission-checkout/)
+  assert.match(app, /sos_rate_completed_mission/)
+  assert.doesNotMatch(app, /buy\.stripe\.com/)
+})

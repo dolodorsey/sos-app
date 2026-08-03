@@ -25,9 +25,11 @@ const sbResetPw=async(email)=>{const r=await fetch(`${SB}/auth/v1/recover`,{meth
 // Edge Function purges the user's data + auth account using the service_role key.
 const sbDeleteAccount=async(token)=>{if(!token)throw new Error('You are not signed in');const r=await fetch(`${SB}/functions/v1/delete-account`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${token}`}});const d=await r.json().catch(()=>({}));if(!r.ok||d.error)throw new Error(d.error||'Delete failed');return d;};
 const getSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(s?.expires_at&&Date.now()/1000>s.expires_at)return null;return s;}catch{return null;}};
-const getMissions=async(userId,token)=>{try{const r=await fetch(`${SB}/rest/v1/sos_missions?citizen_id=eq.${userId}&select=id,status,pickup_address,estimated_price,request_type,created_at&order=created_at.desc&limit=20`,{headers:{apikey:SK,Authorization:`Bearer ${token}`}});return await r.json();}catch{return[];}};
+const api=async(path,token,options={})=>{const r=await fetch(`${SB}${path}`,{...options,headers:{apikey:SK,Authorization:`Bearer ${token}`,'Content-Type':'application/json',...(options.headers||{})}});const d=await r.json().catch(()=>null);if(!r.ok)throw new Error(d?.message||d?.error||'Request failed');return d;};
+const getMissions=async(userId,token)=>{try{return await api(`/rest/v1/sos_missions?citizen_id=eq.${userId}&select=id,status,pickup_address,estimated_price,final_price,pricing_status,requested_service_name,request_type,hero_id,created_at,completed_at,sos_payments(payment_status,amount,escrow_status)&order=created_at.desc&limit=20`,token)}catch{return[];}};
+const getHeroWorkspace=async(token)=>{const heroes=await api('/rest/v1/sos_heroes?select=*&limit=1',token);const hero=heroes?.[0];if(!hero)return{hero:null,offers:[],missions:[],payments:[]};const [offers,missions,payments]=await Promise.all([api(`/rest/v1/sos_mission_offers?hero_id=eq.${hero.id}&status=eq.pending&select=*&order=offered_at.desc`,token),api(`/rest/v1/sos_missions?hero_id=eq.${hero.id}&select=*&order=created_at.desc&limit=30`,token),api(`/rest/v1/sos_payments?hero_id=eq.${hero.id}&select=mission_id,hero_payout,payment_status,escrow_status,released_at,created_at&order=created_at.desc`,token)]);return{hero,offers:offers||[],missions:missions||[],payments:payments||[]};};
+const rpc=(name,body,token)=>api(`/rest/v1/rpc/${name}`,token,{method:'POST',body:JSON.stringify(body)});
 const getLocation=async()=>{try{if(navigator.geolocation){return new Promise((res,rej)=>{navigator.geolocation.getCurrentPosition(p=>res({lat:p.coords.latitude,lng:p.coords.longitude,address:`${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`}),()=>res({lat:null,lng:null,address:'GPS Location'}),{timeout:10000});});}return{lat:null,lng:null,address:'GPS Location'};}catch{return{lat:null,lng:null,address:'GPS Location'};}};
-const SOS_STRIPE_PAYMENT_URL='https://buy.stripe.com/cNi00kcddgZy8lG61HdUY07';
 const openPaymentUrl=async(url)=>{try{const{Native}=await import('../lib/native');await Native.openUrl(url);}catch{window.open(url,'_blank');}};
 
 /* Error Boundary */
@@ -147,6 +149,7 @@ function SOSAppInner(){
   const[openCat,setOpenCat]=useState(null);
   const[dispatch,setDispatch]=useState(null);// null | {phase,service}
   const[heroOn,setHeroOn]=useState(false);
+  const[heroProfile,setHeroProfile]=useState(null);const[heroOffers,setHeroOffers]=useState([]);const[heroMissions,setHeroMissions]=useState([]);const[heroPayments,setHeroPayments]=useState([]);const[heroBusy,setHeroBusy]=useState(false);
   const[heroTab,setHeroTab]=useState('home');
   const[legalView,setLegalView]=useState(null);
   const[isOffline,setIsOffline]=useState(!navigator.onLine);
@@ -154,6 +157,12 @@ function SOSAppInner(){
   const[missions,setMissions]=useState([]);
   const[forgotMode,setForgotMode]=useState(false);
   const[resetSent,setResetSent]=useState(false);
+  const refreshHero=async(s=session)=>{if(!s?.access_token)return;try{const w=await getHeroWorkspace(s.access_token);setHeroProfile(w.hero);setHeroOn(!!w.hero?.on_duty);setHeroOffers(w.offers);setHeroMissions(w.missions);setHeroPayments(w.payments);}catch(e){setErr(e.message)}};
+  useEffect(()=>{if(screen!=='hero'||!session)return;refreshHero(session);const id=setInterval(()=>refreshHero(session),15000);return()=>clearInterval(id)},[screen,session]);
+  useEffect(()=>{if(screen!=='hero'||!session||!heroOn||!heroProfile)return;const beat=async()=>{const loc=await getLocation();if(loc.lat==null||loc.lng==null)return;try{await api(`/rest/v1/sos_heroes?id=eq.${heroProfile.id}`,session.access_token,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({last_lat:loc.lat,last_lng:loc.lng,last_gps_at:new Date().toISOString(),updated_at:new Date().toISOString()})})}catch{}};beat();const id=setInterval(beat,60000);return()=>clearInterval(id)},[screen,session,heroOn,heroProfile?.id]);
+  const updateHeroPresence=async(on)=>{if(!heroProfile||heroBusy)return;setHeroBusy(true);try{let loc={lat:null,lng:null};if(on)loc=await getLocation();await api(`/rest/v1/sos_heroes?id=eq.${heroProfile.id}`,session.access_token,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({on_duty:on,last_lat:loc.lat,last_lng:loc.lng,last_gps_at:on?new Date().toISOString():heroProfile.last_gps_at,updated_at:new Date().toISOString()})});setHeroOn(on);await refreshHero();}catch(e){setErr(e.message)}finally{setHeroBusy(false)}};
+  const answerOffer=async(offer,accept)=>{setHeroBusy(true);setErr('');try{await rpc(accept?'sos_accept_mission_offer':'sos_decline_mission_offer',accept?{p_offer_id:offer.id}:{p_offer_id:offer.id,p_reason:'Unavailable'},session.access_token);await refreshHero();}catch(e){setErr(e.message)}finally{setHeroBusy(false)}};
+  const transitionMission=async(mission,newStatus)=>{setHeroBusy(true);setErr('');try{const loc=await getLocation();await rpc('sos_transition_assigned_mission',{p_mission_id:mission.id,p_new_status:newStatus,p_lat:loc.lat,p_lng:loc.lng,p_note:null},session.access_token);await refreshHero();}catch(e){setErr(e.message)}finally{setHeroBusy(false)}};
 
   // Restore session
   useEffect(()=>{
@@ -208,6 +217,8 @@ function SOSAppInner(){
     setDispatch(p=>({...p,phase:saved?'requested':'error'}));
   };
   const finishMission=()=>{tap();setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
+  const authorizeMission=async(mission)=>{setLoading(true);setErr('');try{const d=await api('/functions/v1/create-mission-checkout',session.access_token,{method:'POST',body:JSON.stringify({mission_id:mission.id})});if(!d?.checkout_url)throw new Error('Secure checkout is unavailable');await openPaymentUrl(d.checkout_url);}catch(e){setErr(e.message)}finally{setLoading(false)}};
+  const rateMission=async(mission)=>{const value=Number(window.prompt('Rate your Hero from 1 to 5'));if(!Number.isInteger(value)||value<1||value>5)return;try{await rpc('sos_rate_completed_mission',{p_mission_id:mission.id,p_rating:value,p_review_text:null,p_tags:[],p_is_public:true},session.access_token);window.alert('Rating submitted. Thank you.');}catch(e){setErr(e.message)}};
 
   const W={fontFamily:ff,color:C.text,background:C.bg,minHeight:'100vh',position:'relative'};
   const safeTop=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat')||'0')||44;
@@ -358,6 +369,7 @@ function SOSAppInner(){
           {/* ── HISTORY TAB ── */}
           {tab==='history'&&(<div style={{padding:'20px 20px 0'}}>
             <div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Mission History</div>
+            {err&&<div style={{padding:10,color:C.red,fontSize:12}}>{err}</div>}
             {missions.length===0?<div style={{background:C.card,borderRadius:16,padding:32,textAlign:'center',border:`1px solid ${C.border}`}}>
               <div style={{fontSize:32,marginBottom:8}}>{'\u{1F4CB}'}</div>
               <div style={{fontWeight:700,fontSize:15}}>No missions yet</div>
@@ -372,7 +384,9 @@ function SOSAppInner(){
                   <div style={{fontSize:12,color:C.sub}}>{new Date(m.created_at).toLocaleDateString()} {'\u00B7'} {m.request_type}</div>
                   <div style={{fontSize:13,fontWeight:700,color:C.accent}}>{m.estimated_price>0?('$'+m.estimated_price):'Quote'}</div>
                 </div>
-                <button onClick={()=>openPaymentUrl(SOS_STRIPE_PAYMENT_URL)} style={{width:'100%',marginTop:12,padding:'12px',background:C.card2,color:C.accent,border:`1px solid ${C.border}`,borderRadius:10,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Pay with Card</button>
+                {m.hero_id&&m.pricing_status==='confirmed'&&!m.sos_payments?.length&&<button disabled={loading} onClick={()=>authorizeMission(m)} style={{width:'100%',marginTop:12,padding:'12px',background:C.accent,color:'#fff',border:0,borderRadius:10,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Authorize ${Number(m.final_price).toFixed(2)} securely</button>}
+                {m.sos_payments?.[0]&&<div style={{fontSize:11,color:C.sub,marginTop:10}}>Payment: {m.sos_payments[0].payment_status.replaceAll('_',' ')}</div>}
+                {m.status==='completed'&&<button onClick={()=>rateMission(m)} style={{width:'100%',marginTop:10,padding:'11px',background:C.card2,color:C.gold,border:`1px solid ${C.border}`,borderRadius:10,fontWeight:700}}>Rate your Hero</button>}
               </div>
             ))}
           </div>)}
@@ -407,6 +421,10 @@ function SOSAppInner(){
 
   // ═══ HERO APP ═══
   if(screen==='hero'){
+    const released=heroPayments.filter(p=>p.payment_status==='released').reduce((n,p)=>n+Number(p.hero_payout||0),0);
+    const pending=heroPayments.filter(p=>['authorized','captured','transfer_pending'].includes(p.payment_status)).reduce((n,p)=>n+Number(p.hero_payout||0),0);
+    const nextStatus={assigned:'en_route',en_route:'on_site',on_site:'working',working:'completed'};
+    const nextLabel={en_route:'Start route',on_site:'Mark arrived',working:'Start work',completed:'Complete mission'};
     const HeroNav=()=>(
       <div style={{position:'fixed',bottom:0,left:0,right:0,background:C.card,borderTop:`1px solid ${C.border}`,padding:'8px 0 calc(20px + env(safe-area-inset-bottom, 0px))',...F('row','center','space-around'),zIndex:100}}>
         {[{id:'home',icon:'\u{1F3E0}',l:'Home'},{id:'missions',icon:'\u{1F4CB}',l:'Missions'},{id:'earnings',icon:'\u{1F4B0}',l:'Earnings'},{id:'profile',icon:'\u{1F464}',l:'Profile'}].map(n=>(
@@ -426,18 +444,18 @@ function SOSAppInner(){
             </div>
             <div style={{background:C.card,borderRadius:16,padding:'16px 20px',marginBottom:16,border:`1px solid ${C.border}`,...F('row','center','space-between')}}>
               <div><div style={{fontWeight:700,fontSize:15}}>On Patrol</div><div style={{fontSize:12,color:heroOn?C.green:C.sub}}>{heroOn?'Accepting missions':'Off duty'}</div></div>
-              <div onClick={()=>setHeroOn(!heroOn)} style={{width:52,height:28,borderRadius:14,background:heroOn?C.green:C.border,cursor:'pointer',padding:2,transition:'all .3s'}}><div style={{width:24,height:24,borderRadius:12,background:'#fff',transform:heroOn?'translateX(24px)':'translateX(0)',transition:'all .3s'}}/></div>
+              <button aria-label="Toggle availability" disabled={heroBusy||!heroProfile} onClick={()=>updateHeroPresence(!heroOn)} style={{width:52,height:28,borderRadius:14,background:heroOn?C.green:C.border,cursor:'pointer',padding:2,transition:'all .3s',border:0}}><div style={{width:24,height:24,borderRadius:12,background:'#fff',transform:heroOn?'translateX(24px)':'translateX(0)',transition:'all .3s'}}/></button>
             </div>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:20}}>
-              {[{l:'Missions',v:'0',c:C.accent},{l:'Rating',v:'5.0',c:C.gold},{l:'Earned',v:'$0',c:C.green}].map((s,i)=>(<div key={i} style={{background:C.card,borderRadius:14,padding:14,textAlign:'center',border:`1px solid ${C.border}`}}><div style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:10,color:C.sub}}>{s.l}</div></div>))}
+              {[{l:'Missions',v:String(heroMissions.filter(m=>m.status==='completed').length),c:C.accent},{l:'Rating',v:Number(heroProfile?.rating||0).toFixed(1),c:C.gold},{l:'Released',v:`$${released.toFixed(2)}`,c:C.green}].map((s,i)=>(<div key={i} style={{background:C.card,borderRadius:14,padding:14,textAlign:'center',border:`1px solid ${C.border}`}}><div style={{fontSize:20,fontWeight:800,color:s.c}}>{s.v}</div><div style={{fontSize:10,color:C.sub}}>{s.l}</div></div>))}
             </div>
             <div style={{background:C.card,borderRadius:16,padding:28,textAlign:'center',border:`1px solid ${C.border}`}}>
-              {heroOn?<><div style={{fontSize:32,marginBottom:8}}>{'\u{1F4E1}'}</div><div style={{fontWeight:700,fontSize:15}}>Scanning for Missions</div><div style={{fontSize:12,color:C.sub,marginTop:4}}>You'll be notified when a citizen needs help</div></>
+              {heroOn?<><div style={{fontSize:32,marginBottom:8}}>{'\u{1F4E1}'}</div><div style={{fontWeight:700,fontSize:15}}>{heroOffers.length?`${heroOffers.length} mission offer${heroOffers.length===1?'':'s'}`:'Available for missions'}</div><div style={{fontSize:12,color:C.sub,marginTop:4}}>Location heartbeat and offer inbox refresh every 15 seconds</div></>
               :<><div style={{fontSize:32,marginBottom:8}}>{'\u{1F634}'}</div><div style={{fontWeight:700,fontSize:15}}>Off Patrol</div><div style={{fontSize:12,color:C.sub,marginTop:4}}>Toggle On Patrol to accept missions</div></>}
             </div>
           </div>)}
-          {heroTab==='missions'&&(<div style={{padding:'20px 20px 0'}}><div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Missions</div><div style={{background:C.card,borderRadius:16,padding:28,textAlign:'center',border:`1px solid ${C.border}`}}><div style={{fontSize:32,marginBottom:8}}>{'\u{1F4CB}'}</div><div style={{fontWeight:700}}>No missions yet</div><div style={{fontSize:12,color:C.sub,marginTop:4}}>Completed missions appear here</div></div></div>)}
-          {heroTab==='earnings'&&(<div style={{padding:'20px 20px 0'}}><div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Earnings</div><div style={{background:C.card,borderRadius:16,padding:28,textAlign:'center',border:`1px solid ${C.border}`}}><div style={{fontSize:32,marginBottom:8}}>{'\u{1F4B0}'}</div><div style={{fontWeight:700}}>$0.00</div><div style={{fontSize:12,color:C.sub,marginTop:4}}>Earnings and payouts appear here</div></div></div>)}
+          {heroTab==='missions'&&(<div style={{padding:'20px 20px 0'}}><div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Mission inbox</div>{err&&<div style={{color:C.red,fontSize:12,marginBottom:10}}>{err}</div>}{heroOffers.map(o=><div key={o.id} style={{background:C.card,borderRadius:16,padding:18,marginBottom:10,border:`1px solid ${C.green}55`}}><div style={{fontWeight:800}}>New mission offer</div><div style={{fontSize:12,color:C.sub,margin:'6px 0'}}>ETA {o.eta_minutes||'—'} min · ${Number(o.payout_amount||0).toFixed(2)} payout · expires {o.expires_at?new Date(o.expires_at).toLocaleTimeString():'soon'}</div><div style={F('row','center','stretch',8)}><button disabled={heroBusy} onClick={()=>answerOffer(o,true)} style={{flex:1,padding:12,border:0,borderRadius:10,background:C.green,color:'#fff',fontWeight:800}}>Accept</button><button disabled={heroBusy} onClick={()=>answerOffer(o,false)} style={{flex:1,padding:12,border:`1px solid ${C.border}`,borderRadius:10,background:'transparent',color:C.sub}}>Decline</button></div></div>)}{heroMissions.map(m=><div key={m.id} style={{background:C.card,borderRadius:16,padding:18,marginBottom:10,border:`1px solid ${C.border}`}}><div style={{...F('row','center','space-between')}}><b>{m.requested_service_name||'Roadside mission'}</b><span style={{fontSize:11,color:C.gold}}>{m.status.replaceAll('_',' ')}</span></div><div style={{fontSize:12,color:C.sub,margin:'8px 0'}}>{m.pickup_address||'Location shared after assignment'}</div>{nextStatus[m.status]&&<button disabled={heroBusy} onClick={()=>transitionMission(m,nextStatus[m.status])} style={{width:'100%',padding:12,border:0,borderRadius:10,background:C.green,color:'#fff',fontWeight:800}}>{nextLabel[nextStatus[m.status]]}</button>}</div>)}{!heroOffers.length&&!heroMissions.length&&<div style={{color:C.sub,textAlign:'center',padding:30}}>No offers or assigned missions.</div>}</div>)}
+          {heroTab==='earnings'&&(<div style={{padding:'20px 20px 0'}}><div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Earnings</div><div style={{background:C.card,borderRadius:16,padding:22,border:`1px solid ${C.border}`}}><div style={{fontSize:12,color:C.sub}}>Released to Stripe Connect</div><div style={{fontWeight:900,fontSize:34,color:C.green}}>${released.toFixed(2)}</div><div style={{fontSize:12,color:C.sub,marginTop:16}}>Captured / awaiting release</div><div style={{fontWeight:800,fontSize:22,color:C.gold}}>${pending.toFixed(2)}</div><div style={{fontSize:11,color:C.muted,marginTop:14}}>{heroProfile?.stripe_connect_id?'Payout account connected':'Payout account is not connected. Contact operations before accepting paid missions.'}</div></div></div>)}
           {heroTab==='profile'&&(<div style={{padding:'20px 20px 0'}}>
             <div style={{fontWeight:800,fontSize:20,marginBottom:16}}>Hero Profile</div>
             <div style={{background:C.card,borderRadius:16,padding:20,border:`1px solid ${C.border}`,textAlign:'center',marginBottom:12}}>
