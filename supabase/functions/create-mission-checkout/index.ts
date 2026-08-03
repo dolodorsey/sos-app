@@ -21,7 +21,8 @@ Deno.serve(async(req)=>{
   const {data:hero}=await admin.from('sos_heroes').select('stripe_connect_id').eq('id',mission.hero_id).single()
   if(!hero?.stripe_connect_id) return json({error:'Hero payout account is not ready'},409)
   const amount=Math.round(Number(mission.final_price)*100), fee=Math.round(amount*.20), payout=amount-fee
-  const stripe=new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!)
+  const stripeKey=Deno.env.get('STRIPE_SECRET_KEY');if(!stripeKey)return json({error:'Secure payments are not configured'},503)
+  const stripe=new Stripe(stripeKey)
   const base=Deno.env.get('SOS_PUBLIC_URL')||'https://superherosonstandby.com'
   const session=await stripe.checkout.sessions.create({mode:'payment',success_url:success_url||`${base}/app/?payment=authorized`,cancel_url:cancel_url||`${base}/app/?payment=canceled`,line_items:[{price_data:{currency:'usd',unit_amount:amount,product_data:{name:'S.O.S. roadside mission',metadata:{mission_id}}},quantity:1}],payment_method_types:['card'],payment_intent_data:{capture_method:'manual',transfer_group:`sos_mission_${mission_id}`,metadata:{mission_id,hero_id:mission.hero_id}},metadata:{mission_id}}, {idempotencyKey:`sos-checkout-${mission_id}-${amount}`})
   await admin.rpc('sos_prepare_mission_payment',{p_mission_id:mission_id,p_payment_intent_id:String(session.payment_intent),p_checkout_session_id:session.id,p_amount:amount/100,p_platform_fee:fee/100,p_hero_payout:payout/100,p_currency:'usd'})

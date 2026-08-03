@@ -1,10 +1,12 @@
 import Stripe from 'npm:stripe@18.5.0'
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4'
-const stripe=new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!)
 Deno.serve(async(req)=>{
+  const stripeKey=Deno.env.get('STRIPE_SECRET_KEY'),webhookSecret=Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET')
+  if(!stripeKey||!webhookSecret)return new Response('Stripe webhook is not configured',{status:503})
+  const stripe=new Stripe(stripeKey)
   const body=await req.text(), sig=req.headers.get('stripe-signature')||''
   let event:Stripe.Event
-  try{ event=await stripe.webhooks.constructEventAsync(body,sig,Deno.env.get('STRIPE_WEBHOOK_SIGNING_SECRET')!) }catch{ return new Response('Invalid signature',{status:400}) }
+  try{ event=await stripe.webhooks.constructEventAsync(body,sig,webhookSecret) }catch{ return new Response('Invalid signature',{status:400}) }
   const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
   const object=event.data.object as any
   const {error:dedupe}=await admin.from('sos_stripe_events').insert({event_id:event.id,event_type:event.type,livemode:event.livemode,object_id:object?.id,payload:{created:event.created}})
