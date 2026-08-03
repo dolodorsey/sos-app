@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run build && npm audit --omit=dev --audit-level=critical",
     "start": "next start",
     "ios:build": "npm run build && npx cap sync ios",
     "ios:open": "npx cap open ios",
@@ -35,7 +37,7 @@
     "typescript": "^6.0.2"
   },
   "engines": {
-    "node": ">=22"
+    "node": "24.x"
   },
   "overrides": {
     "@xmldom/xmldom": "0.9.10",
