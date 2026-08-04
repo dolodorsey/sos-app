@@ -3,11 +3,11 @@
 import dynamic from 'next/dynamic';
 import SOSLoading from '@/components/SOSLoading';
 
-const SOSApp = dynamic(() => import('@/components/SOSApp'), {
+const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
   ssr: false,
-  loading: () => <SOSLoading label="Opening the SOS response network" />,
+  loading: () => <SOSLoading label="Opening the SOS mobility network" />,
 });
 
 export default function AppPage() {
-  return <SOSApp />;
+  return <SOSCustomerMobilityApp />;
 }
