@@ -1,10 +1,11 @@
 import './globals.css';
 import '../components/sos-mobility.css';
+import '../components/sos-customer-v2.css';
 
 export const metadata = {
-  title: 'S.O.S. — Superheroes On Standby | Roadside Request Intake',
-  description: 'Submit a roadside-support request, review the starting estimate, and track confirmed assignment status. S.O.S. is not 911 and does not replace emergency services.',
-  keywords: 'roadside assistance request, towing request, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support Atlanta',
+  title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
+  description: 'Request verified roadside help, see real Hero matching status, and track confirmed mission progress. S.O.S. is not 911.',
+  keywords: 'roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support Atlanta',
   authors: [{ name: 'The Kollective Hospitality Group' }],
   metadataBase: new URL('https://thesuperherosonstandby.com'),
   icons: {
@@ -16,7 +17,7 @@ export const metadata = {
   },
   openGraph: {
     title: 'S.O.S. — Superheroes On Standby',
-    description: 'Log a roadside request and see the real assignment status. Timing and payment are confirmed after an approved provider accepts the request.',
+    description: 'Verified roadside assistance with real matching, assignment, payment, and mission tracking.',
     type: 'website',
     url: 'https://thesuperherosonstandby.com',
     siteName: 'S.O.S. — Superheroes On Standby',
@@ -24,7 +25,7 @@ export const metadata = {
   twitter: {
     card: 'summary',
     title: 'S.O.S. — Superheroes On Standby',
-    description: 'Roadside request intake with honest pending and confirmed assignment states.',
+    description: 'Roadside mobility with honest live mission states.',
   },
 };
 
