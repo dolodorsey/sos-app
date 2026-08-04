@@ -1,4 +1,5 @@
 import './globals.css';
+import '../components/sos-mobility.css';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Request Intake',
