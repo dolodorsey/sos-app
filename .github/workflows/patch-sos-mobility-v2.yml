@@ -1,0 +1,56 @@
+name: Patch SOS Mobility V2
+
+on:
+  push:
+    branches:
+      - agent/sos-mobility-dispatch-v2
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/sos-mobility-dispatch-v2
+      - name: Wire live mission dispatch and tracker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path=Path('src/components/SOSApp.jsx')
+          text=path.read_text()
+          text=text.replace("import NotNineOneOneGate,{hasAcknowledgedNot911}from'./NotNineOneOneGate';","import NotNineOneOneGate,{hasAcknowledgedNot911}from'./NotNineOneOneGate';\nimport SOSMissionTracker from './SOSMissionTracker';\nimport {requestCustomerMission} from '../lib/sosMissionClient';")
+          text=text.replace("  const[dispatch,setDispatch]=useState(null);// null | {phase,service}","  const[dispatch,setDispatch]=useState(null);// null | {phase,service}\n  const[activeMission,setActiveMission]=useState(null);\n  const[trackerOpen,setTrackerOpen]=useState(false);")
+          start=text.index("  const confirmReq=async()=>{tapHeavy();")
+          end=text.index("  const finishMission=",start)
+          replacement="""  const confirmReq=async()=>{tapHeavy();
+    setDispatch(p=>({...p,phase:'finding'}));
+    const loc=await getLocation();
+    try{
+      const serviceAliases={'Flat Tire':'Flat Tire Help','Fuel':'Fuel Delivery','Battery':'Battery Replace'};
+      const result=await requestCustomerMission({token:session?.access_token,serviceName:serviceAliases[dispatch.service.name]||dispatch.service.name,location:loc});
+      setActiveMission(result.mission);setTrackerOpen(true);setDispatch(null);
+      if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));
+    }catch(e){setErr(e.message||'Unable to create roadside request');setDispatch(p=>({...p,phase:'error'}));}
+  };
+"""
+          text=text[:start]+replacement+text[end:]
+          marker="        <DispatchOverlay/>"
+          addition="""        <DispatchOverlay/>
+        {trackerOpen&&activeMission&&<SOSMissionTracker token={session?.access_token} missionId={activeMission.id} initialMission={activeMission} onClose={()=>setTrackerOpen(false)}/>}
+        {!trackerOpen&&activeMission&&!['completed','canceled_by_citizen','canceled_by_hero','canceled_by_system'].includes(activeMission.status)&&<div className="sos-request-live-card" style={{position:'fixed',left:16,right:16,bottom:92,zIndex:150}}><span>LIVE ROADSIDE REQUEST</span><h3>{activeMission.requested_service_name||'S.O.S. Mission'}</h3><p>Your real mission status is active. Open the tracker for matching and assignment updates.</p><button onClick={()=>setTrackerOpen(true)}>Open live tracker</button></div>}"""
+          if marker not in text: raise SystemExit('citizen overlay marker not found')
+          text=text.replace(marker,addition,1)
+          path.write_text(text)
+          PY
+      - name: Commit integration
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add src/components/SOSApp.jsx
+          git commit -m 'connect SOS customer app to live mobility dispatch'
+          git push origin HEAD:agent/sos-mobility-dispatch-v2
