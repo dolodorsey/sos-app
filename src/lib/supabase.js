@@ -4,6 +4,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://cxdqkjvtpil
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const SOS_APP_URL = 'https://thesuperherosonstandby.com';
+export const SOS_CONFIRM_URL = `${SOS_APP_URL}/auth/confirm`;
 
 const N8N_BASE = 'https://dorsey.app.n8n.cloud/webhook';
 
@@ -11,7 +13,7 @@ const N8N_BASE = 'https://dorsey.app.n8n.cloud/webhook';
 export const signUp = async (email, password, fullName, role) => {
   const { data, error } = await supabase.auth.signUp({
     email, password,
-    options: { data: { full_name: fullName, role, app: 'sos' } },
+    options: { emailRedirectTo: SOS_CONFIRM_URL, data: { full_name: fullName, role, app: 'sos' } },
   });
   if (error) throw error;
   fetch(`${N8N_BASE}/sos-new-user`, {
@@ -20,6 +22,11 @@ export const signUp = async (email, password, fullName, role) => {
     body: JSON.stringify({ email, full_name: fullName, role, user_id: data.user?.id || '', app: 'sos' }),
   }).catch(() => {});
   return data;
+};
+
+export const resendConfirmation = async (email) => {
+  const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: SOS_CONFIRM_URL } });
+  if (error) throw error;
 };
 
 export const signIn = async (email, password) => {
