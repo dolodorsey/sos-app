@@ -4,10 +4,8 @@
   "authority": "Supabase cxdqkjvtpilvouwtbgdy public.sos_*",
   "service": "roadside-dispatch-marketplace",
   "fulfillment_mode": "operator-offer-and-hero-acceptance",
-  "status": "ok",
-  "schema_version": 3,
-  "commit": "local",
-  "branch": "local",
-  "environment": "development",
-  "built_at": "2026-08-03T10:46:12.596Z"
+  "status": "manifest-only",
+  "live_health_endpoint": "https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/health",
+  "schema_version": 4,
+  "note": "This static file is deployment metadata only. Use live_health_endpoint for runtime health."
 }
