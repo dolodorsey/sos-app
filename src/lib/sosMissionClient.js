@@ -7,6 +7,12 @@ const headers = token => ({
   'Content-Type': 'application/json',
 })
 
+const parse = async response => {
+  const payload = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(payload?.message || payload?.error || 'Request failed')
+  return payload
+}
+
 export async function requestCustomerMission({ token, serviceName, serviceId, location, notes = null }) {
   if (!token) throw new Error('Please sign in to request a Hero.')
   if (location?.lat == null || location?.lng == null) throw new Error('Location permission is required for roadside dispatch.')
@@ -36,6 +42,7 @@ export async function getCustomerMission(token, missionId) {
     'hero:sos_heroes!sos_missions_hero_id_fkey(id,rating,level,user:sos_users!sos_heroes_user_id_fkey(first_name,last_name,avatar_url))',
     'offers:sos_mission_offers(id,status,eta_minutes,expires_at)',
     'payments:sos_payments(payment_status,escrow_status,amount)',
+    'ratings:sos_ratings(id,rating,review_text,created_at)',
   ].join(',')
   const response = await fetch(`${SOS_URL}/rest/v1/sos_missions?id=eq.${encodeURIComponent(missionId)}&select=${encodeURIComponent(select)}&limit=1`, {
     headers: headers(token),
@@ -45,15 +52,37 @@ export async function getCustomerMission(token, missionId) {
   return payload?.[0] || null
 }
 
+export async function authorizeCustomerMission(token, missionId) {
+  const response = await fetch(`${SOS_URL}/functions/v1/create-mission-checkout`, {
+    method: 'POST',
+    headers: headers(token),
+    body: JSON.stringify({ mission_id: missionId }),
+  })
+  return parse(response)
+}
+
+export async function rateCustomerMission(token, missionId, rating, reviewText = null) {
+  const response = await fetch(`${SOS_URL}/rest/v1/rpc/sos_rate_completed_mission`, {
+    method: 'POST',
+    headers: headers(token),
+    body: JSON.stringify({
+      p_mission_id: missionId,
+      p_rating: rating,
+      p_review_text: reviewText,
+      p_tags: [],
+      p_is_public: true,
+    }),
+  })
+  return parse(response)
+}
+
 export async function cancelCustomerMission(token, missionId, reason = 'Customer canceled from app') {
   const response = await fetch(`${SOS_URL}/rest/v1/rpc/sos_cancel_own_mission`, {
     method: 'POST',
     headers: headers(token),
     body: JSON.stringify({ p_mission_id: missionId, p_reason: reason }),
   })
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload?.message || payload?.error || 'Mission could not be canceled.')
-  return payload
+  return parse(response)
 }
 
 export function missionPhase(status) {
