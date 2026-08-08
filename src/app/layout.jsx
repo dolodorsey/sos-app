@@ -2,6 +2,7 @@ import './globals.css';
 import '../components/sos-mobility.css';
 import '../components/sos-customer-v2.css';
 import '../components/sos-elite.css';
+import '../components/sos-desktop-final.css';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
