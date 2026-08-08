@@ -1,7 +1,12 @@
 'use client';
 
-import SOSApp from '@/components/SOSApp';
+import dynamic from 'next/dynamic';
+
+const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function Home() {
-  return <SOSApp />;
+  return <SOSCustomerMobilityApp />;
 }
