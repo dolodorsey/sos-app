@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import SOSMembershipHost from '@/components/SOSMembershipHost';
+import SOSCustomerLiveHost from '@/components/SOSCustomerLiveHost';
 
 const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
   ssr: false,
@@ -9,5 +10,5 @@ const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMob
 });
 
 export default function Home() {
-  return <><SOSCustomerMobilityApp/><SOSMembershipHost/></>;
+  return <><SOSCustomerMobilityApp/><SOSMembershipHost/><SOSCustomerLiveHost/></>;
 }
