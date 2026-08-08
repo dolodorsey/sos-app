@@ -6,7 +6,7 @@ export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
   description: 'Request verified roadside help, see real Hero matching status, and track confirmed mission progress. S.O.S. is not 911.',
   keywords: 'roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support Atlanta',
-  authors: [{ name: 'The Kollective Hospitality Group' }],
+  authors: [{ name: 'S.O.S. — Superheroes On Standby' }],
   metadataBase: new URL('https://thesuperherosonstandby.com'),
   icons: {
     icon: [
