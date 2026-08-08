@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import SOSHeroAlertsHost from '@/components/SOSHeroAlertsHost';
 
 const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp'), {
   ssr: false,
@@ -8,5 +9,5 @@ const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp
 });
 
 export default function HeroPortalPage() {
-  return <SOSHeroMobilityApp />;
+  return <><SOSHeroMobilityApp/><SOSHeroAlertsHost/></>;
 }
