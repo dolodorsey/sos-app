@@ -4,6 +4,7 @@ import '../components/sos-customer-v2.css';
 import '../components/sos-elite.css';
 import '../components/sos-desktop-final.css';
 import '../components/sos-membership.css';
+import '../components/sos-profile-tools.css';
 import '../components/sos-root-layout-rescue.css';
 
 export const metadata = {
