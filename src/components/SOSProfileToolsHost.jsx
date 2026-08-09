@@ -1,6 +1,6 @@
 'use client';
 
-import React,{useEffect,useMemo,useState}from'react';
+import React,{useEffect,useState}from'react';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
@@ -12,12 +12,11 @@ const categories=[['account','Account'],['vehicle','Vehicle'],['payment','Paymen
 
 export default function SOSProfileToolsHost(){
  const[tool,setTool]=useState(null),[vehicles,setVehicles]=useState([]),[vehicle,setVehicle]=useState(emptyVehicle),[payments,setPayments]=useState([]),[health,setHealth]=useState(null),[tickets,setTickets]=useState([]),[support,setSupport]=useState({category:'account',priority:'normal',subject:'',description:''}),[busy,setBusy]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState('');
- const s=useMemo(()=>session(),[tool]);
  const close=()=>{setTool(null);setVehicle(emptyVehicle);setError('');setNotice('')};
  const loadVehicles=async()=>{const ss=session();if(!ss)return;const rows=await api('/rest/v1/sos_vehicles?select=id,make,model,year,trim,color,plate,vin,is_ev,is_default,notes,created_at&order=is_default.desc,created_at.asc',{token:ss.access_token});setVehicles(rows||[])};
  const loadPayments=async()=>{const ss=session();if(!ss)return;const [rows,h]=await Promise.all([api('/rest/v1/sos_payments?select=id,mission_id,amount,platform_fee,hero_payout,tip,refund_amount,payment_status,escrow_status,settlement_type,cancellation_fee,created_at,updated_at&order=created_at.desc&limit=30',{token:ss.access_token}),fetch(`${SB}/functions/v1/marketplace-payments-health`,{headers:{apikey:SK},cache:'no-store'}).then(r=>r.json()).catch(()=>null)]);setPayments(rows||[]);setHealth(h)};
  const loadTickets=async()=>{const ss=session();if(!ss)return;const rows=await api('/rest/v1/sos_support_tickets?select=id,ticket_number,category,priority,subject,status,created_at,updated_at&order=created_at.desc&limit=20',{token:ss.access_token});setTickets(rows||[])};
- useEffect(()=>{const capture=e=>{const button=e.target?.closest?.('.sos2-profile-menu button,.sos2-membership button');if(!button)return;const label=String(button.querySelector?.('strong')?.textContent||button.textContent||'').trim();if(label==='Vehicles'){e.preventDefault();e.stopPropagation();setTool('vehicles')}else if(label==='Payment methods'){e.preventDefault();e.stopPropagation();setTool('payments')}else if(label==='Shield membership'||label==='Explore Shield'){e.preventDefault();e.stopPropagation();window.dispatchEvent(new Event('sos:open-shield'))}else if(label==='Safety & support'){e.preventDefault();e.stopPropagation();setTool('support')}};document.addEventListener('click',capture,true);return()=>document.removeEventListener('click',capture,true)},[]);
+ useEffect(()=>{const handler=e=>{const next=e?.detail?.tool;if(['vehicles','payments','support'].includes(next)){setError('');setNotice('');setTool(next)}};window.addEventListener('sos:open-profile-tool',handler);return()=>window.removeEventListener('sos:open-profile-tool',handler)},[]);
  useEffect(()=>{if(tool==='vehicles')loadVehicles().catch(e=>setError(e.message));if(tool==='payments')loadPayments().catch(e=>setError(e.message));if(tool==='support')loadTickets().catch(e=>setError(e.message))},[tool]);
  const saveVehicle=async()=>{const ss=session();if(!ss||busy)return;setBusy('vehicle');setError('');setNotice('');try{await api('/rest/v1/rpc/sos_upsert_vehicle',{method:'POST',token:ss.access_token,body:{p_vehicle_id:vehicle.id||null,p_make:vehicle.make,p_model:vehicle.model,p_year:vehicle.year?Number(vehicle.year):null,p_trim:vehicle.trim||null,p_color:vehicle.color||null,p_plate:vehicle.plate||null,p_vin:vehicle.vin||null,p_is_ev:Boolean(vehicle.is_ev),p_is_default:Boolean(vehicle.is_default),p_notes:vehicle.notes||null}});setVehicle(emptyVehicle);await loadVehicles();setNotice('Vehicle saved.')}catch(e){setError(e.message)}finally{setBusy('')}};
  const removeVehicle=async id=>{const ss=session();if(!ss||busy||!window.confirm('Remove this vehicle from your S.O.S. account?'))return;setBusy(id);setError('');try{await api('/rest/v1/rpc/sos_delete_vehicle',{method:'POST',token:ss.access_token,body:{p_vehicle_id:id}});await loadVehicles();if(vehicle.id===id)setVehicle(emptyVehicle);setNotice('Vehicle removed.')}catch(e){setError(e.message)}finally{setBusy('')}};
