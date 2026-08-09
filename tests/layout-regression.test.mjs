@@ -25,6 +25,15 @@ test('desktop customer and Hero products break out of the legacy 450px app shell
   assert.match(rescue, /\.sos2-auth,[\s\S]*?max-width:\s*480px\s*!important/)
 })
 
+test('desktop SOS customer and Hero products cannot regress to micro-sized phone typography', () => {
+  const rescue = read('src/components/sos-root-layout-rescue.css')
+  assert.match(rescue, /\.sos2-service-list strong,[\s\S]*?font-size:\s*14px\s*!important/)
+  assert.match(rescue, /\.sos2-service-list p,[\s\S]*?font-size:\s*12px\s*!important/)
+  assert.match(rescue, /\.sos2-nav button small[\s\S]*?font-size:\s*10px\s*!important/)
+  assert.match(rescue, /\.shc-mission-list strong,[\s\S]*?font-size:\s*13px\s*!important/)
+  assert.match(rescue, /\.shc-metrics small,[\s\S]*?font-size:\s*10px\s*!important/)
+})
+
 test('fee-review component never reads localStorage during state initialization', () => {
   const review = read('src/components/SOSSettlementReviewHost.jsx')
   assert.doesNotMatch(review, /useState\s*\(\s*\(\s*\)\s*=>\s*localStorage/)
