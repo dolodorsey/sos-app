@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import SOSCustomerOperationsHost from '@/components/SOSCustomerOperationsHost';
 import SOSCustomerCancellationHost from '@/components/SOSCustomerCancellationHost';
 import SOSCustomerCoverageStatusHost from '@/components/SOSCustomerCoverageStatusHost';
+import SOSCustomerTruthHost from '@/components/SOSCustomerTruthHost';
 import SOSCustomerReceiptHost from '@/components/SOSCustomerReceiptHost';
 import SOSNotificationInboxHost from '@/components/SOSNotificationInboxHost';
 import SOSShareTrackingHost from '@/components/SOSShareTrackingHost';
@@ -21,5 +22,5 @@ const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerR
 });
 
 export default function AppPage() {
-  return <><SOSPaymentReadinessHost audience="customer"/><SOSRecoveryHost audience="customer"/><SOSPushRegistrationHost/><SOSNotificationInboxHost/><SOSCustomerRealtimeShell/><SOSCustomerCoverageStatusHost/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/><SOSCustomerReceiptHost/><SOSShareTrackingHost/></>;
+  return <><SOSPaymentReadinessHost audience="customer"/><SOSRecoveryHost audience="customer"/><SOSPushRegistrationHost/><SOSNotificationInboxHost/><SOSCustomerRealtimeShell/><SOSCustomerCoverageStatusHost/><SOSCustomerTruthHost/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/><SOSCustomerReceiptHost/><SOSShareTrackingHost/></>;
 }
