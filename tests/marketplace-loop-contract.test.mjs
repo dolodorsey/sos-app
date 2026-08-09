@@ -26,6 +26,25 @@ test('Hero Command owns acceptance, presence, payment-gated travel, and completi
   assert.match(hero, /hero-complete-mission/)
 })
 
+test('Hero Command receives offers, missions, and payments through direct Realtime after login',()=>{
+  const shell=read('src/components/SOSHeroRealtimeShell.jsx')
+  assert.match(shell,/realtime\.setAuth\(s\.access_token\)/)
+  for(const table of ['sos_mission_offers','sos_missions','sos_payments']) assert.match(shell,new RegExp(`table:'${table}'`))
+  assert.match(shell,/setInterval\(connect,1000\)/)
+  assert.match(shell,/LIVE DATA/)
+  assert.match(shell,/POLLING FALLBACK/)
+})
+
+test('marketplace push delivery is event-driven with cron available only as fallback',()=>{
+  const migration=read('supabase/migrations/20260809040000_make_marketplace_push_event_driven.sql')
+  assert.match(migration,/marketplace_kick_push_delivery/)
+  assert.match(migration,/oc_notification_push_kick/)
+  assert.match(migration,/sos_notification_push_kick/)
+  assert.match(migration,/marketplace-push-delivery/)
+  assert.match(migration,/x-worker-token/)
+  assert.match(migration,/revoke all on function private\.marketplace_kick_push_delivery/)
+})
+
 test('customer payment is authorized before Hero travel and rating is tied to completed mission', () => {
   const client = read('src/lib/sosMissionClient.js')
   const tracker = read('src/components/SOSMissionTracker.jsx')
