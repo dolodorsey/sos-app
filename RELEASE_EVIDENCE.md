@@ -13,14 +13,16 @@
 
 - 28 S.O.S. user records.
 - 25 stored Hero records.
-- 0 currently verified, authenticated dispatch-eligible Heroes.
-- 0 on-duty verified Heroes.
+- **0 currently dispatch-eligible Heroes** under the live rule: verified Hero + active authenticated user.
+- 0 on-duty dispatch-eligible Heroes.
 - 0 missions.
 - 0 mission payments.
 - 0 subscriptions.
 - 0 disputes.
 - 0 ratings.
 - 0 Hero earnings rows.
+
+The current `sos-network-readiness` endpoint returns the stored-Hero count separately from dispatch-eligible supply so the customer UI cannot misrepresent stored records as launch-ready Heroes.
 
 Those zero transaction counts are reported as **market activation state**, not as proof that the software lifecycle is absent.
 
@@ -51,7 +53,8 @@ This evidence is recorded separately in the private release-evidence ledger and 
 - Customer/Hero mission chat, persistent notifications, realtime updates, and background alert infrastructure.
 - Customer cancellation quote/settlement and timed customer no-show settlement.
 - Hero release/rematching, start watchdog, stale-GPS warning/escalation, safety/reliability review, and customer fee-review workflows.
-- Completed mission rating contract and Shield subscription architecture.
+- Completed mission rating contract.
+- Shield membership is now a mounted live plan experience: live plans, current-plan state, Stripe subscription checkout contract, return verification, and explicit payment-health gating. The old visible “coming next” behavior is intercepted/replaced.
 
 ## Automated verification
 
@@ -61,15 +64,16 @@ S.O.S. now has three dedicated Node test files rather than the previous single t
 - `tests/layout-regression.test.mjs`
 - `tests/marketplace-loop-contract.test.mjs`
 
-The quality gate validates production build/dependency integrity plus marketplace-loop contracts, customer/Hero portal mounts, payment-gated travel, cancellation/no-show settlement source, desktop shell regressions, desktop readability, and the SSR/localStorage regression that previously broke deployment.
+The quality gate validates production build/dependency integrity plus marketplace-loop contracts, customer/Hero portal mounts, payment-gated travel, cancellation/no-show settlement source, desktop shell regressions, desktop readability, Shield enrollment contracts, truthful Hero eligibility, fail-closed payment behavior, and the SSR/localStorage regression that previously broke deployment.
 
 ## UI verification
 
 - The underlying S.O.S. shell still contains legacy phone-width styling, but the final stylesheet is deliberately loaded last and breaks customer/Hero products out to true desktop width at ≥900px.
-- The production bundle currently contains explicit `max-width:none !important` overrides for `.app-shell.sos-premium`, `.sos2-app`, and the Hero Command shell.
+- The production bundle contains explicit `max-width:none !important` overrides for `.app-shell.sos-premium`, `.sos2-app`, and the Hero Command shell.
 - Desktop card/service/mission typography was increased so desktop no longer relies on phone-scale 7–11px copy.
 - `/app` and `/hero` return HTTP 200 on the custom production domain.
 - The exact CSS bundle served by the production deployment was fetched and contains the final width/readability overrides.
+- Shield is mounted into `/app` with responsive membership styling and live plan state.
 
 A full external Chromium screenshot session is not claimed here because outbound browser networking is unavailable in the current verification environment. Bundle-level production verification, HTTP route checks, CI, database lifecycle tests, and runtime logging are used instead.
 
@@ -84,13 +88,26 @@ The server-only namespace audit currently reports:
 
 ## Release hygiene
 
-A private release-hygiene audit now fails if QA fixture users, QA addresses, or `example.invalid` records remain in the S.O.S./ON CALL marketplace tables. Old `qa-share-*` rows discovered during this repair were removed. Current hygiene result: zero QA fixtures.
+A private release-hygiene audit fails if QA fixture users, QA addresses, or `example.invalid` records remain in the S.O.S./ON CALL marketplace tables. Old `qa-share-*` rows discovered during this repair were removed. Current hygiene result: zero QA fixtures.
 
 ## Payment/runtime truth
 
-- The shared webhook signing secret is present in production configuration.
-- The server-side secret lookup currently does not report a `STRIPE_SECRET_KEY`; therefore no live-money completion is claimed from this audit.
-- The software payment state machine and no-money database lifecycle have been exercised, but a live Stripe charge/transfer still requires confirmed live secret configuration and a real approved Hero/customer transaction.
+The public `marketplace-payments-health` endpoint was called from inside the production Supabase project and returned **HTTP 503** with:
+
+- `ready: false`
+- `stripe_server_credential: false`
+- `webhook_signature_secret: true`
+- `credential_sources.stripe: "missing"`
+- `credential_sources.webhook: "vault"`
+
+Therefore:
+
+- webhook signature verification is configured;
+- the Stripe server credential is not currently available to production Edge Functions;
+- live charges, captures, transfers, payout onboarding, and Shield enrollment are intentionally fail-closed before Stripe is called;
+- Shield still shows the real plans, but enrollment buttons report payment runtime offline while this credential is missing.
+
+The connected Stripe account is available through the authorized Stripe connector, but that connector does not expose or create the secret API key needed by Supabase Edge Functions. Restoring that secret is an authorized account/key-management step, not a missing application-code implementation.
 
 ## Not claimed
 
