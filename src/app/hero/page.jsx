@@ -8,6 +8,7 @@ import SOSHeroReliabilityHost from '@/components/SOSHeroReliabilityHost';
 import SOSPaymentReadinessHost from '@/components/SOSPaymentReadinessHost';
 import SOSMissionChatHost from '@/components/SOSMissionChatHost';
 import SOSHeroClaimAccess from '@/components/SOSHeroClaimAccess';
+import SOSPushRegistrationHost from '@/components/SOSPushRegistrationHost';
 
 const SOSHeroRealtimeShell = dynamic(() => import('@/components/SOSHeroRealtimeShell'), {
   ssr: false,
@@ -15,5 +16,5 @@ const SOSHeroRealtimeShell = dynamic(() => import('@/components/SOSHeroRealtimeS
 });
 
 export default function HeroPortalPage() {
-  return <><SOSPaymentReadinessHost audience="hero"/><SOSHeroRealtimeShell/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSMissionChatHost/><SOSHeroClaimAccess/></>;
+  return <><SOSPaymentReadinessHost audience="hero"/><SOSPushRegistrationHost/><SOSHeroRealtimeShell/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSMissionChatHost/><SOSHeroClaimAccess/></>;
 }
