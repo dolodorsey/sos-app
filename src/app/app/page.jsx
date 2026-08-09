@@ -8,6 +8,7 @@ import SOSPaymentReadinessHost from '@/components/SOSPaymentReadinessHost';
 import SOSMissionChatHost from '@/components/SOSMissionChatHost';
 import SOSMembershipHost from '@/components/SOSMembershipHost';
 import SOSProfileToolsHost from '@/components/SOSProfileToolsHost';
+import SOSPushRegistrationHost from '@/components/SOSPushRegistrationHost';
 
 const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerRealtimeShell'), {
   ssr: false,
@@ -15,5 +16,5 @@ const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerR
 });
 
 export default function AppPage() {
-  return <><SOSPaymentReadinessHost audience="customer"/><SOSCustomerRealtimeShell/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/></>;
+  return <><SOSPaymentReadinessHost audience="customer"/><SOSPushRegistrationHost/><SOSCustomerRealtimeShell/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/></>;
 }
