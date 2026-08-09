@@ -26,6 +26,15 @@ test('Hero Command owns acceptance, presence, payment-gated travel, and completi
   assert.match(hero, /hero-complete-mission/)
 })
 
+test('accepted Hero missions load directly when React mission state has not committed yet',()=>{
+  const hero=read('src/components/SOSHeroMobilityApp.jsx')
+  assert.match(hero,/const openMission=async id=>\{let found=missions\.find/)
+  assert.match(hero,/\/rest\/v1\/sos_missions\?id=eq\.\$\{id\}/)
+  assert.match(hero,/found=Array\.isArray\(rows\)\?rows\[0\]\|\|null:null/)
+  assert.match(hero,/Mission could not be loaded\. Refresh Hero Command and try again\./)
+  assert.doesNotMatch(hero,/setSelectedMission\(found\|\|\{id\}\)/)
+})
+
 test('Hero Command receives offers, missions, and payments through direct Realtime after login',()=>{
   const shell=read('src/components/SOSHeroRealtimeShell.jsx')
   assert.match(shell,/realtime\.setAuth\(s\.access_token\)/)
