@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState}from'react';
-import{getCustomerMission,cancelCustomerMission,authorizeCustomerMission,rateCustomerMission,missionPhase}from'../lib/sosMissionClient';
+import{getCustomerMission,getCustomerCancellationQuote,cancelCustomerMission,authorizeCustomerMission,rateCustomerMission,missionPhase}from'../lib/sosMissionClient';
 
 const STEPS=[
   {id:'received',label:'Request received'},
@@ -31,6 +31,7 @@ export default function SOSMissionTracker({token,missionId,initialMission,onClos
   const paymentReady=paid(payment?.payment_status);
   const finalPrice=Number(mission?.final_price||0);
   const canAuthorize=hasAssignment&&mission?.pricing_status==='confirmed'&&finalPrice>0&&!paymentReady&&!['completed','canceled_by_citizen','canceled_by_hero','canceled_by_system'].includes(mission?.status);
+  const canSelfCancel=['requested','matching','assigned','en_route','on_site'].includes(mission?.status||'requested');
   const mapUrl=useMemo(()=>{
     const lat=mission?.pickup_lat||initialMission?.pickup_lat||33.749;
     const lng=mission?.pickup_lng||initialMission?.pickup_lng||-84.388;
@@ -53,7 +54,16 @@ export default function SOSMissionTracker({token,missionId,initialMission,onClos
   const cancel=async()=>{
     if(canceling)return;
     setCanceling(true);setError('');
-    try{const next=await cancelCustomerMission(token,missionId);setMission(next)}
+    try{
+      const quote=await getCustomerCancellationQuote(token,missionId);
+      if(!quote?.canCancel)throw new Error(quote?.reason||'This mission can no longer be self-canceled.');
+      const fee=Number(quote.feeAmount||0),heroComp=Number(quote.heroCompensation||0);
+      const message=fee>0
+        ?`Cancel this S.O.S. mission for a $${fee.toFixed(2)} late cancellation fee?\n\n${quote.reason}. $${heroComp.toFixed(2)} of the fee is allocated to Hero compensation.`
+        :`Cancel this S.O.S. mission at no charge?\n\n${quote.reason}.`;
+      if(!window.confirm(message)){setCanceling(false);return}
+      const next=await cancelCustomerMission(token,missionId,'Customer canceled from app',fee);setMission(next)
+    }
     catch(e){setError(e.message||'Unable to cancel')}
     finally{setCanceling(false)}
   };
@@ -99,8 +109,8 @@ export default function SOSMissionTracker({token,missionId,initialMission,onClos
       {phase==='completed'&&alreadyRated&&<div style={{color:'#9ff0d3',fontSize:12,fontWeight:700,textAlign:'center',margin:'12px 0'}}>✓ Rating submitted. Thank you.</div>}
 
       {error&&<div className="sos-tracker-error">{error}</div>}
-      <div className="sos-tracker-actions">{['requested','matching'].includes(mission?.status||'requested')&&<button className="sos-cancel-mission" onClick={cancel} disabled={canceling}>{canceling?'Canceling…':'Cancel request'}</button>}<button className="sos-support-action" onClick={()=>window.location.href='/support'}>S.O.S. support</button><button className="sos-support-action" onClick={()=>window.location.href='tel:911'}>Emergency? Call 911</button></div>
-      <p className="sos-tracker-safety">S.O.S. is roadside assistance—not emergency services. Assignment, payment, location, and ETA appear only from live mission data.</p>
+      <div className="sos-tracker-actions">{canSelfCancel&&<button className="sos-cancel-mission" onClick={cancel} disabled={canceling}>{canceling?'Checking policy…':mission?.status==='requested'||mission?.status==='matching'?'Cancel request':'Cancel service'}</button>}<button className="sos-support-action" onClick={()=>window.location.href='/support'}>S.O.S. support</button><button className="sos-support-action" onClick={()=>window.location.href='tel:911'}>Emergency? Call 911</button></div>
+      <p className="sos-tracker-safety">S.O.S. is roadside assistance—not emergency services. Assignment, payment, location, ETA, and cancellation terms appear only from live mission data.</p>
     </section>
   </div>;
 }
