@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import SOSHeroAlertsHost from '@/components/SOSHeroAlertsHost';
 import SOSHeroIssueHost from '@/components/SOSHeroIssueHost';
+import SOSHeroNoShowHost from '@/components/SOSHeroNoShowHost';
 
 const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp'), {
   ssr: false,
@@ -10,5 +11,5 @@ const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp
 });
 
 export default function HeroPortalPage() {
-  return <><SOSHeroMobilityApp/><SOSHeroAlertsHost/><SOSHeroIssueHost/></>;
+  return <><SOSHeroMobilityApp/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/></>;
 }
