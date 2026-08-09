@@ -1,0 +1,45 @@
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import test from 'node:test'
+
+const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8')
+
+test('SOS has a real non-demo Hero application and operator review funnel',()=>{
+  const apply=read('src/app/hero/apply/page.jsx')
+  const ops=read('src/app/ops/heroes/page.jsx')
+  const edge=read('supabase/functions/submit-sos-hero-application/index.ts')
+  const migration=read('supabase/migrations/20260809054000_add_real_sos_hero_application_funnel.sql')
+  const access=read('src/components/SOSHeroClaimAccess.jsx')
+  assert.match(apply,/submit-sos-hero-application/)
+  assert.match(apply,/Approval is not verification/)
+  assert.match(apply,/backgroundConsent/)
+  assert.match(ops,/sos_ops_hero_applications/)
+  assert.match(ops,/sos_ops_review_hero_application/)
+  assert.match(ops,/Approve for claim/)
+  assert.match(edge,/sos_hero_applications/)
+  assert.match(migration,/verification_status,on_duty,is_demo,payout_method\) values\([\s\S]*?'pending',false,false,null/)
+  assert.match(migration,/license_verified,insurance_verified,background_cleared,id_verified,test_mission_passed/)
+  assert.match(migration,/false,false,false,false,false,'pending'/)
+  assert.match(migration,/candidate_source[\s\S]*?'hero_application'/)
+  assert.match(access,/\/hero\/apply/)
+  assert.match(access,/\/hero\/claim/)
+})
+
+test('Stripe Accounts v2 readiness is synchronized through a separate signed thin-event path',()=>{
+  const hook=read('supabase/functions/stripe-v2-account-webhook/index.ts')
+  const bootstrap=read('supabase/functions/marketplace-stripe-bootstrap/index.ts')
+  const snapshot=read('supabase/functions/stripe-webhook/index.ts')
+  const infra=read('supabase/migrations/20260809052000_add_stripe_v2_event_sync_infrastructure.sql')
+  assert.match(hook,/STRIPE_V2_ACCOUNT_WEBHOOK_SECRET/)
+  assert.match(hook,/v2\.core\.account\[configuration\.recipient\]\.capability_status_updated/)
+  assert.match(hook,/stripe_transfer_status/)
+  assert.match(hook,/marketplace_record_stripe_v2_event/)
+  assert.match(bootstrap,/event_payload:'thin'/)
+  assert.match(bootstrap,/events_from:\['other_accounts'\]/)
+  assert.match(bootstrap,/marketplace_store_runtime_secret/)
+  assert.match(bootstrap,/STRIPE_V2_ACCOUNT_WEBHOOK_SECRET/)
+  assert.match(snapshot,/ignored_legacy_account_snapshot:true/)
+  assert.match(snapshot,/stripe_account_api_version==='v2'\?ocPayment\.provider\?\.stripe_transfer_status==='active'/)
+  assert.match(infra,/revoke all on function public\.marketplace_store_runtime_secret/)
+  assert.match(infra,/revoke all on function public\.marketplace_record_stripe_v2_event/)
+})
