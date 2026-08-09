@@ -6,6 +6,7 @@ import SOSHeroIssueHost from '@/components/SOSHeroIssueHost';
 import SOSHeroNoShowHost from '@/components/SOSHeroNoShowHost';
 import SOSHeroReliabilityHost from '@/components/SOSHeroReliabilityHost';
 import SOSPaymentReadinessHost from '@/components/SOSPaymentReadinessHost';
+import SOSMissionChatHost from '@/components/SOSMissionChatHost';
 
 const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp'), {
   ssr: false,
@@ -13,5 +14,5 @@ const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp
 });
 
 export default function HeroPortalPage() {
-  return <><SOSPaymentReadinessHost audience="hero"/><SOSHeroMobilityApp/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/></>;
+  return <><SOSPaymentReadinessHost audience="hero"/><SOSHeroMobilityApp/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSMissionChatHost/></>;
 }
