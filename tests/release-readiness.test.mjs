@@ -8,7 +8,10 @@ test('health contract identifies the app and authority', () => {
   const health = JSON.parse(read('public/health.json'))
   assert.equal(health.app, 'sos-app')
   assert.equal(health.authority, 'Supabase cxdqkjvtpilvouwtbgdy public.sos_*')
-  assert.equal(health.schema_version, 3)
+  assert.equal(health.service, 'roadside-dispatch-marketplace')
+  assert.equal(health.fulfillment_mode, 'operator-offer-and-hero-acceptance')
+  assert.equal(health.schema_version, 4)
+  assert.equal(health.live_health_endpoint, 'https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/health')
 })
 
 test('mission payments require manual capture, verified completion, and idempotent release', () => {
