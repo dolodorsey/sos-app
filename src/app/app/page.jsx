@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import SOSCustomerOperationsHost from '@/components/SOSCustomerOperationsHost';
+import SOSCustomerCancellationHost from '@/components/SOSCustomerCancellationHost';
 
 const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
   ssr: false,
@@ -9,5 +10,5 @@ const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMob
 });
 
 export default function AppPage() {
-  return <><SOSCustomerMobilityApp/><SOSCustomerOperationsHost/></>;
+  return <><SOSCustomerMobilityApp/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/></>;
 }
