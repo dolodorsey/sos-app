@@ -11,6 +11,7 @@ import '../components/sos-current-media.css';
 import SOSAuthConfirmationGuard from '../components/SOSAuthConfirmationGuard';
 import SOSAuthRedirectSessionHost from '../components/SOSAuthRedirectSessionHost';
 import SOSPasswordRecoveryHost from '../components/SOSPasswordRecoveryHost';
+import SOSSessionRefreshHost from '../components/SOSSessionRefreshHost';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
@@ -63,6 +64,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <SOSSessionRefreshHost/>
         <div className="app-shell sos-premium" data-app="sos">{children}</div>
         <SOSAuthRedirectSessionHost/>
         <SOSAuthConfirmationGuard/>
