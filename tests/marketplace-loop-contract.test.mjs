@@ -35,6 +35,15 @@ test('Hero Command receives offers, missions, and payments through direct Realti
   assert.match(shell,/POLLING FALLBACK/)
 })
 
+test('customer mission tracker is realtime-first and follows participant-safe Hero GPS',()=>{
+  const tracker=read('src/components/SOSMissionTracker.jsx')
+  assert.match(tracker,/realtime\.setAuth\(token\)/)
+  for(const table of ['sos_missions','sos_payments','sos_mission_live_positions']) assert.match(tracker,new RegExp(`table:'${table}'`))
+  assert.match(tracker,/filter:`mission_id=eq\.\$\{missionId\}`/)
+  assert.match(tracker,/HERO LIVE/)
+  assert.match(tracker,/setInterval\(refresh,4000\)/)
+})
+
 test('marketplace push delivery is event-driven with cron available only as fallback',()=>{
   const migration=read('supabase/migrations/20260809040000_make_marketplace_push_event_driven.sql')
   assert.match(migration,/marketplace_kick_push_delivery/)
