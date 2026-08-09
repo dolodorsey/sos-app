@@ -38,10 +38,11 @@ The real supply path is now explicit and separate from demo fixtures:
 3. Approval creates a real non-demo claim-ready Hero/candidate record but **does not mark that Hero verified**.
 4. `/hero/claim` links authentication only when the signed-in email matches the existing approved candidate identity.
 5. Approved real Heroes automatically receive a 9-check verification ledger.
-6. Operators review the non-Stripe checks in `/ops/heroes`.
-7. Stripe alone controls the payout-account verification check.
-8. Hero Command shows the same 9/9 readiness state enforced by patrol.
-9. Patrol remains blocked until every required check is `passed`.
+6. Heroes submit private evidence inside Hero Command; uploads move checks to `submitted`, not `passed`.
+7. Operators inspect submitted private evidence through short-lived signed links in `/ops/heroes` and review the non-Stripe checks.
+8. Stripe alone controls the payout-account verification check.
+9. Hero Command shows the same 9/9 readiness state enforced by patrol.
+10. Patrol remains blocked until every required check is `passed`.
 
 The nine required checks are:
 
@@ -56,6 +57,26 @@ The nine required checks are:
 - payout account.
 
 Required Hero checks cannot be waived. `payout_account` cannot be manually passed by an operator; `hero-payouts` synchronizes that row from live Stripe transfer capability.
+
+## Private verification documents
+
+Hero verification documents no longer require an off-platform email/document handoff.
+
+- Supabase Storage bucket: `marketplace-verification`.
+- Bucket is private (`public = false`).
+- Maximum file size: 10 MB.
+- Allowed types: PDF, JPEG, PNG, WebP, HEIC, HEIF.
+- Heroes may upload only into their own authenticated path: `sos/<auth-user>/<hero>/<check>/...`.
+- Demo Heroes are not eligible for this real verification path.
+- Other Heroes cannot browse submitted evidence.
+- Active marketplace operators may read evidence through authenticated Storage policy only.
+- `/ops/heroes` creates **5-minute signed URLs** when an operator opens evidence; no permanent/public verification URL is exposed.
+- Uploaded paths are attached to the corresponding Hero verification ledger row.
+- Uploading evidence changes an unfinished check to `submitted`; it **never automatically passes** a check.
+- `payout_account` does not accept uploaded evidence because Stripe owns that verification state.
+- Heroes do not receive update/delete permissions on evidence objects, preserving the review audit trail.
+
+The bucket configuration, policies, file restrictions, and authenticated-only evidence RPC grants were verified directly in production.
 
 ## Verification/patrol proof without fabricating supply
 
@@ -90,7 +111,7 @@ Historical QA proof is not counted as real mission activity and does not convert
 - GPS-required mission request flow.
 - Ranked Hero dispatch with expiring offers and radius expansion.
 - Dispatch excludes demo identities and requires verified + active authenticated real Heroes.
-- Real Hero application, operator approval, secure same-email claim, 9-check verification, and patrol-readiness pipeline.
+- Real Hero application, operator approval, secure same-email claim, 9-check verification, private evidence submission/review, and patrol-readiness pipeline.
 - Hero presence/location heartbeat and participant-safe customer tracking.
 - Customer tracker follows live Hero GPS through Realtime with polling fallback.
 - Hero accept/decline and automatic offer expiry/recovery.
@@ -121,6 +142,9 @@ The release gate runs repository tests plus production build/dependency checks. 
 - required-check no-waiver rule;
 - Stripe-owned payout verification;
 - exact 9/9 verification/patrol alignment;
+- private verification Storage/privacy/path contracts;
+- Hero evidence upload can only submit, never auto-pass;
+- short-lived operator signed evidence links;
 - operator and Hero verification UIs;
 - Hero/customer Realtime contracts;
 - participant-safe live Hero GPS tracking;
@@ -136,14 +160,14 @@ The release gate runs repository tests plus production build/dependency checks. 
 
 ## Production route/runtime verification
 
-Current custom-domain route checks return HTTP 200 on the latest production deployment for:
+Current custom-domain route checks return HTTP 200 on the production application for:
 
 - `/hero`
 - `/hero/apply`
 - `/hero/claim`
 - `/ops/heroes`
 
-The latest production Vercel deployment is READY and has no error/fatal runtime logs in the checked one-hour window.
+The current production Vercel build is READY and the checked production deployment has no error/fatal runtime logs in the one-hour validation window.
 
 ## Shared-backend isolation
 
@@ -178,4 +202,4 @@ Therefore live charges, captures, transfers, Hero payout onboarding, and Shield 
 - The 25 historical Hero/candidate records are **demo fixtures, not supply**.
 - There are currently **zero real Hero applications, zero real Hero records, zero real recruiting candidates, and zero dispatch-eligible real Heroes** in production.
 - No fake mission, payout, rating, user, application, candidate, verification, or Stripe transaction is counted to make the marketplace appear active.
-- Real market validation begins only after real Heroes apply, are approved, claim their identity, pass 9/9 verification, become payout-enabled, and actual customer missions complete.
+- Real market validation begins only after real Heroes apply, are approved, claim their identity, submit evidence, pass 9/9 verification, become payout-enabled, and actual customer missions complete.
