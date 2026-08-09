@@ -60,3 +60,19 @@ test('cancellation/no-show compensation uses separate transfer semantics instead
     assert.match(source, /stripe_connect_id/)
   }
 })
+
+test('Shield is a mounted live plan/checkout/verification flow instead of a coming-soon toast', () => {
+  const page = read('src/app/app/page.jsx')
+  const host = read('src/components/SOSMembershipHost.jsx')
+  const edge = read('supabase/functions/sos-membership/index.ts')
+  assert.match(page, /SOSMembershipHost/)
+  assert.match(host, /sos-membership/)
+  assert.match(host, /action:'plans'/)
+  assert.match(host, /action:'checkout'/)
+  assert.match(host, /action:'verify'/)
+  assert.match(host, /sb_publishable_/)
+  assert.doesNotMatch(host, /coming next/i)
+  assert.match(edge, /mode:"subscription"/)
+  assert.match(edge, /success_url:"https:\/\/thesuperherosonstandby\.com\/app\?membership=success/)
+  assert.match(edge, /cancel_url:"https:\/\/thesuperherosonstandby\.com\/app\?membership=canceled"/)
+})
