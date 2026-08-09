@@ -26,6 +26,25 @@ test('Hero Command owns acceptance, presence, payment-gated travel, and completi
   assert.match(hero, /hero-complete-mission/)
 })
 
+test('Hero payout onboarding uses Stripe Accounts v2 recipient capability only', () => {
+  const payouts=read('supabase/functions/hero-payouts/index.ts')
+  const migration=read('supabase/migrations/20260809050000_add_marketplace_stripe_accounts_v2_status.sql')
+  assert.match(payouts,/2026-06-24\.dahlia/)
+  assert.match(payouts,/\/v2\/core\/accounts/)
+  assert.match(payouts,/\/v2\/core\/account_links/)
+  assert.match(payouts,/configuration:\{recipient:/)
+  assert.match(payouts,/stripe_transfers:\{requested:true\}/)
+  assert.match(payouts,/fees_collector:'application'/)
+  assert.match(payouts,/losses_collector:'application'/)
+  assert.match(payouts,/dashboard:'express'/)
+  assert.match(payouts,/stripe_connect_api_version:'v2'/)
+  assert.match(payouts,/stripe_transfer_status/)
+  assert.doesNotMatch(payouts,/accounts\.create\(/)
+  assert.doesNotMatch(payouts,/controller:\s*\{/)
+  assert.doesNotMatch(payouts,/details_submitted/)
+  assert.match(migration,/stripe_connect_api_version/)
+})
+
 test('accepted Hero missions load directly when React mission state has not committed yet',()=>{
   const hero=read('src/components/SOSHeroMobilityApp.jsx')
   assert.match(hero,/const openMission=async id=>\{let found=missions\.find/)
