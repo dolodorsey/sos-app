@@ -122,9 +122,22 @@ test('Shield enrollment is fail-closed when marketplace payment health is offlin
   assert.match(host, /Payments offline/)
 })
 
-test('SOS readiness counts only Heroes who satisfy the real dispatch identity gate', () => {
+test('SOS readiness counts only real Heroes who satisfy the dispatch identity gate', () => {
   const readiness = read('supabase/functions/sos-network-readiness/index.ts')
-  assert.match(readiness, /u\.status==='active'&&Boolean\(u\.auth_id\)/)
+  assert.match(readiness, /!h\.user\?\.is_demo/)
+  assert.match(readiness, /u\.status==='active'&&!u\.is_demo&&Boolean\(u\.auth_id\)/)
   assert.match(readiness, /h\.verification_status==='verified'&&eligibleUsers\.has\(h\.user_id\)/)
-  assert.match(readiness, /eligibility_rule:"verified hero \+ active authenticated user"/)
+  assert.match(readiness, /demo_hero_fixtures/)
+  assert.match(readiness, /demo_candidate_fixtures/)
+  assert.match(readiness, /eligibility_rule:"verified real hero \+ active authenticated user"/)
+})
+
+test('demo SOS identities are quarantined from claim, ranking, direct offers, and operations supply',()=>{
+  const migration=read('supabase/migrations/20260809051000_quarantine_sos_demo_supply.sql')
+  assert.match(migration,/is_demo boolean not null default false/)
+  assert.match(migration,/%@sos-demo\.atl/)
+  assert.match(migration,/u\.is_demo=false/)
+  assert.match(migration,/c\.is_demo=false and u\.is_demo=false/)
+  assert.match(migration,/Hero is not verified, authenticated, real, and on duty/)
+  assert.match(migration,/'demo_fixtures'/)
 })
