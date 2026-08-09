@@ -46,3 +46,21 @@ test('Hero and customer portals use the secured mission lifecycle', () => {
   assert.match(app, /sos_rate_completed_mission/)
   assert.doesNotMatch(app, /buy\.stripe\.com/)
 })
+
+test('production Hero claim isolation and FK indexes are reproducible from source', () => {
+  const claim = read('supabase/migrations/20260809054215_sos_claim_status_excludes_demo_supply.sql')
+  const indexes = read('supabase/migrations/20260809060100_add_sos_fk_indexes.sql')
+
+  assert.match(claim, /sos_hero_claim_status/)
+  assert.match(claim, /coalesce\(c\.is_demo,false\)=false/)
+  assert.match(claim, /coalesce\(u\.is_demo,false\)=false/)
+  assert.match(claim, /coalesce\(h\.is_demo,false\)=false/)
+  for (const name of [
+    'sos_hero_applications_candidate_id_idx',
+    'sos_hero_applications_source_hero_id_idx',
+    'sos_hero_applications_source_user_id_idx',
+    'sos_mission_messages_sender_user_id_idx',
+    'sos_mission_shares_v2_citizen_id_idx',
+    'sos_support_tickets_mission_id_idx',
+  ]) assert.match(indexes, new RegExp(name))
+})
