@@ -15,6 +15,7 @@ test('desktop rescue stylesheet is imported after every earlier SOS stylesheet',
     "import '../components/sos-desktop-final.css'",
     "import '../components/sos-membership.css'",
     "import '../components/sos-profile-tools.css'",
+    "import '../components/sos-operations-command.css'",
   ]) assert.ok(rescueIndex > layout.indexOf(earlier), `${earlier} must load before the desktop rescue stylesheet`)
 })
 
@@ -99,4 +100,20 @@ test('visible SOS profile controls are direct and backed by real account operati
   assert.match(support,/sos_open_support_ticket/)
   assert.doesNotMatch(support,/thedoctordorsey@gmail\.com/i)
   assert.doesNotMatch(support,/Get In Touch/i)
+})
+
+test('S.O.S. operations command is operator-only and manages real candidate, verification, and support queues',()=>{
+  const page=read('src/app/ops/page.jsx')
+  const ops=read('src/components/SOSOperationsCommand.jsx')
+  const migration=read('supabase/migrations/20260809044500_add_sos_operations_command.sql')
+  assert.match(page,/SOSOperationsCommand/)
+  for(const rpc of ['sos_ops_snapshot','sos_ops_update_candidate','sos_ops_review_verification_check','sos_ops_update_support_ticket']) assert.match(ops,new RegExp(rpc))
+  assert.match(ops,/CLAIM NEEDED/)
+  assert.match(ops,/VERIFICATION CHECKS/)
+  assert.match(ops,/Support/)
+  assert.match(migration,/private\.marketplace_operators/)
+  assert.match(migration,/private\.is_marketplace_operator\(auth\.uid\(\)\)/)
+  assert.match(migration,/revoke execute on function public\.sos_ops_snapshot\(\) from public,anon/)
+  assert.match(migration,/sos_hero_verification_checks/)
+  assert.match(migration,/sos_support_tickets/)
 })
