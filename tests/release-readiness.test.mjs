@@ -49,7 +49,7 @@ test('Hero and customer portals use the secured mission lifecycle', () => {
 
 test('production Hero claim isolation and FK indexes are reproducible from source', () => {
   const claim = read('supabase/migrations/20260809054215_sos_claim_status_excludes_demo_supply.sql')
-  const indexes = read('supabase/migrations/20260809060100_add_sos_fk_indexes.sql')
+  const indexes = read('supabase/migrations/20260809054608_add_sos_fk_indexes.sql')
 
   assert.match(claim, /sos_hero_claim_status/)
   assert.match(claim, /coalesce\(c\.is_demo,false\)=false/)
