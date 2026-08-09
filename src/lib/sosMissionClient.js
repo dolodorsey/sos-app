@@ -1,5 +1,5 @@
 const SOS_URL = 'https://cxdqkjvtpilvouwtbgdy.supabase.co'
-const SOS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4'
+const SOS_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjeGRxa2p2dHBpbHZvdXd0YmdkeSIsInJlZiI6ImN4ZHFranZ0cGlsdm91d3RiZ2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0OTg4MzgsImV4cCI6MjA4NzA3NDgzOH0.pIOX5kzkY6X-lpQjrGkQN7BWSMQSUFVVIvyZ2RA31-4'
 
 const headers = token => ({
   apikey: SOS_KEY,
@@ -38,10 +38,10 @@ export async function requestCustomerMission({ token, serviceName, serviceId, lo
 export async function getCustomerMission(token, missionId) {
   if (!token || !missionId) return null
   const select = [
-    'id,status,pickup_lat,pickup_lng,pickup_address,estimated_price,final_price,pricing_status,requested_service_name,eta_minutes,hero_id,created_at,matched_at,accepted_at,en_route_at,arrived_at,started_at,completed_at,canceled_at',
+    'id,status,pickup_lat,pickup_lng,pickup_address,estimated_price,final_price,pricing_status,requested_service_name,eta_minutes,hero_id,created_at,matched_at,accepted_at,en_route_at,arrived_at,started_at,completed_at,canceled_at,cancellation_fee,cancellation_hero_compensation,cancellation_policy_version',
     'hero:sos_heroes!sos_missions_hero_id_fkey(id,rating,level,user:sos_users!sos_heroes_user_id_fkey(first_name,last_name,avatar_url))',
     'offers:sos_mission_offers(id,status,eta_minutes,expires_at)',
-    'payments:sos_payments(payment_status,escrow_status,amount)',
+    'payments:sos_payments(payment_status,escrow_status,amount,settlement_type,cancellation_fee)',
     'ratings:sos_ratings(id,rating,review_text,created_at)',
   ].join(',')
   const response = await fetch(`${SOS_URL}/rest/v1/sos_missions?id=eq.${encodeURIComponent(missionId)}&select=${encodeURIComponent(select)}&limit=1`, {
@@ -76,13 +76,23 @@ export async function rateCustomerMission(token, missionId, rating, reviewText =
   return parse(response)
 }
 
-export async function cancelCustomerMission(token, missionId, reason = 'Customer canceled from app') {
-  const response = await fetch(`${SOS_URL}/rest/v1/rpc/sos_cancel_own_mission`, {
+export async function getCustomerCancellationQuote(token, missionId) {
+  const response = await fetch(`${SOS_URL}/functions/v1/sos-cancel-mission`, {
     method: 'POST',
     headers: headers(token),
-    body: JSON.stringify({ p_mission_id: missionId, p_reason: reason }),
+    body: JSON.stringify({ missionId, action: 'quote' }),
   })
   return parse(response)
+}
+
+export async function cancelCustomerMission(token, missionId, reason = 'Customer canceled from app', expectedFeeAmount = null) {
+  const response = await fetch(`${SOS_URL}/functions/v1/sos-cancel-mission`, {
+    method: 'POST',
+    headers: headers(token),
+    body: JSON.stringify({ missionId, action: 'cancel', reason, expectedFeeAmount }),
+  })
+  const payload = await parse(response)
+  return payload?.mission || payload
 }
 
 export function missionPhase(status) {
