@@ -9,109 +9,126 @@
 - Product database namespace: `sos_*` only. Shared infrastructure with ON CALL does not merge product ownership or public branding.
 - Scope: non-emergency roadside and mobile-vehicle service marketplace; emergency copy directs users to 911.
 
-## Current production data — August 9, 2026
+## Current production truth — August 9, 2026
 
-- 28 S.O.S. user records.
-- 25 stored Hero records.
-- **0 currently dispatch-eligible Heroes** under the live rule: verified Hero + active authenticated user.
-- 0 on-duty dispatch-eligible Heroes.
-- 0 missions.
+- 28 S.O.S. user records total.
+- **0 real Hero records currently available as supply.**
+- 25 historical Hero records are explicitly classified as **demo fixtures** because their linked identities use the `@sos-demo.atl` demo domain.
+- **0 real recruiting candidates.**
+- 25 historical recruiting records are explicitly classified as **demo fixtures** and are paused/excluded from the real activation pipeline.
+- 0 dispatch-eligible real Heroes.
+- 0 on-duty dispatch-eligible real Heroes.
+- 0 real missions.
 - 0 mission payments.
 - 0 subscriptions.
 - 0 disputes.
 - 0 ratings.
 - 0 Hero earnings rows.
 
-The current `sos-network-readiness` endpoint returns the stored-Hero count separately from dispatch-eligible supply so the customer UI cannot misrepresent stored records as launch-ready Heroes.
+The `sos-network-readiness` endpoint now returns real supply and demo fixtures separately. Demo users/candidates are also excluded at the database layer from Hero ranking, direct mission offers, candidate claiming, and the real S.O.S. Operations Command queue.
 
-Those zero transaction counts are reported as **market activation state**, not as proof that the software lifecycle is absent.
+Those zero real-supply and transaction counts are reported as **market activation state**, not as evidence that the software lifecycle is absent.
 
 ## Software lifecycle proven without fabricating customer history
 
-A disposable database marketplace simulation was executed against the production schema without calling Stripe and without preserving QA rows. It proved:
+A disposable database marketplace simulation was executed against the production schema without calling Stripe and without preserving QA rows. It proved the lifecycle state machine and payment gate. That historical QA proof is not counted as real mission activity and does not convert the quarantined demo records into real supply.
 
-1. A pending S.O.S. mission entered ranked dispatch.
-2. Dispatch created exactly one Hero offer.
-3. The offered Hero accepted atomically and the mission became `assigned`.
-4. Starting the route without customer payment authorization was rejected.
-5. Adding an authorized payment state unlocked `en_route`.
-6. QA fixture cleanup was verified after the simulation.
+The proven contract is:
 
-This evidence is recorded separately in the private release-evidence ledger and is **not** counted as real mission activity.
+1. A request can enter dispatch.
+2. A qualified eligible Hero offer can be created.
+3. Offer acceptance atomically assigns the mission.
+4. Starting travel without customer payment authorization is rejected.
+5. An authorized payment state unlocks `en_route`.
+6. QA fixture cleanup is verified after the simulation.
 
 ## Marketplace controls currently implemented
 
 - Customer account and live service catalog.
 - GPS-required mission request flow.
-- Ranked verified-Hero dispatch with expiring offers and radius expansion.
+- Ranked Hero dispatch with expiring offers and radius expansion.
+- **Dispatch excludes demo identities and requires verified + active authenticated real Heroes.**
 - Hero presence/location heartbeat and participant-safe customer tracking.
+- Customer tracker follows live Hero GPS through Realtime with polling fallback.
 - Hero accept/decline and automatic offer expiry/recovery.
 - Hero-owned final-price confirmation before travel.
 - Customer payment authorization required before route start.
 - Server-enforced mission transitions and proof-based completion.
 - Stripe capture/transfer lifecycle and Hero payout readiness logic.
-- Customer/Hero mission chat, persistent notifications, realtime updates, and background alert infrastructure.
+- Customer/Hero mission chat and persistent notification infrastructure.
+- Customer and Hero portals are Realtime-first for mission/payment/offer changes, with polling retained as resilience fallback.
+- Background Web Push registration is mounted on both customer and Hero portals.
+- VAPID-backed push delivery uses a service worker and the shared push delivery worker.
+- Push delivery fallback runs every 10 seconds rather than once per minute so urgent offer windows are not missed.
 - Customer cancellation quote/settlement and timed customer no-show settlement.
 - Hero release/rematching, start watchdog, stale-GPS warning/escalation, safety/reliability review, and customer fee-review workflows.
 - Completed mission rating contract.
-- Shield membership is now a mounted live plan experience: live plans, current-plan state, Stripe subscription checkout contract, return verification, and explicit payment-health gating. The old visible “coming next” behavior is intercepted/replaced.
+- Shield membership is a mounted live plan experience with live plans, current-plan state, Stripe subscription checkout contract, return verification, and explicit payment-health gating.
+- Customer profile tools are functional for Vehicles, payment state, Shield, and Safety & Support.
+- `/support` creates real S.O.S. support cases.
+- `/hero/claim` exists for future **real qualified candidates only**; demo candidates are rejected server-side.
+- `/ops` is an operator-only Operations Command for real candidate activation, verification review, and support queues.
 
 ## Automated verification
 
-S.O.S. now has three dedicated Node test files rather than the previous single test file:
+The release gate runs all repository tests plus production build/dependency checks. Regression coverage includes:
 
-- `tests/release-readiness.test.mjs`
-- `tests/layout-regression.test.mjs`
-- `tests/marketplace-loop-contract.test.mjs`
-
-The quality gate validates production build/dependency integrity plus marketplace-loop contracts, customer/Hero portal mounts, payment-gated travel, cancellation/no-show settlement source, desktop shell regressions, desktop readability, Shield enrollment contracts, truthful Hero eligibility, fail-closed payment behavior, and the SSR/localStorage regression that previously broke deployment.
+- marketplace request/offer/accept/payment-gate lifecycle contracts;
+- Hero and customer Realtime contracts;
+- participant-safe live Hero GPS tracking;
+- background push registration and service-worker delivery contracts;
+- customer/Hero portal mounts;
+- payment-gated travel;
+- cancellation/no-show settlement source;
+- desktop shell and desktop readability regressions;
+- Shield enrollment contracts;
+- fail-closed payment behavior;
+- direct profile/account controls;
+- secure S.O.S. Operations Command access;
+- secure qualified-candidate claim rules;
+- **demo fixture quarantine from readiness, claim, ranking, direct offers, and operations supply**;
+- SSR/localStorage regressions.
 
 ## UI verification
 
-- The underlying S.O.S. shell still contains legacy phone-width styling, but the final stylesheet is deliberately loaded last and breaks customer/Hero products out to true desktop width at ≥900px.
-- The production bundle contains explicit `max-width:none !important` overrides for `.app-shell.sos-premium`, `.sos2-app`, and the Hero Command shell.
-- Desktop card/service/mission typography was increased so desktop no longer relies on phone-scale 7–11px copy.
-- `/app` and `/hero` return HTTP 200 on the custom production domain.
-- The exact CSS bundle served by the production deployment was fetched and contains the final width/readability overrides.
+- The final desktop rescue stylesheet breaks customer/Hero products out of legacy phone width at ≥900px.
+- Desktop card/service/mission typography was increased so desktop no longer relies on phone-scale copy.
+- `/app`, `/hero`, `/hero/claim`, `/support`, and `/ops` are production routes.
+- The customer and Hero portals expose Realtime connection/fallback state.
+- `marketplace-sw.js` is served from the production custom domain as JavaScript.
 - Shield is mounted into `/app` with responsive membership styling and live plan state.
-
-A full external Chromium screenshot session is not claimed here because outbound browser networking is unavailable in the current verification environment. Bundle-level production verification, HTTP route checks, CI, database lifecycle tests, and runtime logging are used instead.
 
 ## Shared-backend isolation
 
-The server-only namespace audit currently reports:
+The server-only namespace audit reports:
 
 - zero `sos_* ↔ oc_*` foreign keys;
 - zero public S.O.S./ON CALL product tables with RLS disabled;
 - zero anonymous/public direct INSERT, UPDATE, DELETE, or TRUNCATE grants on product tables;
+- zero authenticated TRUNCATE grants on product tables;
 - zero cross-prefix database-function references.
 
 ## Release hygiene
 
-A private release-hygiene audit fails if QA fixture users, QA addresses, or `example.invalid` records remain in the S.O.S./ON CALL marketplace tables. Old `qa-share-*` rows discovered during this repair were removed. Current hygiene result: zero QA fixtures.
+- QA fixture users/addresses and `example.invalid` records are checked separately and old `qa-share-*` rows were removed.
+- Demo product fixtures are no longer allowed to masquerade as supply: `@sos-demo.atl` identities are explicitly classified with `is_demo=true` and excluded from real readiness/dispatch.
 
 ## Payment/runtime truth
 
-The public `marketplace-payments-health` endpoint was called from inside the production Supabase project and returned **HTTP 503** with:
+The public `marketplace-payments-health` endpoint currently reports **HTTP 503** with:
 
 - `ready: false`
 - `stripe_server_credential: false`
 - `webhook_signature_secret: true`
-- `credential_sources.stripe: "missing"`
-- `credential_sources.webhook: "vault"`
+- Stripe credential source: missing
+- webhook credential source: Vault
 
-Therefore:
-
-- webhook signature verification is configured;
-- the Stripe server credential is not currently available to production Edge Functions;
-- live charges, captures, transfers, payout onboarding, and Shield enrollment are intentionally fail-closed before Stripe is called;
-- Shield still shows the real plans, but enrollment buttons report payment runtime offline while this credential is missing.
-
-The connected Stripe account is available through the authorized Stripe connector, but that connector does not expose or create the secret API key needed by Supabase Edge Functions. Restoring that secret is an authorized account/key-management step, not a missing application-code implementation.
+Therefore live charges, captures, transfers, payout onboarding, and Shield enrollment remain intentionally fail-closed before Stripe is called. The connected Stripe account exists, but the authorized Stripe secret required by production Edge Functions is not available through the current connector.
 
 ## Not claimed
 
-- S.O.S. is **not yet market-proven**: there are no completed real missions, payment history, subscriptions, disputes, ratings, or earnings in production.
-- The 25 stored Hero records are not described as launch-ready supply because none currently satisfies the verified/authenticated dispatch gate.
-- No fake mission, payout, rating, or Stripe transaction is retained to make the marketplace look active.
-- Store distribution status is separate from web/software readiness and should be evaluated from the current native release workflows rather than inferred from web deployment status.
+- S.O.S. is **not market-proven** yet.
+- The 25 historical Hero/candidate records are **demo fixtures, not supply**.
+- There are currently **zero real Hero records and zero real recruiting candidates** in production.
+- No fake mission, payout, rating, user, candidate, or Stripe transaction is counted to make the marketplace appear active.
+- Real market validation begins only after real Heroes are recruited, verified, authenticated, payout-enabled, and actual customer missions complete.
