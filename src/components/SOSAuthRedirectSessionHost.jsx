@@ -16,13 +16,21 @@ export default function SOSAuthRedirectSessionHost(){
     if(!accessToken)return;
     const refreshToken=hash.get('refresh_token')||'';
     const expiresIn=Math.max(60,Number(hash.get('expires_in')||3600));
+    const type=hash.get('type')||'';
     const userResponse=await fetch(`${SB}/auth/v1/user`,{headers:{apikey:SK,Authorization:`Bearer ${accessToken}`}});
     const user=await userResponse.json().catch(()=>null);
-    if(!userResponse.ok||!user?.id)throw new Error('Confirmed account session could not be restored.');
+    if(!userResponse.ok||!user?.id)throw new Error(type==='recovery'?'Recovery session could not be restored.':'Confirmed account session could not be restored.');
     const session={access_token:accessToken,refresh_token:refreshToken,token_type:hash.get('token_type')||'bearer',expires_in:expiresIn,expires_at:Math.floor(Date.now()/1000)+expiresIn,user};
-    localStorage.setItem('sos_session',JSON.stringify(session));
     const clean=`${window.location.pathname}${window.location.search}`;
     history.replaceState({},'',clean);
+    if(type==='recovery'){
+      localStorage.removeItem('sos_session');
+      localStorage.setItem('sos_password_recovery',JSON.stringify(session));
+      window.dispatchEvent(new CustomEvent('sos-password-recovery'));
+      if(active)setMessage('Recovery link verified. Choose a new password.');
+      return;
+    }
+    localStorage.setItem('sos_session',JSON.stringify(session));
     if(!active)return;
     setMessage('Email confirmed. S.O.S. account connected.');
     window.setTimeout(()=>window.location.reload(),450);
