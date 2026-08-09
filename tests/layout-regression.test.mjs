@@ -45,8 +45,8 @@ test('fee-review component never reads localStorage during state initialization'
 test('customer and Hero portals mount the real operations layers', () => {
   const customer = read('src/app/app/page.jsx')
   const hero = read('src/app/hero/page.jsx')
-  for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost','SOSProfileToolsHost']) assert.match(customer, new RegExp(host))
-  for (const host of ['SOSHeroRealtimeShell','SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(hero, new RegExp(host))
+  for (const host of ['SOSCustomerRealtimeShell','SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost','SOSProfileToolsHost','SOSPushRegistrationHost']) assert.match(customer, new RegExp(host))
+  for (const host of ['SOSHeroRealtimeShell','SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSPushRegistrationHost']) assert.match(hero, new RegExp(host))
 })
 
 test('Hero Command is realtime-first with polling only as fallback', () => {
@@ -55,6 +55,27 @@ test('Hero Command is realtime-first with polling only as fallback', () => {
   for (const table of ['sos_mission_offers','sos_missions','sos_payments']) assert.match(shell,new RegExp(`table:'${table}'`))
   assert.match(shell, /LIVE DATA/)
   assert.match(shell, /POLLING FALLBACK/)
+})
+
+test('SOS customer mission state is realtime-first with polling only as fallback', () => {
+  const shell=read('src/components/SOSCustomerRealtimeShell.jsx')
+  assert.match(shell,/realtime\.setAuth\(s\.access_token\)/)
+  for(const table of ['sos_missions','sos_payments','sos_mission_offers']) assert.match(shell,new RegExp(`table:'${table}'`))
+  assert.match(shell,/LIVE DATA/)
+  assert.match(shell,/POLLING FALLBACK/)
+})
+
+test('SOS browser push registration is mounted for customer and Hero portals', () => {
+  const customer=read('src/app/app/page.jsx'),hero=read('src/app/hero/page.jsx'),host=read('src/components/SOSPushRegistrationHost.jsx'),worker=read('public/marketplace-sw.js')
+  assert.match(customer,/SOSPushRegistrationHost/)
+  assert.match(hero,/SOSPushRegistrationHost/)
+  assert.match(host,/marketplace-push-config/)
+  assert.match(host,/marketplace_register_push_subscription/)
+  assert.match(host,/p_app:'sos'/)
+  assert.match(host,/serviceWorker\.register\('\/marketplace-sw\.js'/)
+  assert.match(worker,/addEventListener\('push'/)
+  assert.match(worker,/showNotification/)
+  assert.match(worker,/notificationclick/)
 })
 
 test('visible SOS profile controls are direct and backed by real account operations', () => {
