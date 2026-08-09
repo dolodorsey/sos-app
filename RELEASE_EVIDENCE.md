@@ -1,47 +1,100 @@
-# S.O.S. release evidence
+# S.O.S. Release Evidence
 
 ## Product boundary
 
-- Brand: S.O.S. — Superheroes on Standby, kept separate from ON CALL and every other KHG brand.
-- Scope: non-emergency roadside and mobile-vehicle service marketplace. The safety gate directs emergencies to 911.
-- Uses the approved S.O.S. graphics and rescue-noir visual system from the portfolio graphics library.
+- Public product: **S.O.S. — Superheroes On Standby**.
+- Repository: `dolodorsey/sos-app`.
+- Primary domain: `https://thesuperherosonstandby.com`.
+- Production Supabase project: `cxdqkjvtpilvouwtbgdy`.
+- Product database namespace: `sos_*` only. Shared infrastructure with ON CALL does not merge product ownership or public branding.
+- Scope: non-emergency roadside and mobile-vehicle service marketplace; emergency copy directs users to 911.
 
-## Verified production foundation
+## Current production data — August 9, 2026
 
-- S.O.S. data and functions use the `sos_*` namespace in Supabase project `cxdqkjvtpilvouwtbgdy`; unrelated legacy brand tables in that project are outside this release.
-- Customer requests persist as real missions and never fabricate assignment, Hero identity, GPS movement, or ETA.
-- Operator dispatch creates expiring address-safe offers; Hero acceptance is atomic.
-- Hero portal reads real offers, accepted missions, job states, presence, location heartbeat, payment states, and recorded earnings.
-- Provider application submission is validated and server-controlled.
-- Confirmed mission pricing is server-controlled and locks when payment authorization begins.
-- Mission-specific Stripe Connect functions support manual authorization, completion-gated capture, held-for-release status, transfer, cancellation, refund, dispute events, and idempotent webhook processing.
-- Completed mission ratings are ownership-checked and update the Hero aggregate.
+- 28 S.O.S. user records.
+- 25 stored Hero records.
+- 0 currently verified, authenticated dispatch-eligible Heroes.
+- 0 on-duty verified Heroes.
+- 0 missions.
+- 0 mission payments.
+- 0 subscriptions.
+- 0 disputes.
+- 0 ratings.
+- 0 Hero earnings rows.
 
-## Integrity corrections in this release
+Those zero transaction counts are reported as **market activation state**, not as proof that the software lifecycle is absent.
 
-- Next.js upgraded from vulnerable 14.2.5 to 16.2.12; React upgraded to 19.2.8 and Supabase JS to 2.112.0.
-- Production dependency audit reports zero known vulnerabilities.
-- Removed unsupported five-minute ETA and guaranteed-availability language from the public landing page.
-- Starting prices are labeled as estimates; assignment, timing, and final pricing remain explicitly unconfirmed until review.
-- Removed 24 orphan, non-authenticated Hero profiles from on-duty dispatch eligibility.
-- Nearby-Hero selection now requires a real active authenticated user, verified Hero status, current on-duty state, recent GPS heartbeat, supported service, and matching radius.
+## Software lifecycle proven without fabricating customer history
 
-## Verification
+A disposable database marketplace simulation was executed against the production schema without calling Stripe and without preserving QA rows. It proved:
 
-- Next.js production build: passed.
-- TypeScript: passed as part of the production build.
-- Webhook endpoint fails closed with HTTP 503 while Stripe is unconfigured; once configured, its raw-body signature verification rejects invalid signatures.
-- Protected payment functions require a valid JWT.
-- Database currently contains zero missions, offers, payments, or ratings, so no fabricated end-to-end production success is claimed.
-- Capacitor and all native plugins are upgraded to the 8.5 release line; the CLI is development-only and production dependencies remain at zero vulnerabilities.
-- Added the previously missing complete Android project and synchronized the production web bundle plus Browser, Geolocation, Haptics, Share, Splash, and Status Bar plugins.
-- Replaced the broken hybrid CocoaPods/Swift Package Manager iOS shell with a clean Capacitor 8.5 Swift Package Manager project while preserving the approved S.O.S. icon and splash artwork, `com.superherosonstandby.app` identity, and fastlane files.
-- Added the required iOS foreground-location disclosure and verified the complete iOS Simulator build (`** BUILD SUCCEEDED **`).
-- Exported and signature-verified a distribution-signed App Store Connect IPA for `com.superherosonstandby.app` using team `AFU6P8WW9K`; SHA-256: `73fc39daf62f5392a3d81d79d0e04f59793a92a6c3ac5908aba2360e9470cf50`.
+1. A pending S.O.S. mission entered ranked dispatch.
+2. Dispatch created exactly one Hero offer.
+3. The offered Hero accepted atomically and the mission became `assigned`.
+4. Starting the route without customer payment authorization was rejected.
+5. Adding an authorized payment state unlocked `en_route`.
+6. QA fixture cleanup was verified after the simulation.
 
-## Remaining release gates
+This evidence is recorded separately in the private release-evidence ledger and is **not** counted as real mission activity.
 
-- Rotate the Stripe secret previously exposed in chat, configure the new live secret plus webhook signing secret, and verify the production webhook endpoint in Stripe.
-- Approve and authenticate at least one real Hero account; there are currently zero dispatch-eligible authenticated Heroes.
-- Run a controlled customer → operator offer → Hero acceptance → confirmed price → authorization → job states → capture → transfer → rating test.
-- Upload the verified iOS IPA when the release is authorized, compile Android on a release machine with Java 21 and the Android SDK, then complete store-device and store-review checks.
+## Marketplace controls currently implemented
+
+- Customer account and live service catalog.
+- GPS-required mission request flow.
+- Ranked verified-Hero dispatch with expiring offers and radius expansion.
+- Hero presence/location heartbeat and participant-safe customer tracking.
+- Hero accept/decline and automatic offer expiry/recovery.
+- Hero-owned final-price confirmation before travel.
+- Customer payment authorization required before route start.
+- Server-enforced mission transitions and proof-based completion.
+- Stripe capture/transfer lifecycle and Hero payout readiness logic.
+- Customer/Hero mission chat, persistent notifications, realtime updates, and background alert infrastructure.
+- Customer cancellation quote/settlement and timed customer no-show settlement.
+- Hero release/rematching, start watchdog, stale-GPS warning/escalation, safety/reliability review, and customer fee-review workflows.
+- Completed mission rating contract and Shield subscription architecture.
+
+## Automated verification
+
+S.O.S. now has three dedicated Node test files rather than the previous single test file:
+
+- `tests/release-readiness.test.mjs`
+- `tests/layout-regression.test.mjs`
+- `tests/marketplace-loop-contract.test.mjs`
+
+The quality gate validates production build/dependency integrity plus marketplace-loop contracts, customer/Hero portal mounts, payment-gated travel, cancellation/no-show settlement source, desktop shell regressions, desktop readability, and the SSR/localStorage regression that previously broke deployment.
+
+## UI verification
+
+- The underlying S.O.S. shell still contains legacy phone-width styling, but the final stylesheet is deliberately loaded last and breaks customer/Hero products out to true desktop width at ≥900px.
+- The production bundle currently contains explicit `max-width:none !important` overrides for `.app-shell.sos-premium`, `.sos2-app`, and the Hero Command shell.
+- Desktop card/service/mission typography was increased so desktop no longer relies on phone-scale 7–11px copy.
+- `/app` and `/hero` return HTTP 200 on the custom production domain.
+- The exact CSS bundle served by the production deployment was fetched and contains the final width/readability overrides.
+
+A full external Chromium screenshot session is not claimed here because outbound browser networking is unavailable in the current verification environment. Bundle-level production verification, HTTP route checks, CI, database lifecycle tests, and runtime logging are used instead.
+
+## Shared-backend isolation
+
+The server-only namespace audit currently reports:
+
+- zero `sos_* ↔ oc_*` foreign keys;
+- zero public S.O.S./ON CALL product tables with RLS disabled;
+- zero anonymous/public direct INSERT, UPDATE, DELETE, or TRUNCATE grants on product tables;
+- zero cross-prefix database-function references.
+
+## Release hygiene
+
+A private release-hygiene audit now fails if QA fixture users, QA addresses, or `example.invalid` records remain in the S.O.S./ON CALL marketplace tables. Old `qa-share-*` rows discovered during this repair were removed. Current hygiene result: zero QA fixtures.
+
+## Payment/runtime truth
+
+- The shared webhook signing secret is present in production configuration.
+- The server-side secret lookup currently does not report a `STRIPE_SECRET_KEY`; therefore no live-money completion is claimed from this audit.
+- The software payment state machine and no-money database lifecycle have been exercised, but a live Stripe charge/transfer still requires confirmed live secret configuration and a real approved Hero/customer transaction.
+
+## Not claimed
+
+- S.O.S. is **not yet market-proven**: there are no completed real missions, payment history, subscriptions, disputes, ratings, or earnings in production.
+- The 25 stored Hero records are not described as launch-ready supply because none currently satisfies the verified/authenticated dispatch gate.
+- No fake mission, payout, rating, or Stripe transaction is retained to make the marketplace look active.
+- Store distribution status is separate from web/software readiness and should be evaluated from the current native release workflows rather than inferred from web deployment status.
