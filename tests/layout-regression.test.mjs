@@ -14,6 +14,7 @@ test('desktop rescue stylesheet is imported after every earlier SOS stylesheet',
     "import '../components/sos-elite.css'",
     "import '../components/sos-desktop-final.css'",
     "import '../components/sos-membership.css'",
+    "import '../components/sos-profile-tools.css'",
   ]) assert.ok(rescueIndex > layout.indexOf(earlier), `${earlier} must load before the desktop rescue stylesheet`)
 })
 
@@ -44,6 +45,22 @@ test('fee-review component never reads localStorage during state initialization'
 test('customer and Hero portals mount the real operations layers', () => {
   const customer = read('src/app/app/page.jsx')
   const hero = read('src/app/hero/page.jsx')
-  for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost']) assert.match(customer, new RegExp(host))
+  for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost','SOSProfileToolsHost']) assert.match(customer, new RegExp(host))
   for (const host of ['SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(hero, new RegExp(host))
+})
+
+test('visible SOS profile controls are backed by real account operations', () => {
+  const tools = read('src/components/SOSProfileToolsHost.jsx')
+  const support = read('src/app/support/page.jsx')
+  const migration = read('supabase/migrations/20260809033000_finish_sos_profile_tools_and_support.sql')
+  for (const label of ['Vehicles','Payment methods','Shield membership','Safety & support']) assert.match(tools,new RegExp(label.replace(/[&]/g,'\\&')))
+  for (const rpc of ['sos_upsert_vehicle','sos_delete_vehicle','sos_set_default_vehicle','sos_open_support_ticket']) assert.match(tools,new RegExp(rpc))
+  assert.match(tools,/sos_payments/)
+  assert.match(tools,/marketplace-payments-health/)
+  assert.match(tools,/sos:open-shield/)
+  assert.match(migration,/enable row level security/)
+  assert.match(migration,/user_id=public\.sos_current_user_id\(\)/)
+  assert.match(support,/sos_open_support_ticket/)
+  assert.doesNotMatch(support,/thedoctordorsey@gmail\.com/i)
+  assert.doesNotMatch(support,/Get In Touch/i)
 })
