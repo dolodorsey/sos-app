@@ -13,6 +13,7 @@ test('desktop rescue stylesheet is imported after every earlier SOS stylesheet',
     "import '../components/sos-customer-v2.css'",
     "import '../components/sos-elite.css'",
     "import '../components/sos-desktop-final.css'",
+    "import '../components/sos-membership.css'",
   ]) assert.ok(rescueIndex > layout.indexOf(earlier), `${earlier} must load before the desktop rescue stylesheet`)
 })
 
@@ -43,6 +44,6 @@ test('fee-review component never reads localStorage during state initialization'
 test('customer and Hero portals mount the real operations layers', () => {
   const customer = read('src/app/app/page.jsx')
   const hero = read('src/app/hero/page.jsx')
-  for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(customer, new RegExp(host))
+  for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost']) assert.match(customer, new RegExp(host))
   for (const host of ['SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(hero, new RegExp(host))
 })
