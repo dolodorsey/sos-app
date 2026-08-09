@@ -30,6 +30,25 @@ export default function SOSSessionRefreshHost(){
   useEffect(()=>{
     let cancelled=false;
     let timer;
+    const nativeFetch=window.fetch.bind(window);
+
+    // Existing customer/Hero components can hold the token that was current when
+    // they mounted. Route every browser request to this Supabase project through
+    // the newest persisted access token without changing anonymous catalog calls.
+    const refreshedFetch=async(input,init={})=>{
+      const request=input instanceof Request?input:null;
+      const target=request?.url||String(input);
+      const headers=new Headers(request?.headers||undefined);
+      if(init?.headers)new Headers(init.headers).forEach((value,key)=>headers.set(key,value));
+      const auth=headers.get('Authorization')||'';
+      const current=readSession();
+      if(target.startsWith(`${SB}/`)&&auth.startsWith('Bearer ')&&auth!==`Bearer ${SK}`&&current?.access_token){
+        headers.set('Authorization',`Bearer ${current.access_token}`);
+      }
+      if(request)return nativeFetch(new Request(request,{...init,headers}));
+      return nativeFetch(input,{...init,headers});
+    };
+    window.fetch=refreshedFetch;
 
     const schedule=async()=>{
       if(cancelled)return;
@@ -37,11 +56,16 @@ export default function SOSSessionRefreshHost(){
       if(!current?.access_token||!current?.refresh_token)return;
       const now=Math.floor(Date.now()/1000);
       const expiresAt=Number(current.expires_at||0);
+      const wasExpired=Boolean(expiresAt&&expiresAt<=now);
       const secondsUntilRefresh=expiresAt?expiresAt-now-REFRESH_SKEW_SECONDS:0;
       if(secondsUntilRefresh>0){timer=window.setTimeout(schedule,Math.max(MIN_RETRY_MS,secondsUntilRefresh*1000));return;}
       try{
         const next=await refreshSession(current);
         if(cancelled||!next)return;
+        // A cold reopen can mount the signed-out shell before the async refresh
+        // finishes. Reload only in that already-expired case; normal scheduled
+        // refreshes stay completely in-place.
+        if(wasExpired){window.location.reload();return;}
         const nextExpiry=Number(next.expires_at||0);
         const delay=nextExpiry?Math.max(MIN_RETRY_MS,(nextExpiry-Math.floor(Date.now()/1000)-REFRESH_SKEW_SECONDS)*1000):5*60*1000;
         timer=window.setTimeout(schedule,delay);
@@ -56,7 +80,13 @@ export default function SOSSessionRefreshHost(){
     const onFocus=()=>{if(timer)window.clearTimeout(timer);schedule();};
     window.addEventListener('storage',onStorage);
     window.addEventListener('focus',onFocus);
-    return()=>{cancelled=true;if(timer)window.clearTimeout(timer);window.removeEventListener('storage',onStorage);window.removeEventListener('focus',onFocus);};
+    return()=>{
+      cancelled=true;
+      if(timer)window.clearTimeout(timer);
+      if(window.fetch===refreshedFetch)window.fetch=nativeFetch;
+      window.removeEventListener('storage',onStorage);
+      window.removeEventListener('focus',onFocus);
+    };
   },[]);
   return null;
 }
