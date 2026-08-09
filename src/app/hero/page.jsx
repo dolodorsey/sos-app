@@ -9,11 +9,11 @@ import SOSPaymentReadinessHost from '@/components/SOSPaymentReadinessHost';
 import SOSMissionChatHost from '@/components/SOSMissionChatHost';
 import SOSHeroClaimAccess from '@/components/SOSHeroClaimAccess';
 
-const SOSHeroMobilityApp = dynamic(() => import('@/components/SOSHeroMobilityApp'), {
+const SOSHeroRealtimeShell = dynamic(() => import('@/components/SOSHeroRealtimeShell'), {
   ssr: false,
   loading: () => null,
 });
 
 export default function HeroPortalPage() {
-  return <><SOSPaymentReadinessHost audience="hero"/><SOSHeroMobilityApp/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSMissionChatHost/><SOSHeroClaimAccess/></>;
+  return <><SOSPaymentReadinessHost audience="hero"/><SOSHeroRealtimeShell/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSMissionChatHost/><SOSHeroClaimAccess/></>;
 }
