@@ -9,11 +9,11 @@ import SOSMissionChatHost from '@/components/SOSMissionChatHost';
 import SOSMembershipHost from '@/components/SOSMembershipHost';
 import SOSProfileToolsHost from '@/components/SOSProfileToolsHost';
 
-const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
+const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerRealtimeShell'), {
   ssr: false,
   loading: () => null,
 });
 
 export default function AppPage() {
-  return <><SOSPaymentReadinessHost audience="customer"/><SOSCustomerMobilityApp/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/></>;
+  return <><SOSPaymentReadinessHost audience="customer"/><SOSCustomerRealtimeShell/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/></>;
 }
