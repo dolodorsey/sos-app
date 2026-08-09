@@ -76,3 +76,18 @@ test('Shield is a mounted live plan/checkout/verification flow instead of a comi
   assert.match(edge, /success_url:"https:\/\/thesuperherosonstandby\.com\/app\?membership=success/)
   assert.match(edge, /cancel_url:"https:\/\/thesuperherosonstandby\.com\/app\?membership=canceled"/)
 })
+
+test('Shield enrollment is fail-closed when marketplace payment health is offline', () => {
+  const host = read('src/components/SOSMembershipHost.jsx')
+  assert.match(host, /marketplace-payments-health/)
+  assert.match(host, /paymentHealth\?\.ready===false/)
+  assert.match(host, /No charge was attempted/)
+  assert.match(host, /Payments offline/)
+})
+
+test('SOS readiness counts only Heroes who satisfy the real dispatch identity gate', () => {
+  const readiness = read('supabase/functions/sos-network-readiness/index.ts')
+  assert.match(readiness, /u\.status==='active'&&Boolean\(u\.auth_id\)/)
+  assert.match(readiness, /h\.verification_status==='verified'&&eligibleUsers\.has\(h\.user_id\)/)
+  assert.match(readiness, /eligibility_rule:"verified hero \+ active authenticated user"/)
+})
