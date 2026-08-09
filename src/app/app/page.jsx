@@ -6,6 +6,7 @@ import SOSCustomerCancellationHost from '@/components/SOSCustomerCancellationHos
 import SOSSettlementReviewHost from '@/components/SOSSettlementReviewHost';
 import SOSPaymentReadinessHost from '@/components/SOSPaymentReadinessHost';
 import SOSMissionChatHost from '@/components/SOSMissionChatHost';
+import SOSMembershipHost from '@/components/SOSMembershipHost';
 
 const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
   ssr: false,
@@ -13,5 +14,5 @@ const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMob
 });
 
 export default function AppPage() {
-  return <><SOSPaymentReadinessHost audience="customer"/><SOSCustomerMobilityApp/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/></>;
+  return <><SOSPaymentReadinessHost audience="customer"/><SOSCustomerMobilityApp/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/></>;
 }
