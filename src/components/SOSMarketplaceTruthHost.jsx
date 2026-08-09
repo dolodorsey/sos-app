@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react';
 
-const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
+const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/marketplace-public-coverage';
 
 export default function SOSMarketplaceTruthHost(){
   useEffect(()=>{
@@ -19,9 +18,9 @@ export default function SOSMarketplaceTruthHost(){
     (async()=>{
       let hasVerifiedSupply=false;
       try{
-        const response=await fetch(`${SB}/rest/v1/rpc/sos_public_service_coverage`,{method:'POST',headers:{apikey:SK,Authorization:`Bearer ${SK}`,'Content-Type':'application/json'},body:'{}'});
-        const data=await response.json().catch(()=>[]);
-        if(response.ok&&Array.isArray(data))hasVerifiedSupply=data.some(row=>Boolean(row?.has_verified_supply));
+        const response=await fetch(COVERAGE_URL,{headers:{Accept:'application/json'}});
+        const data=await response.json().catch(()=>null);
+        if(response.ok)hasVerifiedSupply=Boolean(data?.sos?.has_verified_supply);
       }catch{}
       applyTruth(hasVerifiedSupply);
       observer=new MutationObserver(()=>applyTruth(hasVerifiedSupply));
