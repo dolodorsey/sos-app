@@ -35,6 +35,67 @@
     margin: 0 auto !important;
   }
 
+  /* Desktop content must stop inheriting phone-sized 7–11px typography. */
+  .sos2-section-title > span,
+  .sos2-screen-head > span,
+  .sos2-membership > span,
+  .sos2-service-sheet > span,
+  .sos2-profile-card > span {
+    font-size: 10px !important;
+    letter-spacing: .16em !important;
+  }
+
+  .sos2-quick-grid strong,
+  .sos2-category-grid strong,
+  .sos2-service-list strong,
+  .sos2-mission-list strong {
+    font-size: 14px !important;
+    line-height: 1.3 !important;
+  }
+
+  .sos2-quick-grid small,
+  .sos2-category-grid small,
+  .sos2-service-list small,
+  .sos2-mission-list small {
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+  }
+
+  .sos2-service-list p,
+  .sos2-mission-list p,
+  .sos2-empty p,
+  .sos2-screen-head p,
+  .sos2-membership p {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+  }
+
+  .sos2-service-list em,
+  .sos2-mission-list em,
+  .sos2-quick-grid em {
+    font-size: 20px !important;
+  }
+
+  .sos2-nav button small {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+  }
+
+  .sos2-profile-menu strong {
+    font-size: 13px !important;
+  }
+
+  .sos2-profile-menu small {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+
+  .sos2-membership button,
+  .sos2-empty button,
+  .sos2-primary {
+    font-size: 11px !important;
+  }
+
   /* Service detail should read like a desktop task panel, not a phone sheet. */
   .sos2-service-sheet {
     width: min(760px, calc(100vw - 56px)) !important;
@@ -42,6 +103,31 @@
     border-radius: 30px 30px 0 0 !important;
     padding-left: 28px !important;
     padding-right: 28px !important;
+  }
+
+  .sos2-service-sheet > p,
+  .sos2-location-check strong {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+  }
+
+  .sos2-service-facts small,
+  .sos2-location-check small {
+    font-size: 9px !important;
+  }
+
+  .sos-tracker-head small,
+  .sos-mission-facts span,
+  .sos-progress-track label {
+    font-size: 9px !important;
+  }
+
+  .sos-tracker-head p,
+  .sos-mission-facts strong,
+  .sos-hero-card strong,
+  .sos-hero-card small {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
   }
 
   /* Hero Command is intentionally desktop-first. */
@@ -55,5 +141,28 @@
     margin: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+  }
+
+  .shc-screen-head p,
+  .shc-hero-copy p,
+  .shc-gate-card p,
+  .shc-desktop-nav button span {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+  }
+
+  .shc-metrics small,
+  .shc-home-grid small,
+  .shc-mission-list span,
+  .shc-mission-list small,
+  .shc-earning-list span,
+  .shc-earning-list small {
+    font-size: 10px !important;
+    line-height: 1.45 !important;
+  }
+
+  .shc-mission-list strong,
+  .shc-earning-list strong {
+    font-size: 13px !important;
   }
 }
