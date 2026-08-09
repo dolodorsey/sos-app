@@ -46,7 +46,15 @@ test('customer and Hero portals mount the real operations layers', () => {
   const customer = read('src/app/app/page.jsx')
   const hero = read('src/app/hero/page.jsx')
   for (const host of ['SOSCustomerOperationsHost','SOSCustomerCancellationHost','SOSSettlementReviewHost','SOSMissionChatHost','SOSPaymentReadinessHost','SOSMembershipHost','SOSProfileToolsHost']) assert.match(customer, new RegExp(host))
-  for (const host of ['SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(hero, new RegExp(host))
+  for (const host of ['SOSHeroRealtimeShell','SOSHeroAlertsHost','SOSHeroIssueHost','SOSHeroNoShowHost','SOSHeroReliabilityHost','SOSMissionChatHost','SOSPaymentReadinessHost']) assert.match(hero, new RegExp(host))
+})
+
+test('Hero Command is realtime-first with polling only as fallback', () => {
+  const shell = read('src/components/SOSHeroRealtimeShell.jsx')
+  assert.match(shell, /realtime\.setAuth\(s\.access_token\)/)
+  for (const table of ['sos_mission_offers','sos_missions','sos_payments']) assert.match(shell,new RegExp(`table:'${table}'`))
+  assert.match(shell, /LIVE DATA/)
+  assert.match(shell, /POLLING FALLBACK/)
 })
 
 test('visible SOS profile controls are backed by real account operations', () => {
