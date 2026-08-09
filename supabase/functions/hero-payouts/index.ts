@@ -9,6 +9,7 @@ const json=(req:Request,body:unknown,status=200)=>new Response(JSON.stringify(bo
 async function stripeV2(key:string,path:string,init:RequestInit={}){const response=await fetch(`${BASE}${path}`,{...init,headers:{Authorization:`Bearer ${key}`,'Stripe-Version':STRIPE_VERSION,'Content-Type':'application/json',...(init.headers||{})}});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data?.error?.message||data?.error||`Stripe v2 request failed (${response.status})`);return data}
 const dueList=(account:any)=>account?.requirements?.summary?.currently_due??account?.requirements?.currently_due??[];
 const transferStatus=(account:any)=>account?.configuration?.recipient?.capabilities?.stripe_balance?.stripe_transfers?.status||'inactive';
+const now=()=>new Date().toISOString();
 
 Deno.serve(async req=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors(req)});
@@ -24,6 +25,7 @@ Deno.serve(async req=>{
   if(!stripeKey)return json(req,{error:'Payout setup is temporarily unavailable while secure Stripe credentials are restored.'},503);
   const{data:sosUser}=await admin.from('sos_users').select('id,role,email,first_name,last_name,status').eq('auth_id',authData.user.id).single();if(!sosUser||sosUser.role!=='hero'||sosUser.status!=='active')return json(req,{error:'Active Hero account required'},403);
   const{data:hero}=await admin.from('sos_heroes').select('id,stripe_connect_id,verification_status').eq('user_id',sosUser.id).single();if(!hero)return json(req,{error:'Hero profile not found'},404);
+  const syncPayoutCheck=async(status:'pending'|'submitted'|'passed',notes:string)=>{await admin.from('sos_hero_verification_checks').upsert({hero_id:hero.id,check_type:'payout_account',required:true,status,notes,reviewed_by:'stripe',reviewed_at:status==='passed'?now():null,updated_at:now()},{onConflict:'hero_id,check_type'});await admin.rpc('sos_recompute_hero_verification_admin',{p_hero_id:hero.id}).catch(()=>{})};
   const input=await req.json().catch(()=>({})) as Record<string,unknown>;const action=String(input.action||'status');const base=Deno.env.get('SOS_PUBLIC_URL')||'https://thesuperherosonstandby.com';
   let accountId=hero.stripe_connect_id as string|null;let account:any;
   try{
@@ -33,10 +35,11 @@ Deno.serve(async req=>{
     }else if(accountId){
       account=await stripeV2(stripeKey,`/v2/core/accounts/${encodeURIComponent(accountId)}?include[]=configuration.recipient&include[]=requirements`,{method:'GET'});
     }
-  }catch(error){if(accountId){await admin.from('sos_heroes').update({stripe_connect_id:null,stripe_connect_api_version:null,stripe_transfer_status:null,stripe_requirements_due:[],payout_method:null,updated_at:new Date().toISOString()}).eq('id',hero.id)}const message=error instanceof Error?error.message:'Payout account could not be verified.';return json(req,{connected:false,payout_ready:false,requirements_due:[],error:message},409)}
-  if(!accountId)return json(req,{connected:false,payout_ready:false,requirements_due:[],message:'Stripe payout setup is required before going on patrol.'});
+  }catch(error){if(accountId){await admin.from('sos_heroes').update({stripe_connect_id:null,stripe_connect_api_version:null,stripe_transfer_status:null,stripe_requirements_due:[],payout_method:null,updated_at:now()}).eq('id',hero.id);await syncPayoutCheck('pending','Stripe payout account requires reconnection.')}const message=error instanceof Error?error.message:'Payout account could not be verified.';return json(req,{connected:false,payout_ready:false,requirements_due:[],error:message},409)}
+  if(!accountId){await syncPayoutCheck('pending','Stripe payout setup has not started.');return json(req,{connected:false,payout_ready:false,requirements_due:[],message:'Stripe payout setup is required before going on patrol.'});}
   const transfers=transferStatus(account);const requirements=dueList(account);const ready=transfers==='active';
-  await admin.from('sos_heroes').update({stripe_connect_id:accountId,stripe_connect_api_version:'v2',stripe_transfer_status:transfers,stripe_requirements_due:requirements,payout_method:'stripe_connect',updated_at:new Date().toISOString()}).eq('id',hero.id);
+  await admin.from('sos_heroes').update({stripe_connect_id:accountId,stripe_connect_api_version:'v2',stripe_transfer_status:transfers,stripe_requirements_due:requirements,payout_method:'stripe_connect',updated_at:now()}).eq('id',hero.id);
+  await syncPayoutCheck(ready?'passed':'submitted',ready?'Stripe transfers active.':`Stripe payout requirements remaining: ${requirements.length}.`);
   const statusPayload={connected:true,payout_ready:ready,account_id:accountId,transfer_status:transfers,requirements_due:requirements};
   if(action==='status')return json(req,statusPayload);if(action!=='onboard')return json(req,{error:'Invalid action'},400);if(ready)return json(req,statusPayload);
   const link=await stripeV2(stripeKey,'/v2/core/account_links',{method:'POST',body:JSON.stringify({account:accountId,use_case:{type:'account_onboarding',account_onboarding:{configurations:['recipient'],collection_options:{fields:'eventually_due',future_requirements:'include'},refresh_url:`${base}/hero/?connect=refresh`,return_url:`${base}/hero/?connect=return`}}})});
