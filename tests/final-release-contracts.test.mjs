@@ -14,14 +14,17 @@ test('SOS customer and Hero account recovery is mounted and completes a real pas
   assert.match(reset,/updateUser\(\{password\}\)/)
 })
 
-test('shared webhook reconciles SOS Accounts v2 payout readiness into verification', () => {
-  const webhook=read('supabase/functions/stripe-webhook/index.ts')
+test('signed Stripe Accounts v2 webhook reconciles SOS payout readiness into verification', () => {
+  const webhook=read('supabase/functions/stripe-v2-account-webhook/index.ts')
+  const legacy=read('supabase/functions/stripe-webhook/index.ts')
   assert.match(webhook,/2026-06-24\.dahlia/)
   assert.match(webhook,/\/v2\/core\/accounts\//)
-  assert.match(webhook,/stripe_connect_api_version==='v2'/)
+  assert.match(webhook,/STRIPE_V2_ACCOUNT_WEBHOOK_SECRET/)
   assert.match(webhook,/check_type:'payout_account'/)
   assert.match(webhook,/status:ready\?'passed':'submitted'/)
   assert.match(webhook,/sos_recompute_hero_verification_admin/)
+  assert.match(legacy,/stripe_connect_api_version==='v2'/)
+  assert.match(legacy,/ignored_legacy_account_snapshot:true/)
 })
 
 test('SOS iOS delivery is automated and builds the Capacitor SPM xcodeproj', () => {
