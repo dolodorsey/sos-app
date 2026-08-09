@@ -1,0 +1,50 @@
+/* Final desktop shell correction.
+   The global S.O.S. wrapper and customer shell were still capped to phone widths,
+   so desktop layouts rendered inside a 450/480px column. Keep mobile framing on
+   mobile/tablet, but let true desktop customer + Hero products use the viewport. */
+
+@media (min-width: 900px) {
+  body {
+    padding: 0 !important;
+  }
+
+  .app-shell.sos-premium {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  .sos2-app {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Auth/loading can remain focused instead of stretching across a desktop. */
+  .sos2-auth,
+  .sos2-loading {
+    width: min(480px, 100%) !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+  }
+
+  /* Hero Command is intentionally desktop-first. */
+  .shc-app,
+  .shc-auth,
+  .shc-loading,
+  .shc-gate {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
