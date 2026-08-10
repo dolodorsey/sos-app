@@ -11,26 +11,41 @@ Deno.serve(async(req)=>{
   let stripeKey=Deno.env.get('STRIPE_SECRET_KEY')||'';if(!stripeKey){const{data,error}=await admin.rpc('sos_get_runtime_secret',{secret_name:'STRIPE_SECRET_KEY'});if(!error&&data)stripeKey=String(data)}
   const{missionId,action='quote',expectedFeeAmount,reason}=await req.json();if(typeof missionId!=='string')return json({error:'missionId is required'},422);
   const{data:sosUser}=await admin.from('sos_users').select('id').eq('auth_id',user.id).maybeSingle();if(!sosUser)throw new Error('S.O.S. account required');const{data:mission}=await admin.from('sos_missions').select('*').eq('id',missionId).eq('citizen_id',sosUser.id).maybeSingle();if(!mission)throw new Error('Mission not found');
-  const{data:quote,error:qerr}=await admin.rpc('sos_customer_cancellation_quote',{p_mission_id:missionId});if(qerr)throw qerr;const q=Array.isArray(quote)?quote[0]:quote;const responseQuote={missionId,status:q.mission_status,canCancel:Boolean(q.can_cancel),feeAmount:Number(q.fee_amount||0),heroCompensation:Number(q.hero_compensation||0),reason:String(q.reason||''),policyVersion:Number(q.policy_version||1)};
-  if(action==='quote')return json(responseQuote);if(action!=='cancel')return json({error:'action must be quote or cancel'},422);if(!q?.can_cancel)throw new Error(q?.reason||'Mission cannot be canceled');if(expectedFeeAmount!=null&&Math.abs(Number(expectedFeeAmount)-Number(q.fee_amount||0))>0.009)throw new Error('Cancellation fee changed. Please review the updated quote.');
-  const{data:payment}=await admin.from('sos_payments').select('*').eq('mission_id',missionId).maybeSingle();const fee=Number(q.fee_amount||0),heroComp=Number(q.hero_compensation||0),platformFee=Math.max(0,fee-heroComp);
-  if(payment?.stripe_payment_intent_id){
-    if(!stripeKey)throw new Error('STRIPE_SECRET_KEY is not configured');const stripe=new Stripe(stripeKey,{httpClient:Stripe.createFetchHttpClient()});
-    if(fee<=0){if(!['canceled','refunded'].includes(payment.payment_status))await stripe.paymentIntents.cancel(payment.stripe_payment_intent_id,{cancellation_reason:'requested_by_customer'},{idempotencyKey:`sos-cancel-mission-${payment.id}-free-v1`})}
-    else{
-      if(payment.payment_status!=='authorized')throw new Error('Late cancellation fee requires an active payment authorization');
-      await admin.from('sos_payments').update({settlement_type:'customer_cancellation',cancellation_fee:fee,original_platform_fee:payment.original_platform_fee??payment.platform_fee,original_hero_payout:payment.original_hero_payout??payment.hero_payout,platform_fee:platformFee,hero_payout:heroComp,updated_at:new Date().toISOString()}).eq('id',payment.id);
-      const pi=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:Math.round(fee*100),final_capture:true,metadata:{settlement_type:'customer_cancellation',cancellation_fee:String(fee)}},{idempotencyKey:`sos-cancel-mission-${payment.id}-${Math.round(fee*100)}-v2`});
-      const chargeId=typeof pi.latest_charge==='string'?pi.latest_charge:pi.latest_charge?.id||payment.stripe_charge_id||null;const capturedAt=new Date().toISOString();
-      if(heroComp>0&&mission.hero_id){
-        const{data:hero}=await admin.from('sos_heroes').select('stripe_connect_id').eq('id',mission.hero_id).maybeSingle();
-        if(hero?.stripe_connect_id&&chargeId){
-          try{const transfer=await stripe.transfers.create({amount:Math.round(heroComp*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,source_transaction:chargeId,transfer_group:`sos_mission_${missionId}`,metadata:{mission_id:missionId,settlement_type:'customer_cancellation'}},{idempotencyKey:`sos-cancel-fee-transfer-${missionId}-v1`});await admin.from('sos_payments').update({payment_status:'released',escrow_status:'released_to_hero',stripe_charge_id:chargeId,stripe_transfer_id:transfer.id,captured_at:capturedAt,released_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',payment.id)}
-          catch(error){console.error('SOS cancellation compensation transfer failed',{missionId,error:String(error)});await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)}
-        }else await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)
-      }else await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)
+  const{data:quote,error:qerr}=await admin.rpc('sos_customer_cancellation_quote',{p_mission_id:missionId});if(qerr)throw qerr;const q=Array.isArray(quote)?quote[0]:quote;const fee=Number(q.fee_amount||0),heroComp=Number(q.hero_compensation||0),platformFee=Math.max(0,fee-heroComp);const responseQuote={missionId,status:q.mission_status,canCancel:Boolean(q.can_cancel),feeAmount:fee,heroCompensation:heroComp,reason:String(q.reason||''),policyVersion:Number(q.policy_version||1)};
+  if(action==='quote')return json(responseQuote);if(action!=='cancel')return json({error:'action must be quote or cancel'},422);if(!q?.can_cancel)throw new Error(q?.reason||'Mission cannot be canceled');if(expectedFeeAmount!=null&&Math.abs(Number(expectedFeeAmount)-fee)>0.009)throw new Error('Cancellation fee changed. Please review the updated quote.');
+
+  const{data:payment}=await admin.from('sos_payments').select('*').eq('mission_id',missionId).maybeSingle();
+  if(fee>0&&(!payment?.stripe_payment_intent_id||payment.payment_status!=='authorized'))throw new Error('Late cancellation fee requires an active payment authorization');
+  if(payment?.stripe_payment_intent_id&&!stripeKey)throw new Error('STRIPE_SECRET_KEY is not configured');
+
+  // Cancellation wins in Postgres first so the Hero cannot advance the mission
+  // while an external Stripe request is in flight.
+  const{data:canceled,error:cerr}=await admin.rpc('sos_cancel_own_mission_v2',{p_mission_id:missionId,p_reason:typeof reason==='string'?reason:null});if(cerr)throw cerr;
+
+  let settlementPending=false;
+  if(payment){
+    const patch:any={settlement_type:'customer_cancellation',cancellation_fee:fee,original_platform_fee:payment.original_platform_fee??payment.platform_fee,original_hero_payout:payment.original_hero_payout??payment.hero_payout,platform_fee:platformFee,hero_payout:heroComp,updated_at:new Date().toISOString()};
+    const{error:prepError}=await admin.from('sos_payments').update(patch).eq('id',payment.id);if(prepError){settlementPending=true;console.error('SOS cancellation settlement preparation queued for retry',{missionId,paymentId:payment.id,error:prepError.message})}
+    if(!prepError&&payment.stripe_payment_intent_id){
+      try{
+        const stripe=new Stripe(stripeKey,{httpClient:Stripe.createFetchHttpClient()});
+        if(fee<=0){
+          const pi=await stripe.paymentIntents.cancel(payment.stripe_payment_intent_id,{cancellation_reason:'requested_by_customer'},{idempotencyKey:`sos-cancel-mission-${payment.id}-free-v1`});
+          await admin.from('sos_payments').update({payment_status:'canceled',escrow_status:'released_to_customer',stripe_payment_intent_id:pi.id,updated_at:new Date().toISOString()}).eq('id',payment.id);
+        }else{
+          const pi=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:Math.round(fee*100),final_capture:true,metadata:{settlement_type:'customer_cancellation',cancellation_fee:String(fee)}},{idempotencyKey:`sos-cancel-mission-${payment.id}-${Math.round(fee*100)}-v2`});
+          const chargeId=typeof pi.latest_charge==='string'?pi.latest_charge:pi.latest_charge?.id||payment.stripe_charge_id||null;const capturedAt=new Date().toISOString();
+          if(heroComp>0&&mission.hero_id){
+            const{data:hero}=await admin.from('sos_heroes').select('stripe_connect_id').eq('id',mission.hero_id).maybeSingle();
+            if(hero?.stripe_connect_id&&chargeId){
+              try{const transfer=await stripe.transfers.create({amount:Math.round(heroComp*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,source_transaction:chargeId,transfer_group:`sos_mission_${missionId}`,metadata:{mission_id:missionId,settlement_type:'customer_cancellation'}},{idempotencyKey:`sos-cancel-fee-transfer-${missionId}-v1`});await admin.from('sos_payments').update({payment_status:'released',escrow_status:'released_to_hero',stripe_charge_id:chargeId,stripe_transfer_id:transfer.id,captured_at:capturedAt,released_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',payment.id)}
+              catch(error){settlementPending=true;console.error('SOS cancellation compensation transfer queued for retry',{missionId,error:String(error)});await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)}
+            }else{settlementPending=true;await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)}
+          }else await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:capturedAt,updated_at:new Date().toISOString()}).eq('id',payment.id)
+        }
+      }catch(error){settlementPending=true;console.error('SOS cancellation settlement queued for retry',{missionId,paymentId:payment.id,error:String(error)})}
     }
-  }else if(fee>0)throw new Error('Late cancellation fee cannot be settled without an authorization');
-  const{data:canceled,error:cerr}=await admin.rpc('sos_cancel_own_mission_v2',{p_mission_id:missionId,p_reason:typeof reason==='string'?reason:null});if(cerr)throw cerr;return json({...responseQuote,ok:true,mission:canceled});
+  }
+  return json({...responseQuote,ok:true,mission:canceled,paymentSettlement:settlementPending?'pending_retry':'settled',settlementError:settlementPending?'Payment settlement will retry automatically.':undefined},settlementPending?202:200);
  }catch(e){const m=e instanceof Error?e.message:'Unexpected error';const config=m.endsWith('is not configured');return json({error:config?'Payments are not configured for this release.':m},config?503:m==='Authentication required'?401:400)}
 });
