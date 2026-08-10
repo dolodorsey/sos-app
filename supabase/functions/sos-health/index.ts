@@ -38,7 +38,8 @@ Deno.serve(async (req: Request) => {
 
   const fifteenMinAgo = new Date(Date.now() - 15 * 60_000).toISOString();
   const [activeServices, activeZones, verifiedHeroes, liveHeroes, openMissions, pendingPayments,
-         stripeSource, webhookSource] = await Promise.all([
+         stripeSource, webhookSource, vapidPublicSource, vapidPrivateSource,
+         pushSubscriptions, pushDeliveries] = await Promise.all([
     count("sos_subcategories", (q) => q.eq("is_active", true)),
     count("sos_service_zones", (q) => q.eq("is_active", true)),
     count("sos_heroes", (q) => q.eq("verification_status", "verified").eq("is_demo", false)),
@@ -48,8 +49,13 @@ Deno.serve(async (req: Request) => {
     count("sos_payments", (q) => q.in("payment_status", ["pending", "requires_action"])),
     secret("STRIPE_SECRET_KEY"),
     secret("STRIPE_WEBHOOK_SECRET"),
+    secret("MARKETPLACE_VAPID_PUBLIC_KEY"),
+    secret("MARKETPLACE_VAPID_PRIVATE_KEY"),
+    count("marketplace_push_subscriptions"),
+    count("marketplace_push_deliveries"),
   ]);
 
+  const pushReady=vapidPublicSource!=="missing"&&vapidPrivateSource!=="missing"&&pushSubscriptions!==null&&pushDeliveries!==null;
   checks.catalog = { active_services: activeServices, active_zones: activeZones };
   checks.supply = { verified_heroes: verifiedHeroes, live_heroes: liveHeroes, demo_excluded: true };
   checks.demand = { open_missions: openMissions };
@@ -60,6 +66,15 @@ Deno.serve(async (req: Request) => {
     payments_table_reachable: pendingPayments !== null,
     pending_payments: pendingPayments,
   };
+  checks.push = {
+    ready: pushReady,
+    vapid_public_key: vapidPublicSource!=="missing",
+    vapid_private_key: vapidPrivateSource!=="missing",
+    subscription_table_reachable: pushSubscriptions!==null,
+    delivery_table_reachable: pushDeliveries!==null,
+    subscriptions: pushSubscriptions,
+    delivery_rows: pushDeliveries,
+  };
 
   if (activeServices === null || activeZones === null) softwareProblems.push("catalog_unreadable");
   if (!activeServices) softwareProblems.push("no_active_services");
@@ -68,6 +83,9 @@ Deno.serve(async (req: Request) => {
   if (pendingPayments === null) softwareProblems.push("payments_unreadable");
   if (stripeSource === "missing") softwareProblems.push("stripe_secret_missing");
   if (webhookSource === "missing") softwareProblems.push("stripe_webhook_secret_missing");
+  if (vapidPublicSource === "missing") softwareProblems.push("push_public_key_missing");
+  if (vapidPrivateSource === "missing") softwareProblems.push("push_private_key_missing");
+  if (pushSubscriptions === null || pushDeliveries === null) softwareProblems.push("push_tables_unreadable");
 
   if (verifiedHeroes === 0) activationBlockers.push("no_verified_heroes");
   if (liveHeroes === 0) activationBlockers.push("no_live_heroes");
