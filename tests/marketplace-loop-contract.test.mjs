@@ -107,14 +107,19 @@ test('late cancellation and no-show settlements are source-controlled and partia
   assert.match(noShow, /idempotencyKey:`sos-no-show-/)
 })
 
-test('cancellation/no-show compensation uses separate transfer semantics instead of fabricating earnings', () => {
+test('cancellation/no-show compensation uses separate transfers without fabricating earnings', () => {
   const cancel = read('supabase/functions/sos-cancel-mission/index.ts')
   const noShow = read('supabase/functions/sos-customer-no-show/index.ts')
-  for (const source of [cancel,noShow]) {
-    assert.match(source, /stripe\.transfers\.create/)
-    assert.match(source, /source_transaction:chargeId/)
-    assert.match(source, /stripe_connect_id/)
-  }
+  const retry = read('supabase/functions/marketplace-payout-retry/index.ts')
+  assert.match(cancel, /stripe\.transfers\.create/)
+  assert.match(cancel, /source_transaction:chargeId/)
+  assert.match(cancel, /stripe_connect_id/)
+  assert.match(noShow, /payment_status:heroComp>0\?'transfer_pending':'captured'/)
+  assert.doesNotMatch(noShow, /stripe\.transfers\.create/)
+  assert.match(retry, /settlement==='customer_no_show'/)
+  assert.match(retry, /sos-customer-no-show-transfer-/)
+  assert.match(retry, /stripe\.transfers\.create/)
+  assert.match(retry, /source_transaction:p\.stripe_charge_id/)
 })
 
 test('Shield is a mounted live plan/checkout/verification flow instead of a coming-soon toast', () => {
