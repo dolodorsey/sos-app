@@ -19,7 +19,11 @@ async function refreshSession(current){
     body:JSON.stringify({refresh_token:current.refresh_token}),
   });
   const payload=await response.json().catch(()=>null);
-  if(!response.ok||!payload?.access_token)throw new Error(payload?.error_description||payload?.msg||payload?.message||'Session refresh failed');
+  if(!response.ok||!payload?.access_token){
+    const error=new Error(payload?.error_description||payload?.msg||payload?.message||'Session refresh failed');
+    error.code=payload?.error_code||`http_${response.status}`;
+    throw error;
+  }
   const next={...current,...payload,user:payload.user||current.user};
   if(!next.expires_at&&payload.expires_in)next.expires_at=Math.floor(Date.now()/1000)+Number(payload.expires_in);
   writeSession(next);
@@ -70,7 +74,17 @@ export default function SOSSessionRefreshHost(){
         const delay=nextExpiry?Math.max(MIN_RETRY_MS,(nextExpiry-Math.floor(Date.now()/1000)-REFRESH_SKEW_SECONDS)*1000):5*60*1000;
         timer=window.setTimeout(schedule,delay);
       }catch(error){
-        console.warn('S.O.S. session refresh deferred',error instanceof Error?error.message:'refresh failed');
+        const message=error instanceof Error?error.message:'refresh failed';
+        const code=error?.code||'';
+        const invalidRefresh=code==='refresh_token_not_found'||/invalid refresh token|refresh token not found/i.test(message);
+        if(invalidRefresh){
+          console.warn('S.O.S. session expired; clearing invalid refresh token');
+          localStorage.removeItem(SESSION_KEY);
+          window.dispatchEvent(new CustomEvent('sos:session-expired',{detail:{reason:'refresh_token_invalid'}}));
+          window.location.reload();
+          return;
+        }
+        console.warn('S.O.S. session refresh deferred',message);
         timer=window.setTimeout(schedule,MIN_RETRY_MS);
       }
     };
