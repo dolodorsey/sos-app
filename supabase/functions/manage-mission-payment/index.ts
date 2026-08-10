@@ -26,7 +26,11 @@ Deno.serve(async(req)=>{
 
   if(action==='capture'){
     if(mission.status!=='completed'||payment.payment_status!=='authorized'||!payment.stripe_payment_intent_id)return json({error:'Completed mission with an authorized payment required'},409)
-    const pi=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:Math.round(Number(payment.amount)*100)},{idempotencyKey:`sos-capture-${mission_id}`})
+    const captureCents=Math.round((Number(payment.amount||0)+Number(payment.tax||0)+Number(payment.tip||0))*100)
+    if(!Number.isSafeInteger(captureCents)||captureCents<50)return json({error:'Authorized payment total is invalid'},409)
+    const intent=await stripe.paymentIntents.retrieve(payment.stripe_payment_intent_id)
+    if(intent.amount<captureCents)return json({error:'Payment authorization is lower than the mission total'},409)
+    const pi=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:captureCents},{idempotencyKey:`sos-capture-${mission_id}`})
     await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',captured_at:new Date().toISOString(),stripe_charge_id:typeof pi.latest_charge==='string'?pi.latest_charge:null,updated_at:new Date().toISOString()}).eq('id',payment.id)
   }else if(action==='release'){
     if(mission.status!=='completed'||!['captured','transfer_pending'].includes(payment.payment_status)||!payment.stripe_charge_id||!mission.hero_id)return json({error:'Captured completed mission required'},409)
@@ -46,7 +50,7 @@ Deno.serve(async(req)=>{
     await admin.from('sos_payments').update({payment_status:'canceled',escrow_status:'released_to_customer',updated_at:new Date().toISOString()}).eq('id',payment.id)
   }else{
     if(!payment.stripe_charge_id||!['captured','released','partially_refunded','transfer_pending'].includes(payment.payment_status))return json({error:'Captured payment required'},409)
-    const totalPaid=Number(payment.amount||0)+Number(payment.tip||0),alreadyRefunded=Number(payment.refund_amount||0),remaining=Math.max(0,totalPaid-alreadyRefunded)
+    const totalPaid=Number(payment.amount||0)+Number(payment.tax||0)+Number(payment.tip||0),alreadyRefunded=Number(payment.refund_amount||0),remaining=Math.max(0,totalPaid-alreadyRefunded)
     const requested=amount==null?remaining:Number(amount)
     if(!Number.isFinite(requested)||requested<=0||requested>remaining+0.0001)return json({error:'Refund amount exceeds the remaining captured balance'},422)
     const cents=Math.round(requested*100)
