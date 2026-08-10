@@ -13,9 +13,7 @@ test('S.O.S. cancellation Edge uses the v2 settlement path',()=>{
 
 test('S.O.S. cancellation is DB-authoritative before Stripe and retryable',()=>{
   const edge=read('supabase/functions/sos-cancel-mission/index.ts')
-  const cancel=edge.indexOf('sos_cancel_own_mission_v2')
-  const capture=edge.indexOf('paymentIntents.capture')
-  const cancelIntent=edge.indexOf('paymentIntents.cancel')
+  const cancel=edge.indexOf('sos_cancel_own_mission_v2'),capture=edge.indexOf('paymentIntents.capture'),cancelIntent=edge.indexOf('paymentIntents.cancel')
   assert.ok(cancel>=0&&capture>cancel,'DB cancellation must precede Stripe capture')
   assert.ok(cancel>=0&&cancelIntent>cancel,'DB cancellation must precede Stripe authorization cancel')
   assert.match(edge,/pending_retry/)
@@ -38,14 +36,17 @@ test('S.O.S. cancellation settlement split preserves original service economics'
   assert.match(migration,/round\(coalesce\(platform_fee,0\) \+ coalesce\(hero_payout,0\),2\) = round\(amount \+ coalesce\(tip,0\),2\)/)
 })
 
-test('scheduled retry worker uses Vault, v2 Hero readiness, and exact cancellation keys',()=>{
+test('scheduled retry worker uses Vault, v2 Hero readiness, and matching settlement keys',()=>{
   const worker=read('supabase/functions/marketplace-payout-retry/index.ts')
   const schedule=read('supabase/migrations/20260810083127_schedule_marketplace_payout_retry_worker_v2.sql')
   assert.match(worker,/sos_get_runtime_secret/)
   assert.match(worker,/stripe_connect_api_version==='v2'/)
   assert.match(worker,/stripe_transfer_status==='active'/)
-  assert.match(worker,/sos-cancel-mission-\$\{payment\.id\}-\$\{feeCents\}-v2/)
-  assert.match(worker,/sos-cancel-fee-transfer-\$\{payment\.mission_id\}-v1/)
+  assert.match(worker,/customer_no_show/)
+  assert.match(worker,/sos-no-show/)
+  assert.match(worker,/sos-cancel-mission/)
+  assert.match(worker,/sos-cancel-fee-transfer-\$\{p\.mission_id\}-v1/)
+  assert.match(worker,/sos-customer-no-show-transfer-\$\{p\.mission_id\}-v1/)
   assert.doesNotMatch(worker,/retry_worker/)
   assert.match(schedule,/marketplace-payout-retry/)
   assert.match(schedule,/payout_retry_worker_token/)
