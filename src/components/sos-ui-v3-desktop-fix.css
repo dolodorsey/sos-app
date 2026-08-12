@@ -1,0 +1,20 @@
+/* Desktop correction for SOS UI v3. Prevent mobile chrome from expanding into the center of desktop pages. */
+@media (min-width: 900px){
+  .sos-ui-v3 .sos2-app{max-width:1440px!important;margin:0 auto!important;padding-bottom:92px!important;overflow:visible!important}
+  .sos-ui-v3 .sos2-content{max-width:1320px!important;margin:0 auto!important;padding-bottom:24px!important}
+  .sos-ui-v3 .sos2-topbar{height:92px!important;padding:10px max(28px,calc((100vw - 1320px)/2))!important}
+  .sos-ui-v3 .sos2-brand .sos2-mark{display:block!important;width:108px!important;height:72px!important;border-radius:0!important;background:url('/brand/sos-logo.webp') center/contain no-repeat!important;box-shadow:none!important;flex:0 0 auto!important}
+  .sos-ui-v3 .sos2-brand .sos2-mark span{display:none!important}
+  .sos3-logo{width:108px!important;height:72px!important}
+  .sos3-brand-copy strong{font-size:17px!important}.sos3-brand-copy small{font-size:10px!important}
+  .sos3-home-intro{padding:34px 0 18px!important}.sos3-home-intro h1{font-size:72px!important}.sos3-home-intro p{font-size:18px!important;max-width:680px!important}
+  .sos-ui-v3 .sos2-map-hero{margin:0 0 28px!important;border-radius:28px!important;padding-bottom:16px!important}.sos3-home-motion{height:260px!important;object-fit:cover!important}
+  .sos-ui-v3 .sos2-quick,.sos-ui-v3 .sos2-categories{padding:14px 0 32px!important}.sos-ui-v3 .sos2-quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}.sos-ui-v3 .sos2-category-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important}
+  .sos-ui-v3 .sos2-membership,.sos3-ad-slot{margin-left:0!important;margin-right:0!important}
+  .sos-ui-v3 .sos2-nav{left:0!important;right:0!important;bottom:0!important;transform:none!important;width:100%!important;max-width:none!important;height:72px!important;min-height:72px!important;max-height:72px!important;padding:6px max(24px,calc((100vw - 760px)/2))!important;grid-template-columns:repeat(4,minmax(120px,1fr))!important;align-items:stretch!important;border-radius:0!important}
+  .sos-ui-v3 .sos2-nav button{min-height:58px!important;height:58px!important;flex-direction:row!important;gap:9px!important;border-radius:14px!important}.sos-ui-v3 .sos2-nav button span{font-size:23px!important}.sos-ui-v3 .sos2-nav button small{font-size:12px!important}
+  .sos3-utility{left:auto!important;right:24px!important;bottom:84px!important;transform:none!important;width:auto!important;min-width:330px!important;min-height:46px!important;border-radius:16px!important;padding:0 16px!important;z-index:121!important}.sos3-utility button{font-size:11px!important}
+  .sos3-legal{top:108px!important;bottom:92px!important;width:min(760px,calc(100vw - 80px))!important;border:1px solid rgba(224,25,25,.28)!important;border-radius:28px!important;box-shadow:0 35px 100px rgba(0,0,0,.65)!important}
+  .sos-ui-v3 .sos2-service-sheet{bottom:84px!important;width:min(760px,calc(100vw - 80px))!important;max-height:calc(100dvh - 120px)!important;border-radius:28px 28px 0 0!important}
+  .sos-mobility-layer{left:50%!important;right:auto!important;top:96px!important;bottom:92px!important;inset:auto auto 92px 50%!important;transform:translateX(-50%)!important;width:min(760px,calc(100vw - 80px))!important;max-width:760px!important;height:auto!important;border-radius:28px!important;box-shadow:0 35px 100px rgba(0,0,0,.72)!important}
+}
