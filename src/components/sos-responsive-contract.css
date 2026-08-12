@@ -1,0 +1,192 @@
+/* Final shared layout contract. Keep this import last so older presentation
+   layers cannot re-introduce phone-width desktop shells or covered content. */
+:root {
+  --sos-route-header-height: 0px;
+  --sos-bottom-nav-height: 78px;
+}
+
+.sos-route-frame {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.sos-route-frame.has-route-header {
+  --sos-route-header-height: 64px;
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+
+.sos-route-header {
+  position: sticky;
+  top: 0;
+  z-index: 9000;
+  flex: 0 0 calc(64px + env(safe-area-inset-top));
+  min-height: calc(64px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(14px, env(safe-area-inset-right)) 0 max(14px, env(safe-area-inset-left));
+  display: grid;
+  grid-template-columns: minmax(76px, 1fr) auto minmax(76px, 1fr);
+  align-items: center;
+  border-bottom: 1px solid rgba(224, 25, 25, .28);
+  background: rgba(5, 8, 13, .96);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .28);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+}
+
+.sos-route-header button {
+  justify-self: start;
+  min-width: 72px;
+  min-height: 42px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid rgba(224, 25, 25, .36);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(41, 12, 16, .96), rgba(13, 17, 24, .98));
+  color: #fff;
+  font: 800 11px/1 'DM Sans', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.sos-route-header button span { color: #ff4a4a; font-size: 24px; line-height: 0; }
+.sos-route-brand { display: flex; align-items: center; gap: 9px; color: #fff; text-decoration: none; }
+.sos-route-brand img { width: 58px; height: 42px; object-fit: contain; }
+.sos-route-brand span { display: grid; gap: 2px; }
+.sos-route-brand strong { font: 800 14px/1 'Barlow Condensed', sans-serif; letter-spacing: .09em; }
+.sos-route-brand small { color: rgba(255,255,255,.5); font-size: 7px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.sos-route-balance { min-width: 72px; }
+
+.has-route-header > .app-shell {
+  flex: 1 1 auto;
+  min-height: calc(100dvh - 64px - env(safe-area-inset-top)) !important;
+}
+
+/* Customer app chrome owns the viewport: header and dock never cover content. */
+.sos-ui-v3 .sos2-app {
+  width: 100% !important;
+  max-width: none !important;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+.sos-ui-v3 .sos2-topbar {
+  position: relative !important;
+  top: auto !important;
+  flex: 0 0 69px !important;
+}
+
+.sos-ui-v3 .sos2-content {
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding-bottom: max(28px, env(safe-area-inset-bottom)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+  scroll-padding: 72px 0 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sos-ui-v3 .sos2-nav {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: var(--sos-bottom-nav-height) !important;
+  height: auto !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+  padding-bottom: max(9px, env(safe-area-inset-bottom)) !important;
+  z-index: 80 !important;
+}
+
+.sos-ui-v3 .sos2-search { top: 0 !important; }
+.sos-ui-v3 .sos2-content { padding-bottom: max(96px, calc(28px + env(safe-area-inset-bottom))) !important; }
+
+/* The global legal rail follows standalone/auth content instead of covering it.
+   Inside the signed-in app it may float above the dock, with scroll clearance. */
+.sos-route-frame.has-route-header ~ .sos3-utility,
+.sos-route-frame:has(.sos2-auth) ~ .sos3-utility,
+.sos-route-frame:has(.sos2-loading) ~ .sos3-utility {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: min(calc(100% - 24px), 760px) !important;
+  margin: 14px auto max(14px, env(safe-area-inset-bottom)) !important;
+}
+.sos-ui-v3 .sos2-screen,
+.sos-ui-v3 .sos2-quick,
+.sos-ui-v3 .sos2-categories,
+.sos-ui-v3 .sos2-membership,
+.sos-ui-v3 .sos2-active-banner {
+  width: min(100%, 1180px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+@media (max-width: 479px) {
+  .sos-ui-v3 .sos2-quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-quick-grid > button { min-width: 0; min-height: 148px !important; }
+  .sos-ui-v3 .sos2-service-list,
+  .sos-ui-v3 .sos2-mission-list { grid-template-columns: minmax(0, 1fr) !important; }
+  .sos-route-brand span { display: none; }
+  .sos-route-header { grid-template-columns: 76px 1fr 76px; }
+  .sos-route-brand { justify-self: center; }
+}
+
+@media (min-width: 521px) and (max-width: 899px) {
+  body { padding: 0 !important; }
+  .app-shell.sos-premium { width: 100% !important; max-width: none !important; min-height: 100dvh; border-radius: 0 !important; }
+  .sos-ui-v3 .sos2-screen,
+  .sos-ui-v3 .sos2-quick,
+  .sos-ui-v3 .sos2-categories { padding-left: 24px !important; padding-right: 24px !important; }
+  .sos-ui-v3 .sos2-quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-service-list,
+  .sos-ui-v3 .sos2-mission-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
+@media (min-width: 900px) {
+  :root { --sos-bottom-nav-height: 72px; }
+  .sos-ui-v3 .sos2-topbar { flex-basis: 92px !important; }
+  .sos-ui-v3 .sos2-content { width: min(100%, 1320px) !important; margin: 0 auto !important; padding: 0 32px 32px !important; }
+  .sos-ui-v3 .sos2-content { padding-bottom: 104px !important; }
+  .sos-ui-v3 .sos2-nav { min-height: 72px !important; padding: 6px max(24px, calc((100vw - 760px)/2)) !important; grid-template-columns: repeat(4, minmax(120px, 1fr)) !important; }
+  .sos-ui-v3 .sos2-nav button { height: 58px !important; min-height: 58px !important; flex-direction: row !important; }
+  .sos-ui-v3 .sos2-quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-service-list,
+  .sos-ui-v3 .sos2-mission-list { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .sos-ui-v3 .sos2-quick-grid > button { min-height: 180px !important; }
+}
+
+/* Standalone forms and legal/support pages must collapse before they clip. */
+@media (max-width: 680px) {
+  .has-route-header main { min-height: calc(100dvh - 64px - env(safe-area-inset-top)) !important; }
+  .has-route-header main :where(input, select, textarea, button) { max-width: 100%; }
+  .has-route-header [style*="grid-template-columns:1fr 1fr"],
+  .has-route-header [style*="grid-template-columns: 1fr 1fr"],
+  .has-route-header [style*="grid-template-columns:2fr 1fr 1fr"],
+  .has-route-header [style*="grid-template-columns: 2fr 1fr 1fr"],
+  .has-route-header [style*="grid-template-columns:minmax(0,1fr) minmax(0,1fr)"],
+  .has-route-header [style*="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)"] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

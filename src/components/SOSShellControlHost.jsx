@@ -7,12 +7,20 @@ const buttonText=element=>String(element?.textContent||'').replace(/\s+/g,' ').t
 
 export default function SOSShellControlHost(){
   const[header,setHeader]=useState(null);
+  const[showBack,setShowBack]=useState(false);
 
   useEffect(()=>{
-    const sync=()=>setHeader(document.querySelector('.sos2-topbar'));
+    const sync=()=>{
+      setHeader(document.querySelector('.sos2-topbar'));
+      const nav=[...document.querySelectorAll('.sos2-nav button')];
+      const active=nav.find(button=>button.classList.contains('active'));
+      const home=nav.find(button=>buttonText(button).includes('home'));
+      const layer=document.querySelector('.sos-subcat-backdrop, .sos2-backdrop, .sos-mobility-layer');
+      setShowBack(Boolean(layer||(active&&home&&active!==home)));
+    };
     sync();
     const observer=new MutationObserver(sync);
-    observer.observe(document.body,{childList:true,subtree:true});
+    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
     return()=>observer.disconnect();
   },[]);
 
@@ -42,6 +50,6 @@ export default function SOSShellControlHost(){
       .sos-shell-back span{font-size:19px;line-height:1;margin-top:-2px}
       @media(max-width:390px){.sos2-topbar{padding-left:10px!important;padding-right:10px!important}.sos-shell-back{min-width:42px;padding:0 7px;font-size:0}.sos-shell-back span{font-size:22px}.sos2-brand small{display:none}}
     `}</style>
-    {header?createPortal(<button type="button" className="sos-shell-back" onClick={goBack} aria-label="Go back"><span>‹</span>BACK</button>,header):null}
+    {header&&showBack?createPortal(<button type="button" className="sos-shell-back" onClick={goBack} aria-label="Go back"><span>‹</span>BACK</button>,header):null}
   </>;
 }

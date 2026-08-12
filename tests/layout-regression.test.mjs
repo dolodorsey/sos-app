@@ -37,6 +37,34 @@ test('desktop SOS customer and Hero products cannot regress to micro-sized phone
   assert.match(rescue, /\.shc-metrics small,[\s\S]*?font-size:\s*10px\s*!important/)
 })
 
+test('all standalone routes receive history-aware back navigation with logical fallbacks', () => {
+  const layout = read('src/app/layout.jsx')
+  const shell = read('src/components/SOSRouteShell.jsx')
+  assert.match(layout, /SOSRouteShell/)
+  assert.match(shell, /window\.history\.length > 1/)
+  assert.match(shell, /sameOriginReferrer/)
+  assert.match(shell, /router\.back\(\)/)
+  assert.match(shell, /router\.replace\(fallback\)/)
+  for (const fallback of ["'/hero'", "'/ops'", "'/login'", "'/app'"]) assert.match(shell, new RegExp(fallback))
+})
+
+test('final responsive contract loads last and reserves rather than overlays app chrome', () => {
+  const layout = read('src/app/layout.jsx')
+  const contract = read('src/components/sos-responsive-contract.css')
+  assert.ok(layout.indexOf("sos-responsive-contract.css") > layout.indexOf("sos-ui-v3-desktop-fix.css"))
+  assert.match(contract, /\.sos-ui-v3 \.sos2-app[\s\S]*?display:\s*flex\s*!important/)
+  assert.match(contract, /\.sos-ui-v3 \.sos2-content[\s\S]*?overflow-y:\s*auto\s*!important/)
+  assert.match(contract, /\.sos-ui-v3 \.sos2-nav[\s\S]*?position:\s*relative\s*!important/)
+  assert.match(contract, /@media \(min-width: 521px\) and \(max-width: 899px\)/)
+  assert.match(contract, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/)
+})
+
+test('in-app back control is hidden on Home and shown for tabs or overlays', () => {
+  const host = read('src/components/SOSShellControlHost.jsx')
+  assert.match(host, /setShowBack\(Boolean\(layer\|\|\(active&&home&&active!==home\)\)\)/)
+  assert.match(host, /header&&showBack\?createPortal/)
+})
+
 test('fee-review component never reads localStorage during state initialization', () => {
   const review = read('src/components/SOSSettlementReviewHost.jsx')
   assert.doesNotMatch(review, /useState\s*\(\s*\(\s*\)\s*=>\s*localStorage/)

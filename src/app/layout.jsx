@@ -17,6 +17,8 @@ import SOSSessionRefreshHost from '../components/SOSSessionRefreshHost';
 import SOSMarketplaceTruthHost from '../components/SOSMarketplaceTruthHost';
 import SOSAccountDeletionHost from '../components/SOSAccountDeletionHost';
 import SOSUIUpgradeHost from '../components/SOSUIUpgradeHost';
+import SOSRouteShell from '../components/SOSRouteShell';
+import '../components/sos-responsive-contract.css';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
@@ -72,7 +74,7 @@ export default function RootLayout({ children }) {
         <SOSSessionRefreshHost/>
         <SOSMarketplaceTruthHost/>
         <SOSAccountDeletionHost/>
-        <div className="app-shell sos-premium" data-app="sos">{children}</div>
+        <SOSRouteShell>{children}</SOSRouteShell>
         <SOSUIUpgradeHost/>
         <SOSAuthRedirectSessionHost/>
         <SOSAuthConfirmationGuard/>
