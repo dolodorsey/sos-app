@@ -67,7 +67,7 @@ export default function SOSUIUpgradeHost(){
         hero.dataset.v3='1';
         const intro=document.createElement('section');
         intro.className='sos3-home-intro';
-        intro.innerHTML='<span>ROADSIDE RESCUE</span><h1>What happened?</h1><p>Tell us what you need. We’ll notify qualified Heroes near your real location.</p>';
+        intro.innerHTML='<span>ROADSIDE RESCUE</span><h1>SUPERHEROS <em>. ON . STANDBY</em></h1><p>Tell us what you need. We’ll notify qualified Heroes near your real location.</p>';
         hero.parentNode?.insertBefore(intro,hero);
         const video=document.createElement('video');
         video.className='sos3-home-motion';
