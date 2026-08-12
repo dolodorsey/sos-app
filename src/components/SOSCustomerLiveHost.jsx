@@ -13,9 +13,10 @@ const liveStatuses=new Set(['assigned','en_route','on_site','working']);
 const labels={assigned:'Hero assigned',en_route:'Hero en route',on_site:'Hero arrived',working:'Roadside service in progress'};
 
 export default function SOSCustomerLiveHost(){
- const[session,setSession]=useState(null),[mission,setMission]=useState(null),[position,setPosition]=useState(null),[alert,setAlert]=useState(null),[permission,setPermission]=useState(()=>typeof Notification==='undefined'?'denied':Notification.permission),[busy,setBusy]=useState(false);
+ const[session,setSession]=useState(null),[mission,setMission]=useState(null),[position,setPosition]=useState(null),[alert,setAlert]=useState(null),[permission,setPermission]=useState('denied'),[busy,setBusy]=useState(false);
  useEffect(()=>{
    let disposed=false,missionCh=null,posCh=null,notificationCh=null;
+   if(typeof Notification!=='undefined')setPermission(Notification.permission);
    const show=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row?.id?null:cur),4200);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row?.title||'S.O.S. update',{body:row?.body||'Your roadside mission has an update.',tag:row?.id?`sos-${row.id}`:`sos-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>window.focus()}};
    const connect=async()=>{
      const s=storedSession();if(!s||disposed)return;setSession(s);

@@ -12,8 +12,9 @@ const miles=(a,b,c,d)=>{const r=3958.8,rad=v=>v*Math.PI/180;const x=rad(c-a),y=r
 const labels={assigned:'Hero assigned',en_route:'Hero en route',on_site:'Hero arrived',working:'Service in progress'};
 
 export default function SOSCustomerOperationsHost(){
- const[mission,setMission]=useState(null),[hero,setHero]=useState(null),[alert,setAlert]=useState(null),[permission,setPermission]=useState(()=>typeof Notification==='undefined'?'denied':Notification.permission);
+ const[mission,setMission]=useState(null),[hero,setHero]=useState(null),[alert,setAlert]=useState(null),[permission,setPermission]=useState('denied');
  useEffect(()=>{
+  if(typeof Notification!=='undefined')setPermission(Notification.permission);
   const s=stored();if(!s)return;let disposed=false,missionChannel=null,notificationChannel=null,locationTimer=null;
   const notify=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),4800);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. mission update',{body:row.body||'Your mission has an update.',tag:row.id?`sos-c-${row.id}`:`sos-c-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>{window.focus();window.location.assign('/app')}}};
   const rpc=async(name,body)=>{const r=await fetch(`${SB}/rest/v1/rpc/${name}`,{method:'POST',headers:headers(s.access_token),body:JSON.stringify(body||{})});const d=await r.json().catch(()=>null);if(!r.ok)throw new Error(d?.message||d?.error||'Request failed');return d};

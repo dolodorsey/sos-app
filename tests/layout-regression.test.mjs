@@ -65,6 +65,19 @@ test('in-app back control is hidden on Home and shown for tabs or overlays', () 
   assert.match(host, /header&&showBack\?createPortal/)
 })
 
+test('notification prompts hydrate from a stable server-safe initial state', () => {
+  for (const path of [
+    'src/components/SOSCustomerLiveHost.jsx',
+    'src/components/SOSCustomerOperationsHost.jsx',
+    'src/components/SOSHeroAlertsHost.jsx',
+  ]) {
+    const host = read(path)
+    assert.doesNotMatch(host, /useState\(\(\)=>typeof Notification/)
+    assert.match(host, /useState\('denied'\)/)
+    assert.match(host, /setPermission\(Notification\.permission\)/)
+  }
+})
+
 test('fee-review component never reads localStorage during state initialization', () => {
   const review = read('src/components/SOSSettlementReviewHost.jsx')
   assert.doesNotMatch(review, /useState\s*\(\s*\(\s*\)\s*=>\s*localStorage/)

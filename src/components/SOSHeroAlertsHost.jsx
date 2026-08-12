@@ -9,8 +9,9 @@ const client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:fal
 const stored=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 
 export default function SOSHeroAlertsHost(){
- const[permission,setPermission]=useState(()=>typeof Notification==='undefined'?'denied':Notification.permission),[alert,setAlert]=useState(null);
+ const[permission,setPermission]=useState('denied'),[alert,setAlert]=useState(null);
  useEffect(()=>{
+  if(typeof Notification!=='undefined')setPermission(Notification.permission);
   const s=stored();if(!s)return;let channel=null,disposed=false;
   const run=async()=>{
    const r=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{headers:{apikey:SK,Authorization:`Bearer ${s.access_token}`}});const rows=await r.json().catch(()=>[]);const u=rows?.[0];if(!u||u.role!=='hero'||disposed)return;
