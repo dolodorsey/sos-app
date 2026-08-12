@@ -9,6 +9,7 @@ import '../components/sos-operations-command.css';
 import '../components/sos-root-layout-rescue.css';
 import '../components/sos-current-media.css';
 import '../components/sos-ui-v3.css';
+import '../components/sos-ui-v3-desktop-fix.css';
 import SOSAuthConfirmationGuard from '../components/SOSAuthConfirmationGuard';
 import SOSAuthRedirectSessionHost from '../components/SOSAuthRedirectSessionHost';
 import SOSPasswordRecoveryHost from '../components/SOSPasswordRecoveryHost';
