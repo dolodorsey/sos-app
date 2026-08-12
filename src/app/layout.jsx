@@ -8,13 +8,14 @@ import '../components/sos-profile-tools.css';
 import '../components/sos-operations-command.css';
 import '../components/sos-root-layout-rescue.css';
 import '../components/sos-current-media.css';
+import '../components/sos-ui-v3.css';
 import SOSAuthConfirmationGuard from '../components/SOSAuthConfirmationGuard';
 import SOSAuthRedirectSessionHost from '../components/SOSAuthRedirectSessionHost';
 import SOSPasswordRecoveryHost from '../components/SOSPasswordRecoveryHost';
 import SOSSessionRefreshHost from '../components/SOSSessionRefreshHost';
 import SOSMarketplaceTruthHost from '../components/SOSMarketplaceTruthHost';
-import SOSLegalLinksHost from '../components/SOSLegalLinksHost';
 import SOSAccountDeletionHost from '../components/SOSAccountDeletionHost';
+import SOSUIUpgradeHost from '../components/SOSUIUpgradeHost';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
@@ -48,7 +49,7 @@ export const viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   userScalable: false,
-  themeColor: '#05080d',
+  themeColor: '#020609',
 };
 
 export default function RootLayout({ children }) {
@@ -69,9 +70,9 @@ export default function RootLayout({ children }) {
       <body>
         <SOSSessionRefreshHost/>
         <SOSMarketplaceTruthHost/>
-        <SOSLegalLinksHost/>
         <SOSAccountDeletionHost/>
         <div className="app-shell sos-premium" data-app="sos">{children}</div>
+        <SOSUIUpgradeHost/>
         <SOSAuthRedirectSessionHost/>
         <SOSAuthConfirmationGuard/>
         <SOSPasswordRecoveryHost/>
