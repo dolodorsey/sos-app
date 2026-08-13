@@ -190,3 +190,22 @@
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Services opens as Category → Service, never as one flat directory. */
+.sos-ui-v3 .sos2-services-categories { margin-top: 24px !important; }
+.sos-ui-v3 .sos2-category-back {
+  min-height: 42px;
+  margin-top: 18px;
+  padding: 0 15px;
+  border: 1px solid rgba(224, 25, 25, .38);
+  border-radius: 999px;
+  background: #0b1219;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.sos-ui-v3 .sos2-category-back:hover { border-color: #f12222; color: #ff7474; }
+@media (max-width: 520px) {
+  .sos-ui-v3 .sos2-services-categories { grid-template-columns: minmax(0, 1fr) !important; }
+}
