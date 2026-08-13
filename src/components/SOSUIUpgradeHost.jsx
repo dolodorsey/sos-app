@@ -63,12 +63,10 @@ export default function SOSUIUpgradeHost(){
       });
 
       const hero=document.querySelector('.sos2-map-hero');
+      document.documentElement.classList.toggle('sos-home-animation-first',Boolean(hero));
+      document.querySelectorAll('.sos3-home-intro,.sos3-ad-slot').forEach(element=>element.remove());
       if(hero&&!hero.dataset.v3){
         hero.dataset.v3='1';
-        const intro=document.createElement('section');
-        intro.className='sos3-home-intro';
-        intro.innerHTML='<span>ROADSIDE RESCUE</span><h1>SUPERHEROS <em>. ON . STANDBY</em></h1><p>Tell us what you need. We’ll notify qualified Heroes near your real location.</p>';
-        hero.parentNode?.insertBefore(intro,hero);
         const video=document.createElement('video');
         video.className='sos3-home-motion';
         video.autoplay=true;video.muted=true;video.loop=true;video.playsInline=true;video.setAttribute('aria-label','S.O.S. brand animation');
@@ -91,18 +89,11 @@ export default function SOSUIUpgradeHost(){
         box.dataset.icon=key;box.innerHTML=icons[key];
       });
 
-      const categories=document.querySelector('.sos2-categories');
-      if(categories&&!document.querySelector('.sos3-ad-slot')){
-        const ad=document.createElement('section');
-        ad.className='sos3-ad-slot';
-        ad.innerHTML='<div><span>SPONSORED · PARTNER PLACEMENT</span><h2>Your brand can ride with S.O.S.</h2><p>Reserved inventory for roadside, automotive, insurance, fuel, mobility and local-market partners.</p></div><button type="button">Partner with S.O.S.</button>';
-        categories.parentNode?.insertBefore(ad,categories);
-      }
     };
     apply();
     const observer=new MutationObserver(()=>requestAnimationFrame(apply));
     observer.observe(document.body,{childList:true,subtree:true});
-    return()=>observer.disconnect();
+    return()=>{observer.disconnect();document.documentElement.classList.remove('sos-home-animation-first')};
   },[]);
 
   const copy=legal?legalCopy(legal):null;

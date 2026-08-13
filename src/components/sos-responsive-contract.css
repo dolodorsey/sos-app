@@ -192,6 +192,12 @@
 }
 
 /* Services opens as Category → Service, never as one flat directory. */
+.sos-home-animation-first .sos2-topbar,
+.sos-home-animation-first .sosx-readiness,
+.sos-home-animation-first .sos3-home-intro,
+.sos-home-animation-first .sos3-ad-slot { display: none !important; }
+.sos-home-animation-first .sos2-content { padding-top: 0 !important; }
+.sos-home-animation-first .sos2-map-hero { margin-top: 0 !important; }
 .sos-ui-v3 .sos2-services-categories { margin-top: 24px !important; }
 .sos-ui-v3 .sos2-category-back {
   min-height: 42px;
