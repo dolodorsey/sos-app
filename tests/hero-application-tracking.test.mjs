@@ -26,8 +26,12 @@ test('Hero application status needs application ID plus receipt token, not email
 
 test('duplicate Hero application does not leak another tracking token',()=>{
  const edge=read('supabase/functions/submit-sos-hero-application/index.ts')
- const duplicate=edge.match(/if\(existing\)return json\(([^;]+);/)?.[1]||''
- assert.ok(duplicate.length>0)
+ const start=edge.indexOf('if(existing)')
+ const end=edge.indexOf('const source=',start)
+ assert.notEqual(start,-1)
+ assert.notEqual(end,-1)
+ const duplicate=edge.slice(start,end)
+ assert.match(duplicate,/duplicate:true/)
  assert.doesNotMatch(duplicate,/tracking_token/)
 })
 
