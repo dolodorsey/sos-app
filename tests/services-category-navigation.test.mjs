@@ -19,7 +19,8 @@ test('a selected category shows only its services and can return to category sel
   assert.match(customer, /if\(id==='services'\)setCategory\(''\)/)
 })
 
-test('category selection remains responsive on phone, tablet, and desktop', () => {
+test('category and service selection stays three-across as the customer requested', () => {
   assert.match(responsive, /sos2-services-categories/)
-  assert.match(responsive, /@media \(max-width: 520px\)[\s\S]*sos2-services-categories[\s\S]*grid-template-columns: minmax\(0, 1fr\)/)
+  assert.match(responsive, /@media \(max-width: 520px\)[\s\S]*sos2-services-categories[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/)
+  assert.match(responsive, /sos2-quick-grid,[\s\S]*sos2-service-list[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/)
 })

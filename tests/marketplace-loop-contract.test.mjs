@@ -14,6 +14,18 @@ test('customer request path creates a real mission and reads live mission state'
   assert.match(client, /sos_payments/)
 })
 
+test('customer intake gives the Hero vehicle, scene, access, and service preparation details', () => {
+  const customer = read('src/components/SOSCustomerMobilityApp.jsx')
+  const hero = read('src/components/SOSHeroMobilityApp.jsx')
+  for (const detail of ['Vehicle','Where is the vehicle?','Access details','Tools / preparation notes']) assert.match(customer,new RegExp(detail.replace('?', '\\?')))
+  assert.match(customer,/Parking deck/)
+  assert.match(customer,/Highway shoulder/)
+  assert.match(customer,/HERO PREPARATION DETAILS/)
+  assert.match(customer,/notes\}/)
+  assert.match(hero,/citizen_notes/)
+  assert.match(hero,/ARRIVE PREPARED/)
+})
+
 test('Hero Command owns acceptance, presence, payment-gated travel, and completion', () => {
   const hero = read('src/components/SOSHeroMobilityApp.jsx')
   assert.match(hero, /sos_set_hero_presence/)
