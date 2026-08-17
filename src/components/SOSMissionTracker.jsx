@@ -1,9 +1,7 @@
 import React,{useEffect,useMemo,useState}from'react';
-import{createClient}from'@supabase/supabase-js';
 import{getCustomerMission,getCustomerCancellationQuote,cancelCustomerMission,authorizeCustomerMission,rateCustomerMission,missionPhase}from'../lib/sosMissionClient';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 
-const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
 const STEPS=[
   {id:'received',label:'Request received'},
   {id:'matching',label:'Finding a verified Hero'},
@@ -60,8 +58,7 @@ export default function SOSMissionTracker({token,missionId,initialMission,onClos
   useEffect(()=>{
     if(!token||!missionId)return;
     let active=true;
-    const client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-    client.realtime.setAuth(token);
+    const client=authorizeSosRealtime(token);
     const refresh=()=>getCustomerMission(token,missionId).then(next=>{if(active&&next)setMission(next)}).catch(()=>{});
     const channel=client.channel(`sos-customer-mission-${missionId}`)
       .on('postgres_changes',{event:'*',schema:'public',table:'sos_missions',filter:`id=eq.${missionId}`},refresh)

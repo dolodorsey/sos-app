@@ -1,21 +1,19 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
-import{createClient}from'@supabase/supabase-js';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
-const client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false}});
 const stored=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 
 export default function SOSHeroAlertsHost(){
  const[permission,setPermission]=useState('denied'),[alert,setAlert]=useState(null);
  useEffect(()=>{
   if(typeof Notification!=='undefined')setPermission(Notification.permission);
-  const s=stored();if(!s)return;let channel=null,disposed=false;
+  const s=stored();if(!s)return;let channel=null,disposed=false;const client=authorizeSosRealtime(s.access_token);
   const run=async()=>{
    const r=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{headers:{apikey:SK,Authorization:`Bearer ${s.access_token}`}});const rows=await r.json().catch(()=>[]);const u=rows?.[0];if(!u||u.role!=='hero'||disposed)return;
-   client.realtime.setAuth(s.access_token);
    channel=client.channel(`sos-hero-alerts:${u.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},payload=>{
     const row=payload.new||{};setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),5000);
     if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. Hero Command',{body:row.body||'Your Hero network has an update.',tag:row.id?`hero-${row.id}`:`hero-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>{window.focus();window.location.assign('/hero')}}

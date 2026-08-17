@@ -17,10 +17,11 @@ import SOSPushRegistrationHost from '@/components/SOSPushRegistrationHost';
 import SOSRecoveryHost from '@/components/SOSRecoveryHost';
 import SOSShellControlHost from '@/components/SOSShellControlHost';
 import SOSSubcategoryRestoreHost from '@/components/SOSSubcategoryRestoreHost';
+import SOSLoading from '@/components/SOSLoading';
 
 const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerRealtimeShell'), {
   ssr: false,
-  loading: () => null,
+  loading: () => <SOSLoading label="Connecting the response network" />,
 });
 
 export default function AppPage() {

@@ -1,10 +1,9 @@
 'use client';
 
 import React,{useEffect,useMemo,useState}from'react';
-import{createClient}from'@supabase/supabase-js';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
-const realtime=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false}});
 const stored=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));if(!s?.access_token||!s?.user)return null;if(s.expires_at&&s.expires_at<Date.now()/1000)return null;return s}catch{return null}};
 const request=async(path,{method='GET',token,body}={})=>{const r=await fetch(`${SB}${path}`,{method,headers:{apikey:SK,Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d?.message||d?.error_description||d?.error||'Request failed');return d};
 const label=type=>({message:'MESSAGE',mission_offer:'MISSION OFFER',mission_accepted:'MISSION',hero_en_route:'TRACKING',hero_arrived:'ARRIVAL',mission_complete:'COMPLETE',hero_reassigned:'REASSIGNMENT',hero_timeout:'RELIABILITY',payment_received:'PAYMENT',payout_sent:'PAYOUT',system:'SYSTEM'}[type]||String(type||'UPDATE').replaceAll('_',' ').toUpperCase());
@@ -12,7 +11,7 @@ const label=type=>({message:'MESSAGE',mission_offer:'MISSION OFFER',mission_acce
 export default function SOSNotificationInboxHost(){
  const[userId,setUserId]=useState(''),[items,setItems]=useState([]),[open,setOpen]=useState(false),[error,setError]=useState('');
  const load=async(uid=userId)=>{const s=stored();if(!s||!uid)return;const rows=await request(`/rest/v1/sos_notifications?user_id=eq.${uid}&select=id,user_id,type,title,body,data,channel,read,read_at,created_at&order=created_at.desc&limit=100`,{token:s.access_token});setItems(rows||[])};
- useEffect(()=>{let disposed=false;let channel=null;const connect=async()=>{const s=stored();if(!s)return;const us=await request(`/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id&limit=1`,{token:s.access_token});const u=us?.[0];if(!u||disposed)return;setUserId(u.id);await load(u.id);realtime.realtime.setAuth(s.access_token);channel=realtime.channel(`sos-notification-inbox:${u.id}`).on('postgres_changes',{event:'*',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},()=>load(u.id).catch(()=>{})).subscribe()};connect().catch(()=>{});return()=>{disposed=true;if(channel)realtime.removeChannel(channel)}},[]);
+ useEffect(()=>{let disposed=false;let channel=null;let realtime=null;const connect=async()=>{const s=stored();if(!s)return;const us=await request(`/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id&limit=1`,{token:s.access_token});const u=us?.[0];if(!u||disposed)return;setUserId(u.id);await load(u.id);realtime=authorizeSosRealtime(s.access_token);channel=realtime.channel(`sos-notification-inbox:${u.id}`).on('postgres_changes',{event:'*',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},()=>load(u.id).catch(()=>{})).subscribe()};connect().catch(()=>{});return()=>{disposed=true;if(channel&&realtime)realtime.removeChannel(channel)}},[]);
  const unread=useMemo(()=>items.filter(x=>!x.read).length,[items]);
  const mark=async(ids)=>{const s=stored();if(!s)return;setError('');try{await request('/rest/v1/rpc/sos_mark_notifications_read',{method:'POST',token:s.access_token,body:{p_notification_ids:ids?.length?ids:null}});await load()}catch(e){setError(e.message)}};
  const openNotice=async item=>{if(!item.read)await mark([item.id]);setOpen(false)};

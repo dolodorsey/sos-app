@@ -1,6 +1,7 @@
 'use client';
 
 import React,{useEffect,useMemo,useState}from'react';
+import{authorizeSosRealtime,getSosRealtimeClient}from'../lib/sosRealtimeClient';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
@@ -23,15 +24,13 @@ export default function SOSCustomerLiveHost(){
      const users=await req(`/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{token:s.access_token});const u=users?.[0];if(!u||u.role==='hero'||disposed)return;
      const missions=await req(`/rest/v1/sos_missions?citizen_id=eq.${u.id}&status=in.(assigned,en_route,on_site,working)&select=id,status,hero_id,requested_service_name,pickup_lat,pickup_lng,pickup_address,eta_minutes,accepted_at&order=created_at.desc&limit=1`,{token:s.access_token});const m=missions?.[0]||null;setMission(m);
      if(m){const p=await req(`/rest/v1/sos_mission_live_positions?mission_id=eq.${m.id}&select=lat,lng,updated_at&limit=1`,{token:s.access_token});setPosition(p?.[0]||null)}
-     if(!globalThis.supabaseRealtimeClient){const mod=await import('@supabase/supabase-js').catch(()=>null);if(mod)globalThis.supabaseRealtimeClient=mod.createClient(SB,SK,{auth:{persistSession:false}})}
-     const client=globalThis.supabaseRealtimeClient;if(!client)return;
-     client.realtime.setAuth(s.access_token);
+     const client=authorizeSosRealtime(s.access_token);
      missionCh=client.channel(`sos-customer-mission:${u.id}`).on('postgres_changes',{event:'*',schema:'public',table:'sos_missions',filter:`citizen_id=eq.${u.id}`},payload=>{const row=payload.new||{};if(row.id&&liveStatuses.has(row.status))setMission(row);else if(row.id===m?.id&&!liveStatuses.has(row.status)){setMission(null);setPosition(null)}}).subscribe();
      if(m)posCh=client.channel(`sos-live-position:${m.id}`).on('postgres_changes',{event:'*',schema:'public',table:'sos_mission_live_positions',filter:`mission_id=eq.${m.id}`},payload=>setPosition(payload.new||null)).subscribe();
      notificationCh=client.channel(`sos-customer-notify:${u.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},payload=>show(payload.new||{})).subscribe();
    };
    connect().catch(e=>console.warn('S.O.S. customer live layer unavailable',e));
-   return()=>{disposed=true;const client=globalThis.supabaseRealtimeClient;[missionCh,posCh,notificationCh].forEach(ch=>{if(client&&ch)client.removeChannel(ch)})}
+   return()=>{disposed=true;const client=getSosRealtimeClient();[missionCh,posCh,notificationCh].forEach(ch=>{if(ch)client.removeChannel(ch)})}
  },[]);
  const distance=useMemo(()=>mission&&position&&mission.pickup_lat!=null&&mission.pickup_lng!=null?miles(Number(position.lat),Number(position.lng),Number(mission.pickup_lat),Number(mission.pickup_lng)):null,[mission,position]);
  const age=position?.updated_at?Math.max(0,Math.floor((Date.now()-new Date(position.updated_at).getTime())/1000)):null;

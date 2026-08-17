@@ -93,7 +93,7 @@ test('customer and Hero portals mount the real operations layers', () => {
 
 test('Hero Command is realtime-first with polling only as fallback', () => {
   const shell = read('src/components/SOSHeroRealtimeShell.jsx')
-  assert.match(shell, /realtime\.setAuth\(s\.access_token\)/)
+  assert.match(shell, /authorizeSosRealtime\(s\.access_token\)/)
   for (const table of ['sos_mission_offers','sos_missions','sos_payments']) assert.match(shell,new RegExp(`table:'${table}'`))
   assert.match(shell, /LIVE DATA/)
   assert.match(shell, /POLLING FALLBACK/)
@@ -101,7 +101,7 @@ test('Hero Command is realtime-first with polling only as fallback', () => {
 
 test('SOS customer mission state is realtime-first with polling only as fallback', () => {
   const shell=read('src/components/SOSCustomerRealtimeShell.jsx')
-  assert.match(shell,/realtime\.setAuth\(s\.access_token\)/)
+  assert.match(shell,/authorizeSosRealtime\(s\.access_token\)/)
   for(const table of ['sos_missions','sos_payments','sos_mission_offers']) assert.match(shell,new RegExp(`table:'${table}'`))
   assert.match(shell,/LIVE DATA/)
   assert.match(shell,/POLLING FALLBACK/)

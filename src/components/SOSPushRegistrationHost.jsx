@@ -1,11 +1,9 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
-import{createClient}from'@supabase/supabase-js';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
-const supabase=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 const storedSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 const toBytes=base64=>{const padding='='.repeat((4-base64.length%4)%4);const raw=atob((base64+padding).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)))};
 
@@ -17,7 +15,6 @@ export default function SOSPushRegistrationHost(){
    try{
      let next=Notification.permission;if(requestPermission&&next==='default')next=await Notification.requestPermission();setPermission(next);if(next!=='granted'){setReady(false);return}
      const session=storedSession();if(!session?.access_token){setReady(false);return}
-     supabase.realtime.setAuth(session.access_token);
      const configRes=await fetch(`${SB}/functions/v1/marketplace-push-config`,{headers:{apikey:SK},cache:'no-store'});const config=await configRes.json().catch(()=>({}));if(!configRes.ok||!config?.ready||!config?.publicKey)throw new Error('S.O.S. push configuration is unavailable.')
      const worker=await navigator.serviceWorker.register('/marketplace-sw.js',{scope:'/'});await navigator.serviceWorker.ready
      let subscription=await worker.pushManager.getSubscription();if(!subscription)subscription=await worker.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:toBytes(String(config.publicKey))})
