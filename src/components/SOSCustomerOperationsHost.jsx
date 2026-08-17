@@ -1,11 +1,10 @@
 'use client';
 
 import React,{useEffect,useMemo,useState}from'react';
-import{createClient}from'@supabase/supabase-js';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
-const client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false}});
 const stored=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 const headers=t=>({apikey:SK,Authorization:`Bearer ${t}`,'Content-Type':'application/json'});
 const miles=(a,b,c,d)=>{const r=3958.8,rad=v=>v*Math.PI/180;const x=rad(c-a),y=rad(d-b);const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;return 2*r*Math.asin(Math.sqrt(h))};
@@ -15,14 +14,14 @@ export default function SOSCustomerOperationsHost(){
  const[mission,setMission]=useState(null),[hero,setHero]=useState(null),[alert,setAlert]=useState(null),[permission,setPermission]=useState('denied');
  useEffect(()=>{
   if(typeof Notification!=='undefined')setPermission(Notification.permission);
-  const s=stored();if(!s)return;let disposed=false,missionChannel=null,notificationChannel=null,locationTimer=null;
+  const s=stored();if(!s)return;let disposed=false,missionChannel=null,notificationChannel=null,locationTimer=null;const client=authorizeSosRealtime(s.access_token);
   const notify=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),4800);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. mission update',{body:row.body||'Your mission has an update.',tag:row.id?`sos-c-${row.id}`:`sos-c-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>{window.focus();window.location.assign('/app')}}};
   const rpc=async(name,body)=>{const r=await fetch(`${SB}/rest/v1/rpc/${name}`,{method:'POST',headers:headers(s.access_token),body:JSON.stringify(body||{})});const d=await r.json().catch(()=>null);if(!r.ok)throw new Error(d?.message||d?.error||'Request failed');return d};
   const loadLocation=async id=>{if(!id){if(!disposed)setHero(null);return}try{const rows=await rpc('sos_get_assigned_hero_live_location',{p_mission_id:id});const row=Array.isArray(rows)?rows[0]:rows;if(!disposed)setHero(row||null)}catch{if(!disposed)setHero(null)}};
   const connect=async()=>{
    const ur=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{headers:headers(s.access_token)});const users=await ur.json().catch(()=>[]);const u=users?.[0];if(!u||u.role!=='citizen'||disposed)return;
    const refresh=async()=>{const r=await fetch(`${SB}/rest/v1/sos_missions?citizen_id=eq.${u.id}&status=in.(assigned,en_route,on_site,working)&select=id,status,requested_service_name,pickup_address,pickup_lat,pickup_lng,eta_minutes,hero_id&order=created_at.desc&limit=1`,{headers:headers(s.access_token)});const rows=await r.json().catch(()=>[]);const current=rows?.[0]||null;if(disposed)return;setMission(current);await loadLocation(current?.id)};
-   await refresh();client.realtime.setAuth(s.access_token);
+   await refresh();
    missionChannel=client.channel(`sos-customer-mission:${u.id}`).on('postgres_changes',{event:'*',schema:'public',table:'sos_missions',filter:`citizen_id=eq.${u.id}`},()=>refresh().catch(()=>{})).subscribe();
    notificationChannel=client.channel(`sos-customer-notify:${u.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},p=>notify(p.new||{})).subscribe();
    locationTimer=window.setInterval(()=>{if(!disposed&&mission?.id)loadLocation(mission.id)},5000);

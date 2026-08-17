@@ -1,11 +1,9 @@
 'use client';
 
 import React,{useEffect,useRef,useState}from'react';
-import {createClient}from'@supabase/supabase-js';
 import SOSHeroMobilityApp from'./SOSHeroMobilityApp';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 
-const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
 const session=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 
 const activeTabLabel=()=>document.querySelector('.shc-side button.active span')?.textContent||document.querySelector('.shc-mobile-nav button.active span')?.textContent||'Home';
@@ -23,7 +21,7 @@ export default function SOSHeroRealtimeShell(){
      if(!s?.access_token){if(currentToken){disconnect();setConnection('connecting')}return}
      if(s.access_token===currentToken&&channel)return
      disconnect();currentToken=s.access_token;
-     client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});client.realtime.setAuth(s.access_token);
+     client=authorizeSosRealtime(s.access_token);
      const notifyOffer=()=>{if(document.hidden&&'Notification'in window&&Notification.permission==='granted'){try{new Notification('New S.O.S. mission offer',{body:'Open Hero Command to review the live offer.'})}catch{}}refresh('Offers')};
      channel=client.channel(`sos-hero-live-${s.user.id}`)
       .on('postgres_changes',{event:'*',schema:'public',table:'sos_mission_offers'},notifyOffer)

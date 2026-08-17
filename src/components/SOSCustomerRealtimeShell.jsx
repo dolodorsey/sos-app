@@ -1,11 +1,9 @@
 'use client';
 
 import React,{useEffect,useRef,useState}from'react';
-import {createClient}from'@supabase/supabase-js';
 import SOSCustomerMobilityApp from'./SOSCustomerMobilityApp';
+import{authorizeSosRealtime}from'../lib/sosRealtimeClient';
 
-const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
-const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
 const session=()=>{try{const s=JSON.parse(localStorage.getItem('sos_session'));return s?.access_token&&s?.user?s:null}catch{return null}};
 const activeTabLabel=()=>document.querySelector('.sos2-nav button.active small')?.textContent||'Home';
 const restoreTab=label=>{const buttons=[...document.querySelectorAll('.sos2-nav button')];buttons.find(button=>String(button.textContent||'').toLowerCase().includes(String(label||'').toLowerCase()))?.click?.()};
@@ -19,7 +17,7 @@ export default function SOSCustomerRealtimeShell(){
    const disconnect=()=>{if(channel&&client)client.removeChannel(channel);channel=null;client=null;currentToken=''};
    const connect=()=>{
      const s=session();if(!s?.access_token){if(currentToken){disconnect();setConnection('connecting')}return}if(s.access_token===currentToken&&channel)return;
-     disconnect();currentToken=s.access_token;client=createClient(SB,SK,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});client.realtime.setAuth(s.access_token);
+     disconnect();currentToken=s.access_token;client=authorizeSosRealtime(s.access_token);
      channel=client.channel(`sos-customer-live-${s.user.id}`)
        .on('postgres_changes',{event:'*',schema:'public',table:'sos_missions'},()=>refresh('Missions'))
        .on('postgres_changes',{event:'*',schema:'public',table:'sos_payments'},()=>refresh('Missions'))

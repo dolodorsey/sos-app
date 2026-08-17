@@ -68,7 +68,7 @@ test('accepted Hero missions load directly when React mission state has not comm
 
 test('Hero Command receives offers, missions, and payments through direct Realtime after login',()=>{
   const shell=read('src/components/SOSHeroRealtimeShell.jsx')
-  assert.match(shell,/realtime\.setAuth\(s\.access_token\)/)
+  assert.match(shell,/authorizeSosRealtime\(s\.access_token\)/)
   for(const table of ['sos_mission_offers','sos_missions','sos_payments']) assert.match(shell,new RegExp(`table:'${table}'`))
   assert.match(shell,/setInterval\(connect,1000\)/)
   assert.match(shell,/LIVE DATA/)
@@ -77,7 +77,7 @@ test('Hero Command receives offers, missions, and payments through direct Realti
 
 test('customer mission tracker is realtime-first and follows participant-safe Hero GPS',()=>{
   const tracker=read('src/components/SOSMissionTracker.jsx')
-  assert.match(tracker,/realtime\.setAuth\(token\)/)
+  assert.match(tracker,/authorizeSosRealtime\(token\)/)
   for(const table of ['sos_missions','sos_payments','sos_mission_live_positions']) assert.match(tracker,new RegExp(`table:'${table}'`))
   assert.match(tracker,/filter:`mission_id=eq\.\$\{missionId\}`/)
   assert.match(tracker,/HERO LIVE/)
