@@ -1,0 +1,28 @@
+/* Final app-shell contract.
+   SOS is an application at every viewport — never a centered website mockup. */
+html,body{width:100%;min-width:100%;min-height:100%;margin:0!important;padding:0!important;background:#020409!important;overscroll-behavior-y:none}
+body{min-height:100dvh!important}
+.app-shell,.sos-premium{width:100%!important;max-width:none!important;min-height:100dvh!important;margin:0!important;border-radius:0!important;box-shadow:none!important}
+.app-shell{overflow-x:hidden!important;overflow-y:visible!important}
+
+/* Keep navigation/action chrome attached to the viewport and clear iOS safe areas. */
+.sos-premium [style*='position: fixed'][style*='bottom: 0'],
+.sos-premium [style*='position:fixed'][style*='bottom:0']{
+  left:0!important;right:0!important;width:100%!important;max-width:none!important;
+  padding-bottom:max(8px,env(safe-area-inset-bottom))!important;
+}
+.sos-premium [style*='position: sticky'][style*='top: 0'],
+.sos-premium [style*='position:sticky'][style*='top:0']{
+  top:0!important;width:100%!important;max-width:none!important;
+  padding-top:env(safe-area-inset-top)!important;
+}
+
+/* Content fills tablet/desktop screens while retaining readable internal measures. */
+@media(min-width:700px){
+  .sos-premium main,.sos-premium [role='main']{width:100%!important;max-width:none!important}
+  .sos-premium [style*='max-width: 450px'],.sos-premium [style*='max-width:450px']{max-width:none!important}
+}
+
+@media(display-mode:standalone){
+  html,body,.app-shell,.sos-premium{min-height:100dvh!important}
+}
