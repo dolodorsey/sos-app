@@ -19,6 +19,7 @@ import SOSAccountDeletionHost from '../components/SOSAccountDeletionHost';
 import SOSUIUpgradeHost from '../components/SOSUIUpgradeHost';
 import SOSRouteShell from '../components/SOSRouteShell';
 import '../components/sos-responsive-contract.css';
+import '../components/sos-app-native-contract.css';
 
 export const metadata = {
   title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
