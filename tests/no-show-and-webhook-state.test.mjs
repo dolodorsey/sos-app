@@ -23,6 +23,6 @@ test('Stripe webhook keeps S.O.S. payment states monotonic and routes Hero money
   assert.match(hook,/const sosCapturedOrLater=/)
   assert.match(hook,/const sosTerminal=/)
   assert.match(hook,/patch\.payment_status='transfer_pending'/)
-  assert.match(hook,/if\(!sosTerminal\(String\(sosPayment\?\.payment_status\|\|''\)\)\)/)
-  assert.match(hook,/if\(!sosCapturedOrLater\(String\(sosPayment\?\.payment_status\|\|''\)\)\)/)
+  assert.match(hook,/if\(!sosTerminal\(String\(sosPayment\.payment_status\|\|''\)\)\)/)
+  assert.match(hook,/if\(!sosCapturedOrLater\(String\(sosPayment\.payment_status\|\|''\)\)\)/)
 })
