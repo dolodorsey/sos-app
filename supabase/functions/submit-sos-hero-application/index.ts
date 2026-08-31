@@ -31,6 +31,17 @@ const syncKHG=async(admin:any,applicationId:string)=>{
   }
 };
 
+const linkRecruitingCandidate=async(admin:any,applicationId:string)=>{
+  try{
+    const {data,error}=await admin.rpc('sos_link_hero_application_candidate',{p_application_id:applicationId});
+    if(error) throw error;
+    return data||null;
+  }catch(error){
+    console.error('sos-hero-application-attribution',applicationId,error instanceof Error?error.message:String(error));
+    return null;
+  }
+};
+
 Deno.serve(async req=>{
  const origin=req.headers.get('Origin')||'';if(req.method==='OPTIONS')return new Response('ok',{headers:cors(origin)});if(req.method!=='POST')return json(origin,{error:'Method not allowed'},405);if(origin&&!ALLOWED.has(origin))return json(origin,{error:'Origin not allowed'},403);
  const declared=Number(req.headers.get('content-length')||0);if(Number.isFinite(declared)&&declared>MAX_BODY_BYTES)return json(origin,{error:'Application request is too large.'},413);
@@ -48,14 +59,19 @@ Deno.serve(async req=>{
   const email=text(b.email,254).toLowerCase(),phone=text(b.phone,40),first=text(b.firstName,80),last=text(b.lastName,80);
   if(!first||!last||!/^\S+@\S+\.\S+$/.test(email)||phone.length<7)return json(origin,{error:'Name, valid email, and phone are required.'},422);
   if(!b.licenseAttested||!b.insuranceAttested||!b.backgroundConsent||!b.termsAccepted)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
-  const{data:existing}=await admin.from('sos_hero_applications').select('id,status,submitted_at,khg_bridge_status').eq('email',email).in('status',['submitted','reviewing','approved']).maybeSingle();
-  if(existing){if(existing.khg_bridge_status!=='synced')await syncKHG(admin,existing.id);return json(origin,{application_id:existing.id,status:existing.status,duplicate:true,message:'An active Hero application already exists for this email. Use the private receipt saved on the original device to track it.'},200)}
+  const{data:existing}=await admin.from('sos_hero_applications').select('id,status,submitted_at,khg_bridge_status,candidate_id').eq('email',email).in('status',['submitted','reviewing','approved']).maybeSingle();
+  if(existing){
+    const attribution=existing.candidate_id?{linked:true}:await linkRecruitingCandidate(admin,existing.id);
+    if(existing.khg_bridge_status!=='synced')await syncKHG(admin,existing.id);
+    return json(origin,{application_id:existing.id,status:existing.status,duplicate:true,source_attributed:attribution?.linked===true,message:'An active Hero application already exists for this email. Use the private receipt saved on the original device to track it.'},200)
+  }
   const source=(req.headers.get('x-forwarded-for')||req.headers.get('x-real-ip')||req.headers.get('cf-connecting-ip')||'unknown').split(',')[0].trim(),ipHash=await sha256(source);
   const{data:limit,error:limitError}=await admin.rpc('marketplace_consume_intake_rate_limit',{p_app:'sos_hero',p_ip_hash:ipHash,p_limit:8,p_window_minutes:60});if(limitError)throw limitError;if(limit?.allowed!==true)return json(origin,{error:'Too many new applications from this network. Try again later.',retry_after_minutes:60},429);
   const token=trackingToken(),hash=await sha256(token);
   const{data,error}=await admin.from('sos_hero_applications').insert({first_name:first,last_name:last,email,phone,city:text(b.city,100)||null,state:text(b.state,50)||null,services_requested:list(b.services),tools_available:list(b.tools),vehicle_type:text(b.vehicleType,100)||null,vehicle_make:text(b.vehicleMake,100)||null,vehicle_model:text(b.vehicleModel,100)||null,vehicle_year:b.vehicleYear?Number(b.vehicleYear):null,years_experience:Math.max(0,Math.min(80,Number(b.yearsExperience)||0)),experience_summary:text(b.experienceSummary,3000)||null,license_attested:true,insurance_attested:true,background_consent:true,terms_accepted:true,status:'submitted',status_token_hash:hash,khg_bridge_status:'pending'}).select('id,status,submitted_at').single();
   if(error)throw error;
+  const attribution=await linkRecruitingCandidate(admin,data.id);
   await syncKHG(admin,data.id);
-  return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,tracking_token:token,message:'Hero application received. This browser can now track review status. Approval does not bypass identity, license, insurance, background, test mission, or payout requirements.'},201);
+  return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,tracking_token:token,source_attributed:attribution?.linked===true,message:'Hero application received. This browser can now track review status. Approval does not bypass identity, license, insurance, background, test mission, or payout requirements.'},201);
  }catch(error){console.error('submit-sos-hero-application',error);return json(origin,{error:'Hero application could not be processed.'},500)}
 });
