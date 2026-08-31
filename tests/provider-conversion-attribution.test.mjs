@@ -4,6 +4,7 @@ import test from 'node:test'
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8')
 const sql=()=>read('supabase/migrations/20260831075000_sos_provider_conversion_attribution.sql')
+const stateSql=()=>read('supabase/migrations/20260831080500_sos_hero_application_state_integrity.sql')
 const submit=()=>read('supabase/functions/submit-sos-hero-application/index.ts')
 
 test('manual contact outcomes normalize into the constrained recruiting lifecycle',()=>{
@@ -31,13 +32,26 @@ test('application attribution only links a uniquely matched, positively contacte
   assert.match(migration,/grant execute on function public\.sos_link_hero_application_candidate\(uuid\) to service_role/)
 })
 
-test('canonical Hero intake attempts attribution without making attribution a submission blocker',()=>{
+test('canonical Hero intake uses the live application state machine and attempts attribution without blocking submission',()=>{
   const edge=submit()
+  assert.match(edge,/ACTIVE_APPLICATION_STATUSES=\['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'\]/)
+  assert.match(edge,/status:'documents_required'/)
+  assert.doesNotMatch(edge,/status:'submitted'/)
+  assert.match(edge,/\.in\('status',ACTIVE_APPLICATION_STATUSES\)/)
   assert.match(edge,/const linkRecruitingCandidate=/)
   assert.match(edge,/admin\.rpc\('sos_link_hero_application_candidate'/)
   assert.match(edge,/console\.error\('sos-hero-application-attribution'/)
   assert.match(edge,/const attribution=await linkRecruitingCandidate\(admin,data\.id\)/)
   assert.match(edge,/source_attributed:attribution\?\.linked===true/)
+  assert.match(edge,/\['conditionally_approved','approved'\]\.includes\(data\.status\)/)
+})
+
+test('active Hero applications are unique by normalized email across every non-closed state',()=>{
+  const migration=stateSql()
+  assert.match(migration,/DROP INDEX IF EXISTS public\.sos_hero_applications_open_email_uq/)
+  assert.match(migration,/CREATE UNIQUE INDEX sos_hero_applications_open_email_uq/)
+  for(const status of ['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved']) assert.match(migration,new RegExp(`'${status}'`))
+  assert.doesNotMatch(migration,/'submitted'/)
 })
 
 test('conditional approval reuses an attributed recruiting candidate instead of duplicating it',()=>{
