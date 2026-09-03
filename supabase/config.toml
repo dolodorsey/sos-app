@@ -9,3 +9,6 @@ verify_jwt = true
 
 [functions.confirm-mission-price]
 verify_jwt = true
+
+[functions.sos-payments-health]
+verify_jwt = false
