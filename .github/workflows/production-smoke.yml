@@ -21,6 +21,7 @@ jobs:
     env:
       BASE_URL: https://thesuperherosonstandby.com
       BACKEND_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-health
+      PAYMENTS_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-payments-health
     steps:
       - uses: actions/checkout@v6
         with:
@@ -71,6 +72,13 @@ jobs:
           set -euo pipefail
           health="$(curl -L --fail --silent --show-error --retry 3 --retry-all-errors --connect-timeout 8 --max-time 25 "$BACKEND_HEALTH_URL")"
           printf '%s' "$health" | python3 -c 'import json,sys; d=json.load(sys.stdin); p=d.get("checks",{}).get("payments",{}); c=d.get("checks",{}).get("catalog",{}); push=d.get("checks",{}).get("push",{}); support=d.get("checks",{}).get("support",{}); assert d.get("software_status")=="ok", d; assert d.get("software_ready") is True, d; assert p.get("stripe_server_credential") is True, d; assert p.get("webhook_signature_secret") is True, d; assert p.get("stripe_v2_account_webhook_secret") is True, d; assert p.get("payments_table_reachable") is True, d; assert push.get("ready") is True, d; assert support.get("table_reachable") is True, d; assert c.get("ready") is True, d; print("S.O.S. backend software OK; activation status:", d.get("activation_status"))'
+
+      - name: Verify S.O.S.-only payment health
+        shell: bash
+        run: |
+          set -euo pipefail
+          health="$(curl -L --fail --silent --show-error --retry 3 --retry-all-errors --connect-timeout 8 --max-time 25 "$PAYMENTS_HEALTH_URL")"
+          printf '%s' "$health" | python3 -c 'import json,sys; d=json.load(sys.stdin); c=d.get("checks",{}); assert d.get("status")=="ok", d; assert d.get("app")=="SOS", d; assert d.get("scope")=="sos_only", d; assert c.get("stripe_server_key")=="configured", d; assert c.get("sos_webhook_signing_secret")=="configured", d; assert c.get("stripe_api")=="reachable", d; assert c.get("stripe_http_status")==200, d; print("S.O.S.-only payment health OK; Stripe latency ms:", c.get("stripe_latency_ms"))'
 
       - name: Verify public production routes
         shell: bash
