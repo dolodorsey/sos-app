@@ -12,3 +12,6 @@ verify_jwt = true
 
 [functions.sos-payments-health]
 verify_jwt = false
+
+[functions.sos-public-coverage]
+verify_jwt = false

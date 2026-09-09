@@ -2,7 +2,7 @@
 
 import {useEffect,useState} from 'react';
 
-const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/marketplace-public-coverage';
+const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-public-coverage';
 
 function mapUrl(lat,lng){
   if(!Number.isFinite(lat)||!Number.isFinite(lng))return '';
