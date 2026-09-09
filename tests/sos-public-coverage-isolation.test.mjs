@@ -12,8 +12,8 @@ const exactCoverageUrl = /cxdqkjvtpilvouwtbgdy\.supabase\.co\/functions\/v1\/sos
 test('S.O.S. customer coverage reads only the dedicated S.O.S. public coverage endpoint', () => {
   assert.match(coverageHost, exactCoverageUrl);
   assert.match(truthHost, exactCoverageUrl);
-  assert.doesNotMatch(coverageHost, /marketplace-public-coverage|oncallallday|khgoncall|\boc_/i);
-  assert.doesNotMatch(truthHost, /marketplace-public-coverage|oncallallday|khgoncall|\boc_/i);
+  assert.doesNotMatch(coverageHost, /marketplace-public-coverage|on[\s_-]*call|khgoncall|\boc_/i);
+  assert.doesNotMatch(truthHost, /marketplace-public-coverage|on[\s_-]*call|khgoncall|\boc_/i);
 });
 
 test('S.O.S. public coverage function cannot query or expose sibling marketplace coverage', () => {
@@ -21,7 +21,8 @@ test('S.O.S. public coverage function cannot query or expose sibling marketplace
   assert.match(coverageFunction, /app:\s*"sos"/);
   assert.match(coverageFunction, /scope:\s*"sos_only"/);
   assert.match(coverageFunction, /thesuperherosonstandby\.com/);
-  assert.doesNotMatch(coverageFunction, /oc_public_service_coverage|on_call|oncallallday|khgoncall|\boc_/i);
+  assert.doesNotMatch(coverageFunction, /oc_public_service_coverage|on[\s_-]*call|khgoncall|\boc_/i);
+  assert.doesNotMatch(coverageFunction, /Access-Control-Allow-Origin"\s*:\s*"\*"/i);
 });
 
 test('S.O.S. public coverage auth contract is source controlled as public read-only infrastructure', () => {
