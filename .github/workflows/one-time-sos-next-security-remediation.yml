@@ -1,0 +1,63 @@
+name: One-time S.O.S. Next security remediation
+
+on:
+  push:
+    branches:
+      - security/sos-next-16-3-4-20260909
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout remediation branch
+        uses: actions/checkout@v6
+        with:
+          ref: security/sos-next-16-3-4-20260909
+          fetch-depth: 0
+
+      - name: Use Node 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Pin patched runtime versions
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          p.dependencies.next = '16.3.4';
+          p.overrides = p.overrides || {};
+          p.overrides.sharp = '0.35.4';
+          fs.writeFileSync('package.json', JSON.stringify(p, null, 2) + '\n');
+          NODE
+          npm install --package-lock-only --ignore-scripts
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify S.O.S. runtime security candidate
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+          npm audit --omit=dev --audit-level=high
+
+      - name: Commit verified dependency graph and remove one-time workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-time-sos-next-security-remediation.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json tests/sos-runtime-security-floor.test.mjs .github/workflows/one-time-sos-next-security-remediation.yml
+          if git diff --cached --quiet; then
+            echo "No verified remediation changes to commit."
+            exit 1
+          fi
+          git commit -m "Patch S.O.S. runtime security floor"
+          git push origin HEAD:security/sos-next-16-3-4-20260909
