@@ -31,5 +31,8 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Enforce S.O.S. runtime security floor
+        run: node --test tests/sos-runtime-security-floor.test.mjs
+
       - name: Typecheck, build, and audit
         run: npm run verify
