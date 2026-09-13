@@ -1,0 +1,122 @@
+name: SOS coverage UI evidence
+on:
+  pull_request:
+    branches: [main]
+    paths: ['src/**', 'tests/**', 'package*.json', '.github/workflows/coverage-ui-evidence.yml']
+permissions:
+  contents: read
+concurrency:
+  group: sos-coverage-evidence-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Record source
+        run: mkdir -p quality-evidence && git rev-parse HEAD > quality-evidence/source-sha.txt
+      - name: Locked install
+        id: install
+        run: set -o pipefail; npm ci 2>&1 | tee quality-evidence/install.log
+      - name: Typecheck
+        if: always() && steps.install.outcome == 'success'
+        run: set -o pipefail; npm run typecheck 2>&1 | tee quality-evidence/typecheck.log
+      - name: Full unit and contract suite
+        if: always() && steps.install.outcome == 'success'
+        run: set -o pipefail; npm test 2>&1 | tee quality-evidence/tests.log
+      - name: Production build
+        id: build
+        if: always() && steps.install.outcome == 'success'
+        env:
+          VERCEL_GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        run: set -o pipefail; npm run build 2>&1 | tee quality-evidence/build.log
+      - name: Production dependency audit
+        if: always() && steps.install.outcome == 'success'
+        run: set -o pipefail; npm run audit:prod 2>&1 | tee quality-evidence/audit.log
+      - name: Browser prerequisites
+        if: always() && steps.build.outcome == 'success'
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Start exact exported app
+        if: always() && steps.build.outcome == 'success'
+        run: |
+          python -m http.server 4180 --bind 127.0.0.1 --directory out > quality-evidence/server.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:4180/ >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - name: Screen inventory and actual DOM regression
+        if: always() && steps.build.outcome == 'success'
+        run: |
+          python - <<'PY'
+          import json,pathlib,re
+          from playwright.sync_api import sync_playwright
+          out=pathlib.Path('quality-evidence');results=[];failures=[]
+          roots=pathlib.Path('src/app')
+          routes=sorted(set('/'+str(f.parent.relative_to(roots)).replace('\\','/').strip('.')+'/' for f in roots.rglob('page.*') if f.suffix in ('.jsx','.tsx','.js') and '[' not in str(f) and '(' not in str(f)))
+          routes=[re.sub('/+','/',r) for r in routes]
+          def guard(route):
+            if route.request.method not in ('GET','HEAD','OPTIONS'):
+              route.fulfill(status=503,content_type='application/json',body='{"error":"read_only_browser_audit"}')
+            else: route.continue_()
+          with sync_playwright() as p:
+            browser=p.chromium.launch()
+            for width,height in [(390,844),(768,1024),(1440,900)]:
+              ctx=browser.new_context(viewport={'width':width,'height':height},service_workers='block',reduced_motion='reduce')
+              ctx.route('**/*',guard)
+              for path in routes:
+                page=ctx.new_page();errors=[]
+                page.on('pageerror',lambda e:errors.append(str(e)))
+                try:
+                  r=page.goto('http://127.0.0.1:4180'+path,wait_until='domcontentloaded',timeout=25000)
+                  page.wait_for_timeout(1400)
+                  text=page.locator('body').inner_text()
+                  overflow=page.evaluate('Math.max(0,document.documentElement.scrollWidth-innerWidth)')
+                  name=str(width)+'-'+(path.strip('/').replace('/','-') or 'home')
+                  page.screenshot(path=str(out/(name+'.png')),full_page=width==390,animations='disabled',timeout=15000)
+                  row={'route':path,'viewport':width,'status':r.status,'text_length':len(text),'horizontal_overflow':overflow,'page_errors':errors,'headings':page.locator('h1,h2').all_text_contents()[:8]}
+                  results.append(row)
+                  if r.status>=400 or len(text.strip())<20 or overflow>2 or errors: failures.append(row)
+                except Exception as e: failures.append({'route':path,'viewport':width,'error':str(e)})
+                finally: page.close()
+              ctx.close()
+            ctx=browser.new_context();ctx.route('**/*',guard);page=ctx.new_page()
+            source=pathlib.Path('src/components/SOSCustomerCoverageStatusHost.jsx').read_text()
+            callback=source.split('const apply=',1)[1].split(';apply();const observer=',1)[0]
+            page.set_content('<div class="sos2-service-list"><button><strong>Jump Start</strong></button><button><strong>Towing</strong></button></div>')
+            test=page.evaluate('''async callback=>{
+              const styles={badge:'qa-badge',unavailable:'qa-unavailable'};
+              const map=new Map([['jump start',true],['towing',false]]);
+              const normalize=v=>String(v||'').trim().toLowerCase().replace(/\\s+/g,' ');
+              const apply=new Function('styles','map','normalize','return ('+callback+')')(styles,map,normalize);
+              apply();let callbacks=0;
+              const observer=new MutationObserver(()=>{callbacks++;if(callbacks>20){observer.disconnect();return}apply()});
+              observer.observe(document.body,{childList:true,subtree:true});
+              document.body.appendChild(document.createElement('div'));
+              await new Promise(r=>setTimeout(r,100));
+              const before=callbacks;
+              map.set('jump start',false);apply();
+              await new Promise(r=>setTimeout(r,100));observer.disconnect();
+              return {initialCallbacks:before,totalCallbacks:callbacks,labels:[...document.querySelectorAll('.qa-badge')].map(e=>e.textContent),unavailable:document.querySelectorAll('button.qa-unavailable').length};
+            }''',callback)
+            ok=test['initialCallbacks']<=2 and test['totalCallbacks']<=4 and test['unavailable']==2 and test['labels']==['Coverage activating','Coverage activating']
+            results.append({'test':'actual Chromium MutationObserver stability and coverage transition','passed':ok,'fixture':True,'details':test})
+            if not ok:failures.append({'test':'coverage DOM stability','details':test})
+            ctx.close();browser.close()
+          (out/'browser-results.json').write_text(json.dumps({'app':'SOS','source':'exact exported candidate','mode':'public unauthenticated screens and isolated actual-DOM fixture','real_missions':0,'real_payments':0,'results':results,'failures':failures},indent=2))
+          print(json.dumps({'screens':len(results),'failures':failures},indent=2))
+          if failures:raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sos-ui-evidence-${{ github.event.pull_request.head.sha }}
+          path: quality-evidence/
+          retention-days: 14
