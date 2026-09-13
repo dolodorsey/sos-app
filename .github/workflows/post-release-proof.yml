@@ -1,0 +1,93 @@
+name: SOS post-release proof
+on:
+  push:
+    branches: ['audit/release-proof-20260913']
+    paths: ['.github/workflows/post-release-proof.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      APP_LABEL: SOS
+      BASE_URL: https://sos-app-website.vercel.app
+      RELEASE_SHA: 0eacea55c4fd24856c79b383e18c3b536c9d37fb
+      HEALTH_PATH: /health.json
+      ROUTES: /,/app/,/hero/,/hero/apply/,/ops/,/support/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Read exact release and native workflow metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p release-proof
+          python - <<'PY'
+          import os,json,re,urllib.request,datetime,pathlib
+          repo=os.environ['GITHUB_REPOSITORY'];release=os.environ['RELEASE_SHA'];out=pathlib.Path('release-proof')
+          def api(path):
+            req=urllib.request.Request('https://api.github.com/repos/'+repo+'/'+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+            with urllib.request.urlopen(req,timeout=30) as r:return json.load(r)
+          report={'app':os.environ['APP_LABEL'],'expected_release_sha':release,'captured_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'native_search_scope':'latest 100 main-branch runs','app_store_approval_verified':False}
+          try:
+            report['main_sha']=api('git/ref/heads/main')['object']['sha']
+            runs=api('actions/runs?branch=main&per_page=100')['workflow_runs']
+            report['exact_release_runs']=[{k:r.get(k) for k in ['id','name','head_sha','status','conclusion','html_url','event']} for r in runs if r['head_sha']==release]
+            native=[r for r in runs if re.search(r'ios|testflight|apple',r.get('name','')+' '+r.get('path',''),re.I)]
+            report['native_runs']=[]
+            for run in native[:3]:
+              item={k:run.get(k) for k in ['id','name','head_sha','status','conclusion','html_url','event','created_at','updated_at']}
+              item['matches_released_web_source']=run['head_sha']==release
+              jobs=api('actions/runs/'+str(run['id'])+'/jobs?per_page=100').get('jobs',[])
+              item['jobs']=[{'id':j['id'],'name':j['name'],'status':j['status'],'conclusion':j['conclusion'],'steps':[{k:s.get(k) for k in ['name','status','conclusion']} for s in j.get('steps',[])]} for j in jobs]
+              item['artifacts']=[{k:a.get(k) for k in ['id','name','size_in_bytes','expired','created_at']} for a in api('actions/runs/'+str(run['id'])+'/artifacts').get('artifacts',[])]
+              report['native_runs'].append(item)
+          except Exception as e:report['metadata_error']=str(e)
+          (out/'release-metadata.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))
+          PY
+      - name: Browser prerequisites
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Read-only production screens and build identity
+        run: |
+          python - <<'PY'
+          import json,os,pathlib,datetime
+          from playwright.sync_api import sync_playwright
+          out=pathlib.Path('release-proof');base=os.environ['BASE_URL'];rows=[];errors=[]
+          def guard(route):
+            if route.request.method not in ('GET','HEAD','OPTIONS'):route.fulfill(status=503,content_type='application/json',body='{"error":"read_only_release_audit"}')
+            else:route.continue_()
+          with sync_playwright() as p:
+            browser=p.chromium.launch()
+            for width,height in [(390,844),(1440,900)]:
+              ctx=browser.new_context(viewport={'width':width,'height':height},service_workers='block',reduced_motion='reduce');ctx.route('**/*',guard)
+              for path in os.environ['ROUTES'].split(','):
+                page=ctx.new_page();exceptions=[];page.on('pageerror',lambda e:exceptions.append(str(e)))
+                try:
+                  response=page.goto(base+path,wait_until='domcontentloaded',timeout=30000);page.wait_for_timeout(2200)
+                  overflow=page.evaluate('Math.max(0,document.documentElement.scrollWidth-innerWidth)')
+                  row={'route':path,'width':width,'http':response.status,'text_length':len(page.locator('body').inner_text()),'overflow':overflow,'exceptions':exceptions}
+                  page.screenshot(path=str(out/(str(width)+'-'+(path.strip('/').replace('/','-') or 'home')+'.png')),full_page=True,animations='disabled')
+                  rows.append(row)
+                  if response.status>=400 or overflow>2 or exceptions:errors.append(row)
+                except Exception as e:errors.append({'route':path,'width':width,'error':str(e)})
+                finally:page.close()
+              if width==390:
+                health=ctx.request.get(base+os.environ['HEALTH_PATH'],timeout=15000)
+                rows.append({'build_metadata_http':health.status,'build_metadata':health.json(),'not_a_live_backend_test':True})
+              ctx.close()
+            browser.close()
+          result={'app':os.environ['APP_LABEL'],'expected_release_sha':os.environ['RELEASE_SHA'],'base':base,'captured_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'real_writes':0,'authenticated_journeys_tested':False,'results':rows,'failures':errors}
+          (out/'production-browser.json').write_text(json.dumps(result,indent=2));print(json.dumps(result,indent=2))
+          if errors:raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sos-post-release-proof
+          path: release-proof/
+          retention-days: 14
