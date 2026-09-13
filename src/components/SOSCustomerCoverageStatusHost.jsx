@@ -3,7 +3,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import styles from './SOSCustomerCoverageStatusHost.module.css';
 
-const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/marketplace-public-coverage';
+const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-public-coverage';
 const normalize=value=>String(value||'').trim().toLowerCase().replace(/\s+/g,' ');
 
 export default function SOSCustomerCoverageStatusHost(){
