@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import SOSBackendAvailabilityGate from '@/components/SOSBackendAvailabilityGate';
 import SOSCustomerOperationsHost from '@/components/SOSCustomerOperationsHost';
 import SOSCustomerCancellationHost from '@/components/SOSCustomerCancellationHost';
 import SOSCustomerCoverageStatusHost from '@/components/SOSCustomerCoverageStatusHost';
@@ -26,5 +27,26 @@ const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerR
 });
 
 export default function AppPage() {
-  return <><SOSPaymentReadinessHost audience="customer"/><SOSRecoveryHost audience="customer"/><SOSPushRegistrationHost/><SOSNotificationInboxHost/><SOSCustomerRealtimeShell/><SOSShellControlHost/><SOSSubcategoryRestoreHost/><SOSCustomerCoverageStatusHost/><SOSCustomerTruthHost/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/><SOSCustomerReceiptHost/><SOSShareTrackingHost/><SOSHeroRecruitmentWidget/></>;
+  return (
+    <SOSBackendAvailabilityGate>
+      <SOSPaymentReadinessHost audience="customer"/>
+      <SOSRecoveryHost audience="customer"/>
+      <SOSPushRegistrationHost/>
+      <SOSNotificationInboxHost/>
+      <SOSCustomerRealtimeShell/>
+      <SOSShellControlHost/>
+      <SOSSubcategoryRestoreHost/>
+      <SOSCustomerCoverageStatusHost/>
+      <SOSCustomerTruthHost/>
+      <SOSCustomerOperationsHost/>
+      <SOSCustomerCancellationHost/>
+      <SOSSettlementReviewHost/>
+      <SOSMissionChatHost/>
+      <SOSMembershipHost/>
+      <SOSProfileToolsHost/>
+      <SOSCustomerReceiptHost/>
+      <SOSShareTrackingHost/>
+      <SOSHeroRecruitmentWidget/>
+    </SOSBackendAvailabilityGate>
+  );
 }
