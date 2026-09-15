@@ -6,6 +6,7 @@ const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8')
 
 test('S.O.S. founder status is operator-only and S.O.S.-isolated',()=>{
   const source=read('supabase/functions/sos-founder-status/index.ts')
+  const config=read('supabase/config.toml')
   assert.match(source,/marketplace_operator_check/)
   assert.match(source,/authentication_required/)
   assert.match(source,/operator_access_required/)
@@ -19,6 +20,7 @@ test('S.O.S. founder status is operator-only and S.O.S.-isolated',()=>{
   assert.match(source,/sos_recruiting_outreach_events/)
   assert.doesNotMatch(source,/oc_/)
   assert.doesNotMatch(source,/luxe_/)
+  assert.match(config,/\[functions\.sos-founder-status\]\s*verify_jwt = true/)
 })
 
 test('S.O.S. founder status identifies execution stagnation, not configured inventory',()=>{
