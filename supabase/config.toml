@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.sos-public-coverage]
 verify_jwt = false
+
+[functions.sos-founder-status]
+verify_jwt = true
