@@ -4,12 +4,12 @@ import test from 'node:test'
 
 const read = path => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8')
 
-test('SOS customer and Hero account recovery is mounted and completes a real password reset', () => {
-  const customer=read('src/app/app/page.jsx'), hero=read('src/app/hero/page.jsx'), recovery=read('src/components/SOSRecoveryHost.jsx'), reset=read('src/app/auth/reset/page.jsx')
-  assert.match(customer,/SOSRecoveryHost audience="customer"/)
-  assert.match(hero,/SOSRecoveryHost audience="hero"/)
-  assert.match(recovery,/resetPasswordForEmail/)
-  assert.match(recovery,/\/auth\/reset\?portal=/)
+test('SOS recovery is mounted once and retains both current and legacy reset handlers', () => {
+  const customer=read('src/app/app/page.jsx'), hero=read('src/app/hero/page.jsx'), recovery=read('src/components/SOSPasswordRecoveryHost.jsx'), reset=read('src/app/auth/reset/page.jsx')
+  assert.doesNotMatch(customer,/SOSRecoveryHost/)
+  assert.doesNotMatch(hero,/SOSRecoveryHost/)
+  assert.match(read('src/app/layout.jsx'),/SOSPasswordRecoveryHost/)
+  assert.match(recovery,/createPortal\(<button type="button"/)
   assert.match(reset,/exchangeCodeForSession/)
   assert.match(reset,/updateUser\(\{password\}\)/)
 })
