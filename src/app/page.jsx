@@ -1,15 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import SOSMembershipHost from '@/components/SOSMembershipHost';
-import SOSCustomerLiveHost from '@/components/SOSCustomerLiveHost';
-import SOSProfileToolsHost from '@/components/SOSProfileToolsHost';
-
-const SOSCustomerMobilityApp = dynamic(() => import('@/components/SOSCustomerMobilityApp'), {
-  ssr: false,
-  loading: () => null,
-});
-
-export default function Home() {
-  return <><SOSCustomerMobilityApp/><SOSMembershipHost/><SOSProfileToolsHost/><SOSCustomerLiveHost/></>;
-}
+// The packaged app starts at /. Keep it on the same complete customer
+// experience as /app so release safeguards and features cannot drift.
+export {default} from './app/page';

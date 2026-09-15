@@ -48,3 +48,12 @@ test('all realtime features share one non-persistent Supabase client', () => {
     assert.match(source, /SosRealtime/)
   }
 })
+
+
+test('packaged root and web app share the complete customer entry point',()=>{
+  assert.match(read('../src/app/page.jsx'),/export \{default\} from '\.\/app\/page'/)
+  assert.match(appPage,/SOSCustomerCoverageStatusHost/)
+  assert.match(appPage,/SOSCustomerReceiptHost/)
+  assert.match(appPage,/SOSShareTrackingHost/)
+  assert.match(read('../src/components/SOSPasswordRecoveryHost.jsx'),/path==='\/'/)
+})
