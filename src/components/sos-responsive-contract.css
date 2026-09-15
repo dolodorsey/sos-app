@@ -313,3 +313,6 @@
 .app-shell:has(.sosp-backdrop) { z-index:3000!important;overflow:visible!important; }
 .sos-route-frame:has(.sos2-app) .sos2-content { padding-bottom:max(160px, calc(92px + env(safe-area-inset-bottom)))!important; }
 .sos-ui-v3 .sos2-service-sheet { bottom:0!important;max-height:94dvh!important; }
+
+/* Operational activation status belongs to the signed-in customer workspace. */
+body:has(.sos2-auth-panel) .sosx-readiness { display: none; }
