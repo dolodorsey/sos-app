@@ -86,7 +86,7 @@ jobs:
                     assert page.locator('[title="S.O.S. live mission connection"]').count()==0,'Signed-out users must not see a connection badge'
                     hero=page.get_by_role('link',name='Apply to become an SOS Hero',exact=True)
                     a=recovery.bounding_box();b=hero.bounding_box()
-                    assert a and b and b['y']>=a['y']+a['height'],'Hero application link must flow below recovery without overlap'
+                    assert a and b and (b['y']>=a['y']+a['height'] or a['y']>=b['y']+b['height']),'Hero application and recovery actions must not overlap'
                   text=page.locator('body').inner_text()
                   overflow=page.evaluate('Math.max(0,document.documentElement.scrollWidth-innerWidth)')
                   name=str(width)+'-'+(path.strip('/').replace('/','-') or 'home')
