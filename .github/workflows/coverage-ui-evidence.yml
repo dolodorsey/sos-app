@@ -77,6 +77,16 @@ jobs:
                 try:
                   r=page.goto('http://127.0.0.1:4180'+path,wait_until='domcontentloaded',timeout=25000)
                   page.wait_for_timeout(1400)
+                  if path in ('/','/app/') and width==390:
+                    recovery=page.get_by_role('button',name='Forgot password?',exact=True)
+                    recovery.wait_for(state='visible',timeout=15000)
+                    page.wait_for_timeout(7000)
+                    assert recovery.count()==1,'Sign-in must have exactly one recovery action'
+                    assert page.get_by_role('dialog',name='Become an SOS Hero').count()==0,'Recruitment must not interrupt sign-in'
+                    assert page.locator('[title="S.O.S. live mission connection"]').count()==0,'Signed-out users must not see a connection badge'
+                    hero=page.get_by_role('link',name='Apply to become an SOS Hero',exact=True)
+                    a=recovery.bounding_box();b=hero.bounding_box()
+                    assert a and b and (b['y']>=a['y']+a['height'] or a['y']>=b['y']+b['height']),'Hero application and recovery actions must not overlap'
                   text=page.locator('body').inner_text()
                   overflow=page.evaluate('Math.max(0,document.documentElement.scrollWidth-innerWidth)')
                   name=str(width)+'-'+(path.strip('/').replace('/','-') or 'home')
