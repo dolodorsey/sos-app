@@ -46,6 +46,7 @@ Deno.serve(async (req: Request) => {
   const db = createClient(URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
   const queryProblems: string[] = [];
   const founderExceptions: string[] = [];
+  const founderDecisions: string[] = [];
   const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60_000).toISOString();
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60_000).toISOString();
 
@@ -106,6 +107,8 @@ Deno.serve(async (req: Request) => {
     completedMissions,
     outreachEvents,
     outreachEvents4h,
+    reviewRequiredCandidates,
+    overdueComplianceReviews,
   ] = await Promise.all([
     one("sos_provider_activation_funnel_scorecard"),
     one("sos_recruiting_pipeline_health"),
@@ -124,6 +127,8 @@ Deno.serve(async (req: Request) => {
     count("sos_missions", (q) => q.eq("status", "completed")),
     count("sos_recruiting_outreach_events"),
     count("sos_recruiting_outreach_events", (q) => q.gte("occurred_at", fourHoursAgo)),
+    count("sos_recruiting_candidates", (q) => q.eq("is_demo", false).eq("do_not_contact", false).eq("consent_basis", "public_business_listing_review_required")),
+    count("sos_provider_activation_sla_watch", (q) => q.eq("activation_stage", "compliance_review").eq("is_overdue", true)),
   ]);
 
   const prospects = Number(funnel?.prospects || recruitingHealth?.total_candidates || 0);
@@ -140,14 +145,17 @@ Deno.serve(async (req: Request) => {
   if (Number(missions || 0) === 0) founderExceptions.push("zero_lifetime_missions");
   if (Number(crmStale4h || 0) > 0) founderExceptions.push("stale_crm_backlog_over_4h");
   if (Number(crmPendingZeroAttempts || 0) > 0) founderExceptions.push("crm_backlog_zero_attempts");
+  if (Number(overdueComplianceReviews || 0) > 0) founderExceptions.push("overdue_provider_compliance_review_sla");
+  if (Number(reviewRequiredCandidates || 0) > 0) founderDecisions.push("provider_outreach_compliance_approval_required");
 
-  const founderStatus = queryProblems.length || founderExceptions.length ? "red" : "green";
+  const founderStatus = queryProblems.length || founderExceptions.length ? "red" : founderDecisions.length ? "yellow" : "green";
 
   return json({
     app: "sos",
     visibility: "operator_only",
     founder_status: founderStatus,
     founder_exceptions: founderExceptions,
+    founder_decisions: founderDecisions,
     query_problems: queryProblems,
     recruiting: {
       prospects,
@@ -158,6 +166,8 @@ Deno.serve(async (req: Request) => {
       provider_applications: applications,
       provider_applications_24h: applications24h,
       activation_ready: activationReady,
+      consent_review_required: reviewRequiredCandidates,
+      overdue_compliance_reviews: overdueComplianceReviews,
     },
     supply: {
       real_heroes: realHeroes,
