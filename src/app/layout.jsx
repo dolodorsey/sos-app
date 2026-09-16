@@ -18,6 +18,7 @@ import SOSMarketplaceTruthHost from '../components/SOSMarketplaceTruthHost';
 import SOSAccountDeletionHost from '../components/SOSAccountDeletionHost';
 import SOSUIUpgradeHost from '../components/SOSUIUpgradeHost';
 import SOSRouteShell from '../components/SOSRouteShell';
+import KHGTrackingHost from '../components/KHGTrackingHost';
 import '../components/sos-responsive-contract.css';
 import '../components/sos-app-native-contract.css';
 
@@ -72,6 +73,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body>
+        <KHGTrackingHost/>
         <SOSSessionRefreshHost/>
         <SOSMarketplaceTruthHost/>
         <SOSAccountDeletionHost/>
