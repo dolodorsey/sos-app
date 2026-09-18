@@ -2,6 +2,19 @@
 
 import { useEffect, useState } from 'react';
 
+
+function forceInstall(){try{return new URLSearchParams(location.search).get('install')==='1'}catch{return false}}
+function InstallQr(){
+  const [qr,setQr]=useState('');
+  useEffect(()=>{if(typeof window==='undefined'||window.innerWidth<760)return;try{const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('install','1');setQr('https://wfkohcwxxsrhcxhepfql.supabase.co/functions/v1/app-install-qr?url='+encodeURIComponent(u.toString()))}catch{}},[]);
+  if(!qr)return null;
+  return <aside aria-label="Scan to install app" style={{position:'fixed',right:22,bottom:22,zIndex:2147483002,width:188,padding:12,borderRadius:20,background:'rgba(7,8,11,.97)',border:'1px solid rgba(255,255,255,.16)',boxShadow:'0 24px 70px rgba(0,0,0,.48)',color:'#fff',fontFamily:'Arial,sans-serif'}}>
+    <img src={qr} alt="QR code to install this app" width="164" height="164" style={{display:'block',width:'100%',height:'auto',borderRadius:12,background:'#fff',padding:6}}/>
+    <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>SCAN TO GET THE APP</strong>
+    <small style={{display:'block',marginTop:5,color:'rgba(255,255,255,.62)',fontSize:9,lineHeight:1.45}}>iPhone: Share → Add to Home Screen → Open as Web App → Add. Android: tap Install App.</small>
+  </aside>
+}
+
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
 const providerRoutes = ['/hero', '/provider', '/become-a-provider', '/launch-updates'];
 const get = key => { try { return localStorage.getItem(key); } catch { return null; } };
@@ -83,6 +96,7 @@ export default function SOSInstallAppPrompt() {
   };
 
   return <div className="sos-pwa-install" role="dialog" aria-modal="true" aria-label="Install S.O.S.">
+    <InstallQr/>
     <section>
       <button className="sos-pwa-x" onClick={close} aria-label="Close">×</button>
       <div className="sos-pwa-phone" aria-hidden="true"><i/><b>SOS</b><small>ON STANDBY</small></div>
