@@ -34,7 +34,7 @@ export const metadata = {
       { url: '/favicon.ico', sizes: 'any' },
       { url: '/favicon.png', type: 'image/png', sizes: '32x32' },
     ],
-    apple: '/apple-touch-icon.png',
+    apple: '/sos-logo-192.svg',
   },
   openGraph: {
     title: 'S.O.S. — Superheroes On Standby',
