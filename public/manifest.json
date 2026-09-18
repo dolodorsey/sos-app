@@ -12,9 +12,9 @@
   "categories": ["utilities", "lifestyle"],
   "prefer_related_applications": false,
   "icons": [
-    { "src": "/api/pwa-icon?size=192", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/api/pwa-icon?size=512", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/api/pwa-icon?size=512", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/sos-icon-192.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/sos-icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/sos-icon-512.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
   ],
   "shortcuts": [
     { "name": "Become a Hero", "short_name": "Hero", "url": "/hero/apply/?source=pwa-shortcut" },
