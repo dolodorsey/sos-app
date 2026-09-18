@@ -41,6 +41,6 @@ test('Hero application UI persists receipt, polls, and shows approved claim acti
  assert.match(ui,/localStorage\.setItem\(RECEIPT_KEY/)
  assert.match(ui,/action:'status'/)
  assert.match(ui,/setInterval\(\(\)=>refreshStatus\(receipt\),30000\)/)
- assert.match(ui,/Claim approved Hero profile/)
+ assert.match(ui,/Continue Hero activation/)
  assert.match(ui,/href="\/hero\/claim"/)
 })
