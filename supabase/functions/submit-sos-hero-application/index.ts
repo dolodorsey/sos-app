@@ -56,7 +56,20 @@ Deno.serve(async req=>{
     const hash=await sha256(token);const{data,error}=await admin.from('sos_hero_applications').select('id,status,submitted_at,updated_at,reviewed_at,source_hero_id,candidate_id').eq('id',applicationId).eq('status_token_hash',hash).maybeSingle();
     if(error)throw error;if(!data)return json(origin,{error:'Application receipt was not recognized.'},404);
     const claimReady=['conditionally_approved','approved'].includes(data.status);
-    return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,updated_at:data.updated_at,reviewed_at:data.reviewed_at,next_action:claimReady?'Create or sign in with the same email and claim your approved Hero profile.':data.status==='rejected'?'Application review is closed. Contact S.O.S. operations if information should be reconsidered.':'No action is required while S.O.S. operations reviews your application.',claim_url:claimReady?'/hero/claim':null},200);
+    const nextAction = claimReady
+      ? 'Create or sign in with the same email and continue Hero activation.'
+      : data.status==='documents_required'
+        ? 'Secure your application with the same email, then upload Government ID, driver license, and current insurance.'
+        : data.status==='waitlisted'
+          ? 'Your required credentials are received. S.O.S. Operations review is next.'
+          : data.status==='reviewing'
+            ? 'S.O.S. Operations is reviewing your application. Watch your application center for updates.'
+            : data.status==='needs_information'
+              ? 'Sign in to your application center and provide the information requested by S.O.S. Operations.'
+              : data.status==='rejected'
+                ? 'Application review is closed. Contact S.O.S. Operations if information should be reconsidered.'
+                : 'Open your application center for the current next step.';
+    return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,updated_at:data.updated_at,reviewed_at:data.reviewed_at,next_action:nextAction,claim_url:claimReady?'/hero/claim':null},200);
   }
   const email=text(b.email,254).toLowerCase(),phone=text(b.phone,40),first=text(b.firstName,80),last=text(b.lastName,80);
   if(!first||!last||!/^\S+@\S+\.\S+$/.test(email)||phone.length<7)return json(origin,{error:'Name, valid email, and phone are required.'},422);
