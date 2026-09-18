@@ -10,7 +10,7 @@ function InstallQr(){
   if(!qr)return null;
   return <aside aria-label="Scan to install app" style={{position:'fixed',right:22,bottom:22,zIndex:2147483002,width:188,padding:12,borderRadius:20,background:'rgba(7,8,11,.97)',border:'1px solid rgba(255,255,255,.16)',boxShadow:'0 24px 70px rgba(0,0,0,.48)',color:'#fff',fontFamily:'Arial,sans-serif'}}>
     <img src={qr} alt="QR code to install this app" width="164" height="164" style={{display:'block',width:'100%',height:'auto',borderRadius:12,background:'#fff',padding:6}}/>
-    <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>SCAN TO GET THE APP</strong>
+    <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>PROVIDERS — SCAN TO GET S.O.S.</strong>
     <small style={{display:'block',marginTop:5,color:'rgba(255,255,255,.62)',fontSize:9,lineHeight:1.45}}>iPhone: Share → Add to Home Screen → Open as Web App → Add. Android: tap Install App.</small>
   </aside>
 }
@@ -50,7 +50,7 @@ export default function SOSInstallAppPrompt() {
     const isApple = isIOS();
     setApple(isApple);
     const dismissed = Number(get('sos:pwa-dismissed') || 0);
-    const eligible = !dismissed || Date.now() - dismissed > DISMISS_MS;
+    const eligible = forceInstall() || !dismissed || Date.now() - dismissed > DISMISS_MS;
 
     const beforeInstall = event => {
       event.preventDefault();
@@ -67,7 +67,8 @@ export default function SOSInstallAppPrompt() {
     addEventListener('appinstalled', installedHandler);
 
     let timer = 0;
-    if (eligible && isApple) timer = window.setTimeout(() => setShow(true), 4200);
+    if (forceInstall()) timer = window.setTimeout(() => setShow(true), 120);
+    else if (eligible && isApple) timer = window.setTimeout(() => setShow(true), 4200);
 
     return () => {
       removeEventListener('beforeinstallprompt', beforeInstall);
@@ -76,7 +77,11 @@ export default function SOSInstallAppPrompt() {
     };
   }, []);
 
-  if (installed || !show) return null;
+  if (installed) return null;
+  const pathNow=typeof window!=='undefined'?window.location.pathname.toLowerCase():'';
+  const providerIntentNow=providerRoutes.some(prefix=>pathNow===prefix||pathNow.startsWith(prefix+'/'));
+  if (!providerIntentNow) return null;
+  if (!show) return <button aria-label="Get S.O.S. provider app" onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:'provider_persistent_get_app'})}} style={{position:'fixed',right:16,bottom:18,zIndex:2147482500,border:'1px solid rgba(255,189,99,.55)',borderRadius:999,padding:'13px 17px',background:'linear-gradient(100deg,#ffbd63,#ff6b35)',color:'#130805',font:'900 11px/1 Arial',letterSpacing:'.08em',boxShadow:'0 16px 44px rgba(0,0,0,.4)',cursor:'pointer'}}>SERVICE PROVIDERS — GET S.O.S. ↗</button>;
 
   const close = () => {
     set('sos:pwa-dismissed', String(Date.now()));
