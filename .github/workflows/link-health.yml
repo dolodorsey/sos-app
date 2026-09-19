@@ -1,0 +1,32 @@
+name: S.O.S. Link Health
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "23 8 * * 2"
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check documentation and static-page links
+        uses: lycheeverse/lychee-action@v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --max-concurrency 8
+            --exclude-loopback
+            './**/*.md'
+            './**/*.html'
+          fail: false
+          jobSummary: true
+          output: lychee/results.md
