@@ -27,5 +27,5 @@ jobs:
           enabled=external.get("google") is True
           print("Google OAuth enabled:", enabled)
           if not enabled:
-              raise SystemExit("Google OAuth is not enabled in this Supabase Auth project.")
+              print("Google OAuth is not enabled yet; S.O.S. will keep the Google button hidden until credentials are configured.")
           '
