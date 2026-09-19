@@ -19,7 +19,7 @@ import SOSAccountDeletionHost from '../components/SOSAccountDeletionHost';
 import SOSUIUpgradeHost from '../components/SOSUIUpgradeHost';
 import SOSRouteShell from '../components/SOSRouteShell';
 import KHGTrackingHost from '../components/KHGTrackingHost';
-import SOSInstallAppPrompt from '../components/SOSInstallAppPrompt';
+import SOSInstallAppPromptClient from '../components/SOSInstallAppPromptClient';
 import '../components/sos-responsive-contract.css';
 import '../components/sos-app-native-contract.css';
 
@@ -83,7 +83,7 @@ export default function RootLayout({ children }) {
         <SOSAuthRedirectSessionHost/>
         <SOSAuthConfirmationGuard/>
         <SOSPasswordRecoveryHost/>
-        <SOSInstallAppPrompt/>
+        <SOSInstallAppPromptClient/>
       </body>
     </html>
   );
