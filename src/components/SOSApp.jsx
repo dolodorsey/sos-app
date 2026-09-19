@@ -201,6 +201,17 @@ function SOSAppInner(){
   };
 
   const signOut=()=>{localStorage.removeItem('sos_session');setSession(null);setSosUser(null);setScreen('auth');setTab('home');setHeroTab('home');};
+  const signInWithGoogle=()=>{
+    if(loading)return;
+    setErr('');
+    const destination=authRole==='hero'?'/hero/claim':'/app';
+    localStorage.setItem('sos_pending_auth_role',authRole);
+    const redirect=`${window.location.origin}${destination}`;
+    const target=new URL(`${SB}/auth/v1/authorize`);
+    target.searchParams.set('provider','google');
+    target.searchParams.set('redirect_to',redirect);
+    window.location.assign(target.toString());
+  };
 
   const request=(svc)=>{tapLight();setDispatch({phase:'confirm',service:svc});};
   const confirmReq=async()=>{tapHeavy();
@@ -242,6 +253,15 @@ function SOSAppInner(){
       {/* Mode */}
       <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:3,marginBottom:20}}>
         {['signup','signin'].map(m=><button key={m} onClick={()=>{setAuthMode(m);setErr('')}} style={{flex:1,padding:'11px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authMode===m?C.card:'transparent',color:authMode===m?C.text:C.sub}}>{m==='signup'?'Sign Up':'Sign In'}</button>)}
+      </div>
+      <button type="button" disabled={loading} onClick={signInWithGoogle} style={{width:'100%',padding:'15px',marginBottom:12,background:'#fff',color:'#111',border:'1px solid rgba(255,255,255,.2)',borderRadius:14,fontSize:14,fontWeight:800,cursor:loading?'not-allowed':'pointer',fontFamily:ff,display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
+        <span aria-hidden="true" style={{fontSize:18,fontWeight:900}}>G</span>
+        Continue with Google
+      </button>
+      <div style={{display:'flex',alignItems:'center',gap:10,margin:'0 0 12px',color:C.muted,fontSize:10,fontWeight:800,letterSpacing:1.2}}>
+        <span style={{height:1,flex:1,background:C.border}}/>
+        OR USE EMAIL
+        <span style={{height:1,flex:1,background:C.border}}/>
       </div>
       {authMode==='signup'&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Full Name" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>}
       <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>
