@@ -1,0 +1,31 @@
+name: S.O.S. Google Auth Provider Check
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-google-provider:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify Supabase Google provider
+        shell: bash
+        env:
+          SUPABASE_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co
+          SUPABASE_PUBLIC_KEY: sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN
+        run: |
+          set -euo pipefail
+          body="$(curl -L --fail --silent --show-error --retry 3 --connect-timeout 8 --max-time 20 -H "apikey: $SUPABASE_PUBLIC_KEY" "$SUPABASE_URL/auth/v1/settings")"
+          printf '%s' "$body" | python3 -c '
+          import json,sys
+          d=json.load(sys.stdin)
+          external=d.get("external") or {}
+          enabled=external.get("google") is True
+          print("Google OAuth enabled:", enabled)
+          if not enabled:
+              print("Google OAuth is not enabled yet; S.O.S. will keep the Google button hidden until credentials are configured.")
+          '
