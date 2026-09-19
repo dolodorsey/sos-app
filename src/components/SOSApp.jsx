@@ -144,6 +144,7 @@ function SOSAppInner(){
   const[authRole,setAuthRole]=useState('citizen');
   const[email,setEmail]=useState('');const[pw,setPw]=useState('');const[name,setName]=useState('');
   const[err,setErr]=useState('');const[loading,setLoading]=useState(false);
+  const[googleReady,setGoogleReady]=useState(false);
   const[session,setSession]=useState(null);const[sosUser,setSosUser]=useState(null);
   const[tab,setTab]=useState('home');
   const[openCat,setOpenCat]=useState(null);
@@ -157,6 +158,14 @@ function SOSAppInner(){
   const[missions,setMissions]=useState([]);
   const[forgotMode,setForgotMode]=useState(false);
   const[resetSent,setResetSent]=useState(false);
+  useEffect(()=>{
+    let active=true;
+    fetch(`${SB}/auth/v1/settings`,{headers:{apikey:SK,Accept:'application/json'},cache:'no-store'})
+      .then(r=>r.ok?r.json():null)
+      .then(d=>{if(active)setGoogleReady(d?.external?.google===true)})
+      .catch(()=>{if(active)setGoogleReady(false)});
+    return()=>{active=false};
+  },[]);
   const refreshHero=async(s=session)=>{if(!s?.access_token)return;try{const w=await getHeroWorkspace(s.access_token);setHeroProfile(w.hero);setHeroOn(!!w.hero?.on_duty);setHeroOffers(w.offers);setHeroMissions(w.missions);setHeroPayments(w.payments);}catch(e){setErr(e.message)}};
   useEffect(()=>{if(screen!=='hero'||!session)return;refreshHero(session);const id=setInterval(()=>refreshHero(session),15000);return()=>clearInterval(id)},[screen,session]);
   useEffect(()=>{if(screen!=='hero'||!session||!heroOn||!heroProfile)return;const beat=async()=>{const loc=await getLocation();if(loc.lat==null||loc.lng==null)return;try{await api(`/rest/v1/sos_heroes?id=eq.${heroProfile.id}`,session.access_token,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({last_lat:loc.lat,last_lng:loc.lng,last_gps_at:new Date().toISOString(),updated_at:new Date().toISOString()})})}catch{}};beat();const id=setInterval(beat,60000);return()=>clearInterval(id)},[screen,session,heroOn,heroProfile?.id]);
@@ -254,15 +263,17 @@ function SOSAppInner(){
       <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:3,marginBottom:20}}>
         {['signup','signin'].map(m=><button key={m} onClick={()=>{setAuthMode(m);setErr('')}} style={{flex:1,padding:'11px',borderRadius:10,border:'none',cursor:'pointer',fontSize:13,fontWeight:700,fontFamily:ff,background:authMode===m?C.card:'transparent',color:authMode===m?C.text:C.sub}}>{m==='signup'?'Sign Up':'Sign In'}</button>)}
       </div>
-      <button type="button" disabled={loading} onClick={signInWithGoogle} style={{width:'100%',padding:'15px',marginBottom:12,background:'#fff',color:'#111',border:'1px solid rgba(255,255,255,.2)',borderRadius:14,fontSize:14,fontWeight:800,cursor:loading?'not-allowed':'pointer',fontFamily:ff,display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
-        <span aria-hidden="true" style={{fontSize:18,fontWeight:900}}>G</span>
-        Continue with Google
-      </button>
-      <div style={{display:'flex',alignItems:'center',gap:10,margin:'0 0 12px',color:C.muted,fontSize:10,fontWeight:800,letterSpacing:1.2}}>
-        <span style={{height:1,flex:1,background:C.border}}/>
-        OR USE EMAIL
-        <span style={{height:1,flex:1,background:C.border}}/>
-      </div>
+      {googleReady&&<>
+        <button type="button" disabled={loading} onClick={signInWithGoogle} style={{width:'100%',padding:'15px',marginBottom:12,background:'#fff',color:'#111',border:'1px solid rgba(255,255,255,.2)',borderRadius:14,fontSize:14,fontWeight:800,cursor:loading?'not-allowed':'pointer',fontFamily:ff,display:'flex',alignItems:'center',justifyContent:'center',gap:10}}>
+          <span aria-hidden="true" style={{fontSize:18,fontWeight:900}}>G</span>
+          Continue with Google
+        </button>
+        <div style={{display:'flex',alignItems:'center',gap:10,margin:'0 0 12px',color:C.muted,fontSize:10,fontWeight:800,letterSpacing:1.2}}>
+          <span style={{height:1,flex:1,background:C.border}}/>
+          OR USE EMAIL
+          <span style={{height:1,flex:1,background:C.border}}/>
+        </div>
+      </>}
       {authMode==='signup'&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Full Name" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>}
       <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>
       <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password (8+ chars)" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:16}}/>
