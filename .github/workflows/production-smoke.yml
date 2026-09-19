@@ -23,7 +23,7 @@ jobs:
       BACKEND_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-health
       PAYMENTS_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-payments-health
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
