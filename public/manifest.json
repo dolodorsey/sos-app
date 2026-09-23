@@ -2,7 +2,7 @@
   "name": "S.O.S. — Superheroes On Standby",
   "short_name": "S.O.S.",
   "description": "Provider and Hero network for S.O.S. roadside mobility operations. S.O.S. is not 911 or an emergency service.",
-  "start_url": "/become-a-hero?source=pwa",
+  "start_url": "/hero/apply?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -38,12 +38,12 @@
     {
       "name": "Become a Hero",
       "short_name": "Apply",
-      "url": "/become-a-hero?source=pwa-shortcut"
+      "url": "/hero/apply?source=pwa-shortcut"
     },
     {
       "name": "Provider Application",
       "short_name": "Provider",
-      "url": "/apply?source=pwa-shortcut"
+      "url": "/hero/apply?source=pwa-provider-shortcut"
     }
   ]
 }
