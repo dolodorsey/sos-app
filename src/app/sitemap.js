@@ -1,3 +1,5 @@
+export const dynamic = 'force-static';
+
 export default function sitemap(){
   const base='https://thesuperherosonstandby.com';
   const paths=['/','/superheros/','/why-superheros/','/about-superheros-on-standby/','/superheros-network/','/history/','/brand/','/press/','/media-kit/'];
