@@ -1,6 +1,14 @@
-# S.O.S.
+# S.O.S. — Superheros On Standby
 
 S.O.S. — The Kollective Hospitality Group
+
+## Canonical brand spelling
+
+**SUPERHEROS** is intentional. When referring to the S.O.S. brand, branded provider network or public entity name, do **not** rewrite it as “SUPERHEROES.”
+
+Canonical public name: **S.O.S. — Superheros On Standby**  
+Canonical branded term: **SUPERHEROS**  
+Canonical website entity: **https://thesuperherosonstandby.com**
 
 ## Current operating truth
 

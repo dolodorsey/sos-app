@@ -10,6 +10,7 @@ import '../components/sos-root-layout-rescue.css';
 import '../components/sos-current-media.css';
 import '../components/sos-ui-v3.css';
 import '../components/sos-ui-v3-desktop-fix.css';
+import '../components/sos-authority.css';
 import SOSAuthConfirmationGuard from '../components/SOSAuthConfirmationGuard';
 import SOSAuthRedirectSessionHost from '../components/SOSAuthRedirectSessionHost';
 import SOSPasswordRecoveryHost from '../components/SOSPasswordRecoveryHost';
@@ -24,11 +25,12 @@ import '../components/sos-responsive-contract.css';
 import '../components/sos-app-native-contract.css';
 
 export const metadata = {
-  title: 'S.O.S. — Superheroes On Standby | Roadside Mobility Network',
-  description: 'Request verified roadside help, see real Hero matching status, and track confirmed mission progress. S.O.S. is not 911.',
-  keywords: 'roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support Atlanta',
-  authors: [{ name: 'S.O.S. — Superheroes On Standby' }],
+  title: 'S.O.S. — Superheros On Standby | Roadside Mobility Network',
+  description: 'Superheros On Standby connects customers with real roadside help and tracks Hero matching and mission progress. SUPERHEROS is the brand’s intentional spelling.',
+  keywords: 'SUPERHEROS, Superheros On Standby, S.O.S., SOS, roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support',
+  authors: [{ name: 'S.O.S. — Superheros On Standby' }],
   metadataBase: new URL('https://thesuperherosonstandby.com'),
+  alternates: { canonical: '/' },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -37,16 +39,16 @@ export const metadata = {
     apple: '/sos-logo-192.svg',
   },
   openGraph: {
-    title: 'S.O.S. — Superheroes On Standby',
-    description: 'Verified roadside assistance with real matching, assignment, payment, and mission tracking.',
+    title: 'S.O.S. — Superheros On Standby',
+    description: 'SUPERHEROS is the intentionally spelled S.O.S. brand term for real people who show up when help is needed.',
     type: 'website',
     url: 'https://thesuperherosonstandby.com',
-    siteName: 'S.O.S. — Superheroes On Standby',
+    siteName: 'S.O.S. — Superheros On Standby',
   },
   twitter: {
     card: 'summary',
-    title: 'S.O.S. — Superheroes On Standby',
-    description: 'Roadside mobility with honest live mission states.',
+    title: 'S.O.S. — Superheros On Standby',
+    description: 'SUPERHEROS: real people who show up when help is needed.',
   },
 };
 

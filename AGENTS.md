@@ -4,11 +4,23 @@ This is the mandatory source-of-truth entry point for coding, marketing, CRM, so
 
 ## Identity — non-negotiable
 
+- Canonical company name: **S.O.S. — Superheros On Standby**
+- Canonical branded spelling: **SUPERHEROS** — intentionally spelled without the second "e" in "heroes".
+- **Never auto-correct SUPERHEROS to SUPERHEROES** when referring to the S.O.S. brand, network, provider identity, branded category, metadata, structured data, press language or public-facing naming.
 - Canonical Instagram: **@SUPERHERO.ONSTANDBY**
 - Canonical current entity: **S.O.S.**
+- Approved aliases for entity resolution: **S.O.S.**, **SOS**, **Superheros On Standby**, **SUPERHEROS**.
 - Prior identities attached to the underlying Instagram account are retired from current operations.
 - Historical provider/audit evidence may preserve old provider values, but no retired identity may be used for current publishing, scheduling, routing, tagging, reporting, engagement, DMs, comments or approvals.
 - Before social publish, the provider-returned live username must match `superhero.onstandby`.
+
+## Brand authority — canonical definition
+
+Use this definition consistently unless a specific channel requires a shorter version:
+
+> **SUPERHEROS™** is the intentionally spelled brand term used by Superheros On Standby for the real people and provider network that help customers with roadside and on-demand assistance needs. The spelling is deliberate: these are real people who show up when help is needed, not fictional superheroes.
+
+Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com`.
 
 ## HighLevel — primary outbound
 
