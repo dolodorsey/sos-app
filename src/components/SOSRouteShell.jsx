@@ -4,6 +4,16 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const ROOT_ROUTES = new Set(['/', '/app', '/hero', '/ops']);
+const AUTHORITY_ROUTES = new Set([
+  '/superheros',
+  '/why-superheros',
+  '/about-superheros-on-standby',
+  '/superheros-network',
+  '/brand',
+  '/press',
+  '/media-kit',
+  '/history',
+]);
 
 const fallbackFor = (pathname) => {
   if (pathname.startsWith('/hero/')) return '/hero';
@@ -12,6 +22,7 @@ const fallbackFor = (pathname) => {
   if (pathname === '/login') return '/';
   if (pathname === '/privacy' || pathname === '/terms' || pathname === '/legal') return '/';
   if (pathname === '/support' || pathname === '/track') return '/app';
+  if (AUTHORITY_ROUTES.has(pathname)) return '/superheros';
   return '/';
 };
 
@@ -20,7 +31,8 @@ export default function SOSRouteShell({ children }) {
   const router = useRouter();
   const currentPath = useRef(pathname);
   const previousAppPath = useRef(null);
-  const hasRouteHeader = !ROOT_ROUTES.has(pathname);
+  const authority = AUTHORITY_ROUTES.has(pathname);
+  const hasRouteHeader = !ROOT_ROUTES.has(pathname) && !authority;
 
   useEffect(() => {
     if (currentPath.current !== pathname) {
@@ -43,6 +55,10 @@ export default function SOSRouteShell({ children }) {
     router.replace(fallback);
   };
 
+  if (authority) {
+    return <div className="sos-authority-shell">{children}</div>;
+  }
+
   return (
     <div className={hasRouteHeader ? 'sos-route-frame has-route-header' : 'sos-route-frame'}>
       {hasRouteHeader && (
@@ -53,7 +69,7 @@ export default function SOSRouteShell({ children }) {
           </button>
           <a href="/" className="sos-route-brand" aria-label="S.O.S. home">
             <img src="/brand/sos-logo.webp" alt="" />
-            <span><strong>S.O.S.</strong><small>Superheroes On Standby</small></span>
+            <span><strong>S.O.S.</strong><small>Superheros On Standby</small></span>
           </a>
           <span className="sos-route-balance" aria-hidden="true" />
         </header>
