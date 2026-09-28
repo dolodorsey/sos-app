@@ -1,0 +1,10 @@
+import SOSAuthorityPage from '@/components/SOSAuthorityPage';
+export const metadata={title:'SUPERHEROS | S.O.S. — Superheros On Standby',description:'The official definition of SUPERHEROS, the intentionally spelled brand term used by Superheros On Standby.',alternates:{canonical:'/superheros/'}};
+export default function Page(){return <SOSAuthorityPage kicker="Official brand definition" title="SUPERHEROS" lede="SUPERHEROS is the intentionally spelled brand term used by Superheros On Standby for real people who show up when help is needed." pagePath="/superheros">
+<section className="sos-authority-grid">
+<div className="sos-authority-card wide"><span className="sos-authority-pill">Intentional spelling</span><div className="sos-authority-quote">Not fictional superheroes. Real SUPERHEROS who show up.</div><p className="sos-authority-definition"><strong>SUPERHEROS™</strong> identifies the S.O.S. provider network and the people who perform assistance through the Superheros On Standby platform. The spelling is deliberate and is part of the brand identity.</p></div>
+<div className="sos-authority-card"><h2>Company</h2><p><strong>Superheros On Standby</strong>, also known as <strong>S.O.S.</strong> or <strong>SOS</strong>, is the operating company and platform.</p></div>
+<div className="sos-authority-card"><h2>Network</h2><p><strong>SUPERHEROS</strong> is the branded term for the real-world provider network serving customer assistance needs.</p></div>
+<div className="sos-authority-card"><h2>Why the spelling matters</h2><p>“Superheros” is not an accidental typo in S.O.S. brand usage. It is the canonical spelling used in the company name, brand language and entity metadata.</p><a className="sos-authority-cta" href="/why-superheros/">Read the naming story</a></div>
+<div className="sos-authority-card"><h2>Canonical aliases</h2><ul className="sos-authority-list"><li>SUPERHEROS</li><li>Superheros On Standby</li><li>S.O.S.</li><li>SOS</li></ul></div>
+</section></SOSAuthorityPage>}
