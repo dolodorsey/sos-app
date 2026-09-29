@@ -10,6 +10,17 @@ const ORG = {
   description: 'Superheros On Standby is a roadside mobility and assistance network. SUPERHEROS is the company’s intentionally spelled brand term for real people who show up when help is needed.'
 };
 
+const WEBSITE = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': 'https://thesuperherosonstandby.com/#website',
+  url: 'https://thesuperherosonstandby.com/',
+  name: 'S.O.S. — Superheros On Standby',
+  alternateName: ['Superheros On Standby', 'SUPERHEROS', 'S.O.S.', 'SOS'],
+  publisher: { '@id': 'https://thesuperherosonstandby.com/#organization' },
+  inLanguage: 'en-US'
+};
+
 export default function SOSAuthorityPage({ kicker, title, lede, children, pagePath='/superheros', pageDescription }) {
   const webPage = {
     '@context': 'https://schema.org',
@@ -19,11 +30,14 @@ export default function SOSAuthorityPage({ kicker, title, lede, children, pagePa
     name: title,
     description: pageDescription || lede,
     isPartOf: { '@id': 'https://thesuperherosonstandby.com/#website' },
-    about: { '@id': 'https://thesuperherosonstandby.com/#organization' }
+    about: { '@id': 'https://thesuperherosonstandby.com/#organization' },
+    publisher: { '@id': 'https://thesuperherosonstandby.com/#organization' },
+    inLanguage: 'en-US'
   };
 
   return <main className="sos-authority">
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(ORG)}} />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(WEBSITE)}} />
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(webPage)}} />
     <nav className="sos-authority-nav" aria-label="S.O.S. authority navigation">
       <a className="sos-authority-brand" href="/superheros/">
