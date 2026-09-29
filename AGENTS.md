@@ -20,7 +20,7 @@ Use this definition consistently unless a specific channel requires a shorter ve
 
 > **SUPERHEROS™** is the intentionally spelled brand term used by Superheros On Standby for the real people and provider network that help customers with roadside and on-demand assistance needs. The spelling is deliberate: these are real people who show up when help is needed, not fictional superheroes.
 
-Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com`.
+Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com`.\n\nFor media authority, trademark-reference, Wikipedia-readiness and GHL media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
 
 ## HighLevel — primary outbound
 
