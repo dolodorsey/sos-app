@@ -6,7 +6,7 @@ export default function SOSLoading({ label = 'Connecting roadside support' }) {
       <div className="sos-runtime-loading__radar" aria-hidden="true">
         <div className="sos-runtime-loading__core">SOS</div>
       </div>
-      <div className="sos-runtime-loading__eyebrow">Superheroes on standby</div>
+      <div className="sos-runtime-loading__eyebrow">Superheros on standby</div>
       <div className="sos-runtime-loading__label">{label}</div>
       <style jsx>{`
         .sos-runtime-loading {
