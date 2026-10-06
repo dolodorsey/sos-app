@@ -1,7 +1,8 @@
 {
-  "name": "S.O.S. — Superheroes On Standby",
+  "name": "S.O.S. — Superheros On Standby",
   "short_name": "S.O.S.",
   "description": "Provider and Hero network for S.O.S. roadside mobility operations. S.O.S. is not 911 or an emergency service.",
+  "id": "/hero/apply",
   "start_url": "/hero/apply?source=pwa",
   "scope": "/",
   "display": "standalone",

@@ -17,23 +17,23 @@
     "android:open": "npx cap open android"
   },
   "dependencies": {
-    "@capacitor/android": "^8.5.0",
+    "@capacitor/android": "^8.5.1",
     "@capacitor/browser": "^8.0.3",
-    "@capacitor/core": "^8.5.0",
+    "@capacitor/core": "^8.5.1",
     "@capacitor/geolocation": "^8.2.0",
     "@capacitor/haptics": "^8.0.2",
-    "@capacitor/ios": "^8.5.0",
+    "@capacitor/ios": "^8.5.1",
     "@capacitor/share": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
     "@supabase/supabase-js": "2.112.3",
-    "next": "16.3.4",
+    "next": "16.3.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^8.5.0",
+    "@capacitor/cli": "^8.5.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",
     "typescript": "6.0.3"
@@ -51,6 +51,7 @@
     "tar": "7.5.22",
     "tmp": "0.2.7",
     "uuid": "11.1.1",
-    "ws": "8.21.1"
+    "ws": "8.21.1",
+    "source-map-js": "1.2.2"
   }
 }
