@@ -4,15 +4,23 @@ import test from 'node:test'
 
 const read=path=>fs.readFileSync(new URL(`../${path}`,import.meta.url),'utf8')
 
-for (const route of ['src/app/apply/page.jsx','src/app/become-a-hero/page.jsx']) {
-  test(`${route} permanently redirects into the secure Hero application`,()=>{
-    const src=read(route)
-    assert.match(src,/permanentRedirect\(['"]\/hero\/apply['"]\)/)
-    assert.doesNotMatch(src,/submit-provider-application/)
-    assert.doesNotMatch(src,/sos-provider-application/)
-    assert.doesNotMatch(src,/dzlmtvodpyhetvektfuo/)
-  })
-}
+// Pre-launch (issue #103): public recruiting routes lead to early-interest registration,
+// never to the full credentialed application or a retired intake.
+test('src/app/apply/page.jsx permanently redirects to provider early registration',()=>{
+  const src=read('src/app/apply/page.jsx')
+  assert.match(src,/permanentRedirect\(['"]\/become-a-hero\/['"]\)/)
+  assert.doesNotMatch(src,/submit-provider-application/)
+  assert.doesNotMatch(src,/dzlmtvodpyhetvektfuo/)
+})
+
+test('src/app/become-a-hero/page.jsx is the early-interest registration, not the full application',()=>{
+  const src=read('src/app/become-a-hero/page.jsx')
+  assert.match(src,/SOSProviderEarlyRegistration/)
+  assert.doesNotMatch(src,/hero\/apply/)
+  assert.doesNotMatch(src,/submit-provider-application/)
+  assert.doesNotMatch(src,/sos-provider-application/)
+  assert.doesNotMatch(src,/dzlmtvodpyhetvektfuo/)
+})
 
 test('the retired provider edge function remains fail-closed',()=>{
   const src=read('supabase/functions/submit-provider-application/index.ts')

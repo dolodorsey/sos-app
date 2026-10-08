@@ -25,7 +25,7 @@ export default function SOSRequestLanding() {
       <header className="topbar">
         <a className="brand" href="/" aria-label="S.O.S. home">
           <strong>S.O.S.</strong>
-          <span>SUPERHEROES ON STANDBY</span>
+          <span>SUPERHEROS ON STANDBY</span>
         </a>
         <nav aria-label="Primary navigation">
           <a href="#services">Services</a>
@@ -130,7 +130,7 @@ export default function SOSRequestLanding() {
       </section>
 
       <footer>
-        <div className="brand foot"><strong>S.O.S.</strong><span>SUPERHEROES ON STANDBY</span></div>
+        <div className="brand foot"><strong>S.O.S.</strong><span>SUPERHEROS ON STANDBY</span></div>
         <div><a href="/legal/">Safety &amp; Legal</a><a href="/privacy/">Privacy</a><a href="/become-a-hero/">Provider Application</a></div>
         <p>© 2026 The Kollective Hospitality Group. S.O.S. is not an emergency service.</p>
       </footer>

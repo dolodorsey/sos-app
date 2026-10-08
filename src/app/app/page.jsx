@@ -1,5 +1,7 @@
 'use client';
 
+import SOSPrelaunchGate from '@/components/prelaunch/SOSPrelaunchGate';
+
 import dynamic from 'next/dynamic';
 import SOSCustomerOperationsHost from '@/components/SOSCustomerOperationsHost';
 import SOSCustomerCancellationHost from '@/components/SOSCustomerCancellationHost';
@@ -24,6 +26,11 @@ const SOSCustomerRealtimeShell = dynamic(() => import('@/components/SOSCustomerR
   loading: () => <SOSLoading label="Connecting the response network" />,
 });
 
-export default function AppPage() {
+function AppPage() {
   return <><SOSPaymentReadinessHost audience="customer"/><SOSPushRegistrationHost/><SOSNotificationInboxHost/><SOSCustomerRealtimeShell/><SOSShellControlHost/><SOSSubcategoryRestoreHost/><SOSCustomerCoverageStatusHost/><SOSCustomerTruthHost/><SOSCustomerOperationsHost/><SOSCustomerCancellationHost/><SOSSettlementReviewHost/><SOSMissionChatHost/><SOSMembershipHost/><SOSProfileToolsHost/><SOSCustomerReceiptHost/><SOSShareTrackingHost/><SOSHeroRecruitmentWidget/></>;
+}
+
+// Pre-launch: preserved for authorized internal QA only. Server-side triggers enforce the closure.
+export default function GatedAppPage(){
+  return <SOSPrelaunchGate area="app"><AppPage /></SOSPrelaunchGate>;
 }

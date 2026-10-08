@@ -50,8 +50,9 @@ test('all realtime features share one non-persistent Supabase client', () => {
 })
 
 
-test('packaged root and web app share the complete customer entry point',()=>{
-  assert.match(read('../src/app/page.jsx'),/export \{default\} from '\.\/app\/page'/)
+test('packaged root is the pre-launch landing and /app preserves the complete customer entry point',()=>{
+  assert.match(read('../src/app/page.jsx'),/SOSPrelaunchLanding/)
+  assert.doesNotMatch(read('../src/app/page.jsx'),/from '\.\/app\/page'/)
   assert.match(appPage,/SOSCustomerCoverageStatusHost/)
   assert.match(appPage,/SOSCustomerReceiptHost/)
   assert.match(appPage,/SOSShareTrackingHost/)

@@ -1,6 +1,9 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
+import {usePathname} from 'next/navigation';
+
+const PRELAUNCH_ROUTES=new Set(['/','/become-a-hero','/ops/recruitment']);
 
 const ASSET='https://woqlhjodiedyqfvzweoe.supabase.co/storage/v1/object/public';
 const MOTION=`${ASSET}/animations/sos-ani2.mp4`;
@@ -52,6 +55,9 @@ function legalCopy(kind){
 
 export default function SOSUIUpgradeHost(){
   const[legal,setLegal]=useState(null);
+  const rawPath=usePathname()||'/';
+  const path=rawPath.length>1&&rawPath.endsWith('/')?rawPath.slice(0,-1):rawPath;
+  const prelaunchPublic=PRELAUNCH_ROUTES.has(path);
 
   useEffect(()=>{
     const apply=()=>{
@@ -59,7 +65,7 @@ export default function SOSUIUpgradeHost(){
       document.querySelectorAll('.sos2-brand').forEach(brand=>{
         if(brand.dataset.v3)return;
         brand.dataset.v3='1';
-        brand.innerHTML='<img class="sos3-logo" src="/brand/sos-logo.webp" alt="S.O.S. — Superheroes On Standby"/><div class="sos3-brand-copy"><strong>SUPERHEROES ON STANDBY</strong><small>Roadside Mobility Network</small></div>';
+        brand.innerHTML='<img class="sos3-logo" src="/brand/sos-logo.webp" alt="S.O.S. — Superheros On Standby"/><div class="sos3-brand-copy"><strong>SUPERHEROS ON STANDBY</strong><small>Roadside Mobility Network</small></div>';
       });
 
       const hero=document.querySelector('.sos2-map-hero');
@@ -97,6 +103,7 @@ export default function SOSUIUpgradeHost(){
   },[]);
 
   const copy=legal?legalCopy(legal):null;
+  if(prelaunchPublic)return null;
   return <>
     <div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
       <button onClick={()=>setLegal('privacy')}>Privacy</button><i/>

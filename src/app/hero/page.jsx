@@ -1,5 +1,7 @@
 'use client';
 
+import SOSPrelaunchGate from '@/components/prelaunch/SOSPrelaunchGate';
+
 import dynamic from 'next/dynamic';
 import SOSHeroAlertsHost from '@/components/SOSHeroAlertsHost';
 import SOSHeroCitizenTrustHost from '@/components/SOSHeroCitizenTrustHost';
@@ -18,6 +20,11 @@ const SOSHeroRealtimeShell = dynamic(() => import('@/components/SOSHeroRealtimeS
   loading: () => null,
 });
 
-export default function HeroPortalPage() {
+function HeroPortalPage() {
   return <><SOSPaymentReadinessHost audience="hero"/><SOSPushRegistrationHost/><SOSNotificationInboxHost/><SOSHeroRealtimeShell/><SOSHeroVerificationReadinessHost/><SOSHeroAlertsHost/><SOSHeroIssueHost/><SOSHeroNoShowHost/><SOSHeroReliabilityHost/><SOSHeroCitizenTrustHost/><SOSMissionChatHost/><SOSHeroClaimAccess/></>;
+}
+
+// Pre-launch: preserved for authorized internal QA only. Server-side triggers enforce the closure.
+export default function GatedHeroPortalPage(){
+  return <SOSPrelaunchGate area="app"><HeroPortalPage /></SOSPrelaunchGate>;
 }

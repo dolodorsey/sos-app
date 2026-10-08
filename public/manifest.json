@@ -1,14 +1,14 @@
 {
   "name": "S.O.S. — Superheros On Standby",
   "short_name": "S.O.S.",
-  "description": "Provider and Hero network for S.O.S. roadside mobility operations. S.O.S. is not 911 or an emergency service.",
-  "id": "/hero/apply",
-  "start_url": "/hero/apply?source=pwa",
+  "description": "S.O.S. — Superheros On Standby. Pre-launch provider recruitment for Atlanta. S.O.S. is not 911 or an emergency service.",
+  "id": "/become-a-hero/",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#020609",
-  "theme_color": "#e53232",
+  "theme_color": "#070e1a",
   "categories": [
     "business",
     "automotive",
@@ -37,14 +37,9 @@
   ],
   "shortcuts": [
     {
-      "name": "Become a Hero",
-      "short_name": "Apply",
-      "url": "/hero/apply?source=pwa-shortcut"
-    },
-    {
-      "name": "Provider Application",
-      "short_name": "Provider",
-      "url": "/hero/apply?source=pwa-provider-shortcut"
+      "name": "Join as a provider",
+      "short_name": "Join",
+      "url": "/become-a-hero/?source=pwa-shortcut"
     }
   ]
 }

@@ -7,7 +7,7 @@ const tapHeavy=()=>tap('Heavy');
 const tapLight=()=>tap('Light');
 
 /* ═══════════════════════════════════════════
-   S.O.S — SUPERHEROES ON STANDBY — MOBILE APP
+   S.O.S — SUPERHEROS ON STANDBY — MOBILE APP
    8 categories, 40 services, citizen/hero portals
    ═══════════════════════════════════════════ */
 
@@ -253,7 +253,7 @@ function SOSAppInner(){
     <div style={{...W,padding:'60px 24px 24px'}}>
       <div style={{textAlign:'center',marginBottom:28}}>
         <div style={{fontWeight:900,fontSize:28,letterSpacing:-1}}>S.O.S</div>
-        <div style={{fontSize:12,color:C.accent,fontWeight:700,letterSpacing:2,marginTop:2}}>SUPERHEROES ON STANDBY</div>
+        <div style={{fontSize:12,color:C.accent,fontWeight:700,letterSpacing:2,marginTop:2}}>SUPERHEROS ON STANDBY</div>
       </div>
       {/* Role */}
       <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:3,marginBottom:16}}>

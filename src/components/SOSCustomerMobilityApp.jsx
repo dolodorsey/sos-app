@@ -20,7 +20,7 @@ const STATUS_LABEL={requested:'Request received',matching:'Finding a verified He
 const openProfileTool=tool=>window.dispatchEvent(new CustomEvent('sos:open-profile-tool',{detail:{tool}}));
 const openShield=()=>window.dispatchEvent(new Event('sos:open-shield'));
 
-function Brand(){return <div className="sos2-brand"><div className="sos2-mark"><span>SOS</span></div><div><strong>SUPERHEROES<br/>ON STANDBY</strong><small>Roadside mobility network</small></div></div>}
+function Brand(){return <div className="sos2-brand"><div className="sos2-mark"><span>SOS</span></div><div><strong>SUPERHEROS<br/>ON STANDBY</strong><small>Roadside mobility network</small></div></div>}
 function Loading(){return <div className="sos2-loading"><div className="sos2-loading-mark">SOS</div><div className="sos2-loader"/><span>Connecting the response network</span></div>}
 const serviceTone=service=>{const quickIndex=QUICK_NAMES.indexOf(service?.name);return quickIndex>=0?SERVICE_TONES[quickIndex]:CATEGORY_META[service?.category_id]?.tone||'orange'};
 const vehicleLabel=vehicle=>[vehicle?.year,vehicle?.make,vehicle?.model,vehicle?.trim].filter(Boolean).join(' ');

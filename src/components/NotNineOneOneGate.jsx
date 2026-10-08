@@ -184,7 +184,7 @@ export default function NotNineOneOneGate({ onAccept, forceShow = false, onDismi
         </div>
 
         <div style={{ fontSize: 15, lineHeight: 1.6, color: C.sub, marginBottom: 16 }}>
-          <strong style={{ color: C.text }}>Superheroes on Standby (SOS)</strong> is a private roadside-assistance and mobile-service dispatch marketplace. It connects you with independent service providers ("Heroes") for non-emergency help.
+          <strong style={{ color: C.text }}>Superheros on Standby (SOS)</strong> is a private roadside-assistance and mobile-service dispatch marketplace. It connects you with independent service providers ("Heroes") for non-emergency help.
         </div>
 
         <SectionTitle>What SOS is</SectionTitle>
