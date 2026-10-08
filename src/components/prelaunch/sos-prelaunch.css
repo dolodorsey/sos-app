@@ -388,3 +388,18 @@
 .pl-cat.is-open { grid-column: 1 / -1; }
 .pl-deliver .pl-tag { align-self: flex-start; }
 .pl-flow-title:focus, .pl-flow-title:focus-visible { outline: none; }
+
+/* New S.O.S. shield logo (cape + ring + S.O.S.). The wordmark is live text so the
+   brand spelling is always SUPERHEROS — never the misspelling baked into source art. */
+.pl-brand img { width: 64px; height: auto; }
+.pl-footer-brand img { width: 60px; height: auto; }
+.pl-gate-card img { width: 180px; height: auto; }
+.pl-signal { align-content: center; }
+.pl-signal img { width: 92%; }
+.pl-signal-wordmark { position: relative; z-index: 2; display: grid; justify-items: center; margin-top: 6px; font: 800 clamp(28px, 7vw, 44px)/.95 var(--pl-display); letter-spacing: .08em; color: #d9dee6; text-shadow: 0 2px 0 #5d6670, 0 10px 24px rgba(0,0,0,.6); }
+.pl-signal-wordmark small { margin-top: 6px; font: 800 clamp(13px, 2.6vw, 17px)/1 var(--pl-display); letter-spacing: .42em; color: var(--pl-red); text-transform: uppercase; text-shadow: none; padding-left: .42em; }
+@media (max-width: 959px) {
+  .pl-hero { padding-top: 20px; gap: 8px; }
+  .pl-signal { order: -1; width: min(300px, 74vw); }
+  .pl-hero-copy .pl-status { margin-top: 4px; }
+}

@@ -12,7 +12,7 @@ export default function SOSInviteOnlyNotice({ children }) {
   return (
     <div className="pl-gate">
       <main className="pl-gate-card">
-        <img src="/brand/prelaunch/sos-mark-180.png" alt="S.O.S. — Superheros On Standby" width="96" height="92" />
+        <img src="/brand/prelaunch/sos-shield-360.webp" alt="S.O.S. — Superheros On Standby" width="180" height="94" />
         <h1>Full application is by invitation</h1>
         <p>Before launch, S.O.S. starts with a one-minute early registration — no documents. Providers who are a fit for the services and areas we need are invited to this full application, where ID, license, insurance and background checks happen.</p>
         <div className="pl-actions">

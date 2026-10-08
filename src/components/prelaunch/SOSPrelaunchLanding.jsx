@@ -159,7 +159,7 @@ export default function SOSPrelaunchLanding() {
 
       <header className="pl-header">
         <a href="#welcome" className="pl-brand" aria-label="S.O.S. — Superheros On Standby, back to top">
-          <img src="/brand/prelaunch/sos-mark-180.png" alt="" width="40" height="38" />
+          <img src="/brand/prelaunch/sos-shield-200.png" alt="" width="64" height="33" />
           <span><strong>S.O.S.</strong><small>Superheros On Standby</small></span>
         </a>
         <nav className="pl-nav" aria-label="Page sections">
@@ -187,7 +187,8 @@ export default function SOSPrelaunchLanding() {
           </div>
           <div className="pl-signal" aria-hidden="true">
             <span className="pl-ring pl-ring-1" /><span className="pl-ring pl-ring-2" /><span className="pl-ring pl-ring-3" />
-            <img src="/brand/prelaunch/sos-mark-640.webp" alt="" width="640" height="610" fetchPriority="high" />
+            <img src="/brand/prelaunch/sos-shield-720.webp" alt="" width="720" height="374" fetchPriority="high" />
+            <span className="pl-signal-wordmark">SUPERHEROS<small>On Standby</small></span>
           </div>
           <p className="pl-wordmark" aria-hidden="true">SUPERHEROS ON STANDBY</p>
         </section>
@@ -418,7 +419,7 @@ export default function SOSPrelaunchLanding() {
 
       <footer className="pl-footer">
         <div className="pl-footer-brand">
-          <img src="/brand/prelaunch/sos-mark-180.png" alt="" width="36" height="34" loading="lazy" />
+          <img src="/brand/prelaunch/sos-shield-200.png" alt="" width="60" height="31" loading="lazy" />
           <span><strong>S.O.S. — Superheros On Standby</strong><small>SUPERHEROS is the intentional S.O.S. spelling.</small></span>
         </div>
         <nav aria-label="Legal and support">

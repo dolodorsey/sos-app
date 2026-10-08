@@ -94,7 +94,7 @@ export default function SOSRecruitmentCommand() {
   return (
     <div className="pl-ops">
       <header className="pl-header">
-        <a href="/ops/" className="pl-brand"><img src="/brand/prelaunch/sos-mark-180.png" alt="" width="40" height="38" /><span><strong>S.O.S.</strong><small>Recruitment command · internal</small></span></a>
+        <a href="/ops/" className="pl-brand"><img src="/brand/prelaunch/sos-shield-200.png" alt="" width="64" height="33" /><span><strong>S.O.S.</strong><small>Recruitment command · internal</small></span></a>
         <button type="button" className="pl-btn pl-btn-ghost pl-btn-small" onClick={load}>Refresh</button>
         <button type="button" className="pl-btn pl-btn-ghost pl-btn-small" onClick={signOut}>Sign out</button>
       </header>

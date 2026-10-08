@@ -234,7 +234,7 @@ export default function SOSProviderEarlyRegistration() {
     <div className="pl-flow">
       <header className="pl-header">
         <a href="/" className="pl-brand" aria-label="S.O.S. — Superheros On Standby home">
-          <img src="/brand/prelaunch/sos-mark-180.png" alt="" width="40" height="38" />
+          <img src="/brand/prelaunch/sos-shield-200.png" alt="" width="64" height="33" />
           <span><strong>S.O.S.</strong><small>Provider early registration</small></span>
         </a>
         <a href="/" className="pl-btn pl-btn-ghost pl-btn-small">Back to S.O.S.</a>

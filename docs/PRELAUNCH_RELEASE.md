@@ -75,7 +75,7 @@ Edge Function `supabase/functions/sos-provider-early-interest` (verify_jwt = fal
 
 | Use | File in repo | Source | Notes |
 |---|---|---|---|
-| Logo mark (hero, header, gate) | `public/brand/prelaunch/sos-mark-{640,320}.webp`, `sos-mark-180.png` | `AppIcon-1024-official.png` (repo root) | Only approved mark spelled **SUPERHEROS** correctly. Black background keyed to alpha; wordmark rendered as DOM text. Original untouched. |
+| Logo (hero, header, gate, footer) | `public/brand/prelaunch/sos-shield-{720,360}.webp`, `sos-shield-200.png` | Founder-supplied new logo 2026-10-08 (same file as BOH `brand-assets/_shared/logos/APPs/SOS LOGO.png`, 1,969,580 B) | Cropped to ring + cape + S.O.S. (rows 0–652). The source art spells **"SUPERHEROES"** in the band below; that band is excluded and the wordmark is rendered as live text "SUPERHEROS ON STANDBY". Original untouched. Replaces the earlier tire app-icon mark. |
 | Hero texture | `public/brand/prelaunch/sos-bg-ribbon.webp` | BOH `website-graphics/sos-graphics/chatgpt-image-jul-30-2026-04_19_47-am-4-.png`, crop x0–800 | Logo with misspelling cropped out. |
 | Network + final CTA sky | `public/brand/prelaunch/sos-bg-beacon-sky.webp` | `…04_19_49-am-9-.png`, crop x880–1672, y0–500 | S.O.S. beacon only; city skyline cropped out. |
 | Feature card | `public/brand/prelaunch/sos-bg-signal-sky.webp` | `…04_19_47-am-3-.png`, crop x760–1672, y0–370 | Signal ring only; skyline cropped out. |

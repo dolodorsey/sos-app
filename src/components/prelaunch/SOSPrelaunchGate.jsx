@@ -94,7 +94,7 @@ export default function SOSPrelaunchGate({ area = 'app', children }) {
   return (
     <div className="pl-gate" data-prelaunch-gate={state.phase}>
       <main className="pl-gate-card" aria-live="polite">
-        <img src="/brand/prelaunch/sos-mark-180.png" alt="S.O.S. — Superheros On Standby" width="96" height="92" />
+        <img src="/brand/prelaunch/sos-shield-360.webp" alt="S.O.S. — Superheros On Standby" width="180" height="94" />
         {state.phase === 'checking' ? (
           <><h1>Checking access</h1><p>One moment.</p></>
         ) : (
