@@ -1,5 +1,16 @@
-'use client';
+import SOSPrelaunchLanding from '@/components/prelaunch/SOSPrelaunchLanding';
 
-// The packaged app starts at /. Keep it on the same complete customer
-// experience as /app so release safeguards and features cannot drift.
-export {default} from './app/page';
+// Pre-launch public homescreen (issue #103). The operational customer app is preserved at
+// /app behind the internal-access gate; it is no longer the public entry point.
+export const metadata = {
+  title: 'S.O.S. — Superheros On Standby | Coming to Atlanta · Providers wanted',
+  description: 'S.O.S. — Superheros On Standby is pre-launch and recruiting verified roadside and mobile vehicle-service providers across Atlanta. Not accepting service requests yet. Not 911.',
+  alternates: { canonical: '/' },
+};
+
+// Public pages allow pinch-zoom (accessibility); the preserved operational app keeps its own viewport.
+export const viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', userScalable: true, themeColor: '#070e1a' };
+
+export default function HomePage() {
+  return <SOSPrelaunchLanding />;
+}

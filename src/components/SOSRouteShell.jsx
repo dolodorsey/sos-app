@@ -4,6 +4,9 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const ROOT_ROUTES = new Set(['/', '/app', '/hero', '/ops']);
+// Pre-launch public surfaces render full-bleed, outside the operational app shell.
+const PRELAUNCH_ROUTES = new Set(['/', '/become-a-hero', '/ops/recruitment']);
+const normalize = (path) => (path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path);
 const AUTHORITY_ROUTES = new Set([
   '/superheros',
   '/why-superheros',
@@ -21,13 +24,13 @@ const fallbackFor = (pathname) => {
   if (pathname.startsWith('/auth/')) return '/login';
   if (pathname === '/login') return '/';
   if (pathname === '/privacy' || pathname === '/terms' || pathname === '/legal') return '/';
-  if (pathname === '/support' || pathname === '/track') return '/app';
+  if (pathname === '/support' || pathname === '/track') return '/';
   if (AUTHORITY_ROUTES.has(pathname)) return '/superheros';
   return '/';
 };
 
 export default function SOSRouteShell({ children }) {
-  const pathname = usePathname() || '/';
+  const pathname = normalize(usePathname() || '/');
   const router = useRouter();
   const currentPath = useRef(pathname);
   const previousAppPath = useRef(null);
@@ -57,6 +60,10 @@ export default function SOSRouteShell({ children }) {
 
   if (authority) {
     return <div className="sos-authority-shell">{children}</div>;
+  }
+
+  if (PRELAUNCH_ROUTES.has(pathname)) {
+    return <div className="sos-prelaunch-shell">{children}</div>;
   }
 
   return (

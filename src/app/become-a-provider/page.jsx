@@ -1,5 +1,6 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
+// Public recruiting aliases lead to the early-interest registration (issue #103).
 export default function ProviderAliasPage() {
-  redirect('/hero');
+  permanentRedirect('/become-a-hero/');
 }

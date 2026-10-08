@@ -2,7 +2,7 @@
 import React,{useEffect,useRef,useState}from'react';
 
 /* ═══════════════════════════════════════════════════════════
-   S.O.S — SUPERHEROES ON STANDBY
+   S.O.S — SUPERHEROS ON STANDBY
    Landing / Front Door — "Rescue Noir"
    Signature interaction: the dispatch beacon (radar sweep)
    ═══════════════════════════════════════════════════════════ */
@@ -108,7 +108,7 @@ export default function SOSLanding(){
     <header className={'hdr'+(scrolled?' hdr-on':'')}>
       <a href="/" className="mark" aria-label="SOS home">
         <span className="mark-s">S.O.S</span>
-        <span className="mark-sub">SUPERHEROES ON STANDBY</span>
+        <span className="mark-sub">SUPERHEROS ON STANDBY</span>
       </a>
       <nav className="hdr-nav">
         <a href="#services">Services</a>
@@ -132,7 +132,7 @@ export default function SOSLanding(){
           <span className="dot"/> ATLANTA &amp; METRO &nbsp;·&nbsp; REQUESTS ACCEPTED 24/7
         </div>
         <h1 className="h1" data-rv style={{'--d':'.06s'}}>
-          <span className="l1">SUPERHEROES</span>
+          <span className="l1">SUPERHEROS</span>
           <span className="l2">ON STANDBY</span>
         </h1>
         <p className="lede" data-rv style={{'--d':'.14s'}}>
@@ -287,7 +287,7 @@ export default function SOSLanding(){
       <div className="ftr-cols">
         <div>
           <div className="ftr-mark">S.O.S</div>
-          <div className="ftr-sub">SUPERHEROES ON STANDBY</div>
+          <div className="ftr-sub">SUPERHEROS ON STANDBY</div>
         </div>
         <div>
           <span className="ftr-h">Get Help</span>
@@ -309,7 +309,7 @@ export default function SOSLanding(){
         </div>
       </div>
       <div className="ftr-btm">
-        <span>© {new Date().getFullYear()} S.O.S — Superheroes On Standby. A Kollective Hospitality Group company.</span>
+        <span>© {new Date().getFullYear()} S.O.S — Superheros On Standby. A Kollective Hospitality Group company.</span>
         <span>Not an emergency service. For emergencies dial 911.</span>
       </div>
     </footer>

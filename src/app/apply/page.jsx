@@ -1,5 +1,6 @@
 import { permanentRedirect } from 'next/navigation';
 
-export default function ApplyPage() {
-  permanentRedirect('/hero/apply');
+// Public recruiting aliases lead to the early-interest registration (issue #103).
+export default function ProviderAliasPage() {
+  permanentRedirect('/become-a-hero/');
 }

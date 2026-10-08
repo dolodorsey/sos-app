@@ -23,10 +23,11 @@ import KHGTrackingHost from '../components/KHGTrackingHost';
 import SOSInstallAppPromptClient from '../components/SOSInstallAppPromptClient';
 import '../components/sos-responsive-contract.css';
 import '../components/sos-app-native-contract.css';
+import '../components/prelaunch/sos-prelaunch.css';
 
 export const metadata = {
-  title: 'S.O.S. — Superheros On Standby | Roadside Mobility Network',
-  description: 'Superheros On Standby connects customers with real roadside help and tracks Hero matching and mission progress. SUPERHEROS is the brand’s intentional spelling.',
+  title: 'S.O.S. — Superheros On Standby',
+  description: 'S.O.S. — Superheros On Standby is building a verified roadside and mobile vehicle-service network in Atlanta. Pre-launch: not accepting service requests. SUPERHEROS is the brand’s intentional spelling.',
   keywords: 'SUPERHEROS, Superheros On Standby, S.O.S., SOS, roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support',
   authors: [{ name: 'S.O.S. — Superheros On Standby' }],
   metadataBase: new URL('https://thesuperherosonstandby.com'),
@@ -57,7 +58,7 @@ export const viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   userScalable: false,
-  themeColor: '#020609',
+  themeColor: '#070e1a',
 };
 
 export default function RootLayout({ children }) {
@@ -68,12 +69,8 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <script src="/sos-safety-guard.js" defer />
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "(function(){try{var c=window.Capacitor;if(c&&typeof c.isNativePlatform==='function'&&c.isNativePlatform()){var p=location.pathname;if(p==='/'||p==='/index.html'){location.replace('/app/');}}}catch(e){}})();",
-          }}
-        />
+        {/* Pre-launch (issue #103): the native shell no longer forces / -> /app/. Web and Capacitor
+            both open the public landing; /app stays behind the internal-access gate. */}
       </head>
       <body>
         <KHGTrackingHost/>

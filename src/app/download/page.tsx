@@ -1,9 +1,10 @@
+import SOSPrelaunchGate from '@/components/prelaunch/SOSPrelaunchGate';
 export const metadata = {
   title: "SOS - Android Download",
   description: "Download the SOS Android app directly.",
 };
 
-export default function DownloadPage() {
+function DownloadPage() {
   return (
     <div style={{
       minHeight: "100vh",
@@ -95,4 +96,9 @@ export default function DownloadPage() {
       </p>
     </div>
   );
+}
+
+// Pre-launch: preserved for authorized internal QA only. Server-side triggers enforce the closure.
+export default function GatedDownloadPage(){
+  return <SOSPrelaunchGate area="app"><DownloadPage /></SOSPrelaunchGate>;
 }
