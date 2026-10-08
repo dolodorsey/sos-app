@@ -76,6 +76,7 @@ Edge Function `supabase/functions/sos-provider-early-interest` (verify_jwt = fal
 | Use | File in repo | Source | Notes |
 |---|---|---|---|
 | Logo (hero, header, gate, footer) | `public/brand/prelaunch/sos-shield-{720,360}.webp`, `sos-shield-200.png` | Founder-supplied new logo 2026-10-08 (same file as BOH `brand-assets/_shared/logos/APPs/SOS LOGO.png`, 1,969,580 B) | Cropped to ring + cape + S.O.S. (rows 0–652). The source art spells **"SUPERHEROES"** in the band below; that band is excluded and the wordmark is rendered as live text "SUPERHEROS ON STANDBY". Original untouched. Replaces the earlier tire app-icon mark. |
+| Homescreen animation | `public/brand/prelaunch/sos-dispatch-loop.{webm,mp4}` (440×720, 9.46 s, muted), poster `sos-dispatch-poster.webp` | Founder-supplied `SOS_ANI.mp4` (same file as BOH `animations/sos-ani.mp4`, md5 `5360fc01…`), founder directive 2026-10-08 "use animation for homescreen" | Cropped to x 700–1140 (holographic dispatch city + route arcs). The crop excludes the baked-in **"SUPERHEROES"** wordmark (x ≤ 720), the fabricated stats column "Active Heroes 128 / Response time 00:43" (x ≥ 1195) and the generator watermark (x ≈ 1160, y ≈ 600). Seamless loop via 0.6 s crossfade, audio removed. Clean shield + live "SUPERHEROS ON STANDBY" overlaid; labeled "Animation · illustrative"; pause button; reduced-motion shows the poster only; pauses off-screen. |
 | Hero texture | `public/brand/prelaunch/sos-bg-ribbon.webp` | BOH `website-graphics/sos-graphics/chatgpt-image-jul-30-2026-04_19_47-am-4-.png`, crop x0–800 | Logo with misspelling cropped out. |
 | Network + final CTA sky | `public/brand/prelaunch/sos-bg-beacon-sky.webp` | `…04_19_49-am-9-.png`, crop x880–1672, y0–500 | S.O.S. beacon only; city skyline cropped out. |
 | Feature card | `public/brand/prelaunch/sos-bg-signal-sky.webp` | `…04_19_47-am-3-.png`, crop x760–1672, y0–370 | Signal ring only; skyline cropped out. |
@@ -85,7 +86,9 @@ Edge Function `supabase/functions/sos-provider-early-interest` (verify_jwt = fal
 * All ten `website-graphics/sos-graphics/*.png` in full: each has the logo baked in as **"SUPERHEROES"**
   (brand violation). Several also show Manhattan landmarks (Empire State Building), police/ambulance/helicopter
   imagery implying emergency service, and fabricated dashboard stats ("Active Heroes 128", response times).
-* `animations/sos-ani.mp4`, `sos-ani2.mp4`: same "SUPERHEROES" logo throughout, fake stats, emergency vehicles.
+* `animations/sos-ani.mp4` in full and `sos-ani2.mp4` entirely: same "SUPERHEROES" logo throughout, fake stats, emergency vehicles.
+  `sos-ani.mp4` is used only as the cropped homescreen loop above. `sos-ani2.mp4` has no usable region: the logo travels
+  across the whole frame (and doubles at the end) and the remaining edges show police cars, ambulances and a helicopter.
   (`sos-ani2.mp4` is still referenced by the preserved operational app via `SOSUIUpgradeHost` from project
   `woqlhjodiedyqfvzweoe`.) Needs a corrected re-render before public use.
 * `brand-assets/_shared/logos/*` and `_shared/decks/SOS MAIN/*` (private bucket): not fetched — no signed

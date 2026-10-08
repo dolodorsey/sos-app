@@ -101,6 +101,62 @@ function useSectionTracking() {
   }, []);
 }
 
+// Homescreen animation: founder-supplied S.O.S. dispatch animation (SOS_ANI), cropped to the
+// holographic city and route arcs. The crop deliberately excludes the source art's baked-in
+// misspelled wordmark, its fabricated stats column and the generator watermark; the brand mark
+// is overlaid as the clean shield plus live SUPERHEROS text. Muted, inline, pausable; honors
+// prefers-reduced-motion (poster only) and pauses while off-screen.
+function HeroAnimation() {
+  const videoRef = useRef(null);
+  const [paused, setPaused] = useState(false);
+  const userPaused = useRef(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return undefined;
+    video.muted = true;
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { userPaused.current = true; setPaused(true); return undefined; }
+    const play = () => video.play().catch(() => setPaused(true));
+    if (typeof IntersectionObserver === 'undefined') { play(); return undefined; }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (userPaused.current) return;
+      if (entry.isIntersecting) play(); else video.pause();
+    }, { threshold: 0.15 });
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
+
+  const toggle = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) { userPaused.current = false; video.play().then(() => setPaused(false)).catch(() => {}); }
+    else { userPaused.current = true; video.pause(); setPaused(true); }
+  };
+
+  return (
+    <div className="pl-signal pl-stage">
+      <div className="pl-stage-screen">
+        <video ref={videoRef} className="pl-stage-video" muted loop playsInline preload="metadata"
+          poster="/brand/prelaunch/sos-dispatch-poster.webp" width="440" height="720" aria-hidden="true" tabIndex={-1}>
+          <source src="/brand/prelaunch/sos-dispatch-loop.webm" type="video/webm" />
+          <source src="/brand/prelaunch/sos-dispatch-loop.mp4" type="video/mp4" />
+        </video>
+        <span className="pl-stage-tag">Animation · illustrative</span>
+        <button type="button" className="pl-stage-toggle" onClick={toggle} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>
+          {paused
+            ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>}
+        </button>
+      </div>
+      <div className="pl-stage-mark" aria-hidden="true">
+        <img src="/brand/prelaunch/sos-shield-720.webp" alt="" width="720" height="374" fetchPriority="high" />
+        <span className="pl-signal-wordmark">SUPERHEROS<small>On Standby</small></span>
+      </div>
+    </div>
+  );
+}
+
 function JoinLink({ cta, className = 'pl-btn pl-btn-primary', children = 'Join as a provider' }) {
   return <a href={JOIN_HREF} className={className} data-khg-cta={`prelaunch_join_${cta}`} onClick={() => trackPrelaunch('cta_click', { cta })}>{children}</a>;
 }
@@ -185,11 +241,7 @@ export default function SOSPrelaunchLanding() {
             </div>
             <p className="pl-not911">S.O.S. is not 911. In an emergency, call 911.</p>
           </div>
-          <div className="pl-signal" aria-hidden="true">
-            <span className="pl-ring pl-ring-1" /><span className="pl-ring pl-ring-2" /><span className="pl-ring pl-ring-3" />
-            <img src="/brand/prelaunch/sos-shield-720.webp" alt="" width="720" height="374" fetchPriority="high" />
-            <span className="pl-signal-wordmark">SUPERHEROS<small>On Standby</small></span>
-          </div>
+          <HeroAnimation />
           <p className="pl-wordmark" aria-hidden="true">SUPERHEROS ON STANDBY</p>
         </section>
 

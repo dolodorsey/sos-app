@@ -54,6 +54,23 @@ test('landing claims stay truthful: live taxonomy, previews labeled, no fabricat
   }
 })
 
+test('homescreen animation is the cropped dispatch loop, accessible and never shows the misspelled art', () => {
+  assert.match(landing, /<HeroAnimation \/>/)
+  assert.match(landing, /sos-dispatch-loop\.webm/)
+  assert.match(landing, /sos-dispatch-loop\.mp4/)
+  assert.match(landing, /playsInline/)
+  assert.match(landing, /video\.muted = true/)
+  assert.match(landing, /prefers-reduced-motion: reduce/)
+  assert.match(landing, /Pause background animation/)
+  assert.match(landing, /Animation · illustrative/)
+  assert.match(landing, /SUPERHEROS<small>On Standby<\/small>/)
+  assert.doesNotMatch(landing, /src=["'][^"']*sos[-_]ani/i, 'raw source animations contain the SUPERHEROES misspelling and fake stats')
+  for (const f of ['sos-dispatch-loop.webm', 'sos-dispatch-loop.mp4', 'sos-dispatch-poster.webp']) {
+    const size = fs.statSync(new URL(`../public/brand/prelaunch/${f}`, import.meta.url)).size
+    assert.ok(size > 1000 && size < 1_500_000, `${f} exists and stays light (${size} B)`)
+  }
+})
+
 test('early registration asks for no credentials, documents, banking or passwords', () => {
   for (const banned of [/type="password"/, /type="file"/, /license_number|licenseNumber/, /\bssn\b|social security/i, /\bEIN\b/, /insurance_document|routing|bank account/i]) {
     assert.doesNotMatch(flow, banned)
