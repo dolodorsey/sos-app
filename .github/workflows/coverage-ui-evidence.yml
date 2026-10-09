@@ -99,13 +99,14 @@ jobs:
               ctx.close()
             ctx=browser.new_context();ctx.route('**/*',guard);page=ctx.new_page()
             source=pathlib.Path('src/components/SOSCustomerCoverageStatusHost.jsx').read_text()
-            callback=source.split('const apply=',1)[1].split(';apply();const observer=',1)[0]
+            callback=source.split('const apply=',1)[1].split(';\n  const stop=observeBody(apply);',1)[0]
+            helpers=pathlib.Path('src/lib/domObserver.js').read_text().replace("'use client';",'').replace('export function','function')
             page.set_content('<div class="sos2-service-list"><button><strong>Jump Start</strong></button><button><strong>Towing</strong></button></div>')
-            test=page.evaluate('''async callback=>{
+            test=page.evaluate('''async ([callback,helpers])=>{
               const styles={badge:'qa-badge',unavailable:'qa-unavailable'};
               const map=new Map([['jump start',true],['towing',false]]);
               const normalize=v=>String(v||'').trim().toLowerCase().replace(/\\s+/g,' ');
-              const apply=new Function('styles','map','normalize','return ('+callback+')')(styles,map,normalize);
+              const apply=new Function('styles','map','normalize',helpers+';return ('+callback+')')(styles,map,normalize);
               apply();let callbacks=0;
               const observer=new MutationObserver(()=>{callbacks++;if(callbacks>20){observer.disconnect();return}apply()});
               observer.observe(document.body,{childList:true,subtree:true});
@@ -115,7 +116,7 @@ jobs:
               map.set('jump start',false);apply();
               await new Promise(r=>setTimeout(r,100));observer.disconnect();
               return {initialCallbacks:before,totalCallbacks:callbacks,labels:[...document.querySelectorAll('.qa-badge')].map(e=>e.textContent),unavailable:document.querySelectorAll('button.qa-unavailable').length};
-            }''',callback)
+            }''',[callback,helpers])
             ok=test['initialCallbacks']<=2 and test['totalCallbacks']<=4 and test['unavailable']==2 and test['labels']==['Coverage activating','Coverage activating']
             results.append({'test':'actual Chromium MutationObserver stability and coverage transition','passed':ok,'fixture':True,'details':test})
             if not ok:failures.append({'test':'coverage DOM stability','details':test})
