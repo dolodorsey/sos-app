@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect,useState} from 'react';
+import {observeBody,setAttr,setData,setText} from '../lib/domObserver';
 
 const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-public-coverage';
 
@@ -42,36 +43,33 @@ export default function SOSCustomerTruthHost(){
         const copy=head.querySelector('p');
         if(!copy)continue;
         const count=document.querySelectorAll('.sos2-service-list>button').length;
-        copy.textContent=`${count} roadside services in the catalog. Verified Hero coverage is shown service-by-service.`;
+        setText(copy,`${count} roadside services in the catalog. Verified Hero coverage is shown service-by-service.`);
       }
 
       const quickTitle=document.querySelector('.sos2-quick .sos2-section-title h2');
-      if(quickTitle)quickTitle.textContent=coverageCount>0?'Get help now':'Browse roadside help';
+      setText(quickTitle,coverageCount>0?'Get help now':'Browse roadside help');
 
       for(const button of document.querySelectorAll('.sos2-service-list>button,.sos2-quick-grid>button')){
         const subline=button.querySelector('small');
         if(!subline)continue;
-        if(!subline.dataset.sosOriginalCopy)subline.dataset.sosOriginalCopy=subline.textContent||'';
-        if(button.dataset.verifiedCoverage==='active')subline.textContent=subline.dataset.sosOriginalCopy;
-        else if(button.dataset.verifiedCoverage==='activating')subline.textContent='Verified Hero coverage not active yet';
-        else subline.textContent='Checking verified Hero coverage';
+        if(!subline.dataset.sosOriginalCopy)setData(subline,'sosOriginalCopy',subline.textContent||'');
+        if(button.dataset.verifiedCoverage==='active')setText(subline,subline.dataset.sosOriginalCopy);
+        else if(button.dataset.verifiedCoverage==='activating')setText(subline,button.parentElement?.classList.contains('sos2-quick-grid')?'Coverage soon':'Verified Hero coverage not active yet');
+        else setText(subline,button.parentElement?.classList.contains('sos2-quick-grid')?'Checking…':'Checking verified Hero coverage');
       }
     };
 
-    applyTruth();
-    const observer=new MutationObserver(applyTruth);
-    observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-verified-coverage']});
-    return()=>observer.disconnect();
+    return observeBody(applyTruth,{subtree:true,childList:true,attributes:true,attributeFilter:['data-verified-coverage']});
   },[coverageCount]);
 
   useEffect(()=>{
     const neutralizeDefaultMap=()=>{
       const frame=document.querySelector('.sos2-map-hero iframe');
       if(!frame||frame.dataset.sosLocationCentered==='true')return;
-      frame.src='about:blank';
-      frame.style.visibility='hidden';
-      frame.setAttribute('aria-hidden','true');
-      frame.dataset.sosMapState='awaiting-location';
+      if(frame.getAttribute('src')!=='about:blank')frame.src='about:blank';
+      if(frame.style.visibility!=='hidden')frame.style.visibility='hidden';
+      setAttr(frame,'aria-hidden','true');
+      setData(frame,'sosMapState','awaiting-location');
     };
 
     const recenter=()=>{
@@ -91,15 +89,13 @@ export default function SOSCustomerTruthHost(){
       }, {enableHighAccuracy:true,timeout:12000,maximumAge:15000});
     };
 
-    neutralizeDefaultMap();
-    const observer=new MutationObserver(neutralizeDefaultMap);
-    observer.observe(document.body,{subtree:true,childList:true});
+    const stopObserving=observeBody(neutralizeDefaultMap);
     const handleClick=event=>{
       if(event.target?.closest?.('.sos2-location-pill'))recenter();
     };
 
     document.addEventListener('click',handleClick,false);
-    return()=>{observer.disconnect();document.removeEventListener('click',handleClick,false)};
+    return()=>{stopObserving();document.removeEventListener('click',handleClick,false)};
   },[]);
 
   return null;

@@ -7,7 +7,7 @@ const tapHeavy=()=>tap('Heavy');
 const tapLight=()=>tap('Light');
 
 /* ═══════════════════════════════════════════
-   S.O.S — SUPERHEROES ON STANDBY — MOBILE APP
+   S.O.S — SUPERHEROS ON STANDBY — MOBILE APP
    8 categories, 40 services, citizen/hero portals
    ═══════════════════════════════════════════ */
 
@@ -40,19 +40,19 @@ class SOSErrorBoundary extends React.Component{
     if(this.state.hasError)return React.createElement('div',{style:{minHeight:'100vh',background:'#080c14',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontFamily:"'Inter',sans-serif",color:'#fff',padding:24,textAlign:'center'}},
       React.createElement('div',{style:{fontSize:40,marginBottom:16}},'\u26A0\uFE0F'),
       React.createElement('h2',{style:{fontSize:20,fontWeight:700,marginBottom:8}},'Something went wrong'),
-      React.createElement('button',{onClick:()=>{this.setState({hasError:false});window.location.reload()},style:{background:'#FF6B35',color:'#fff',border:'none',borderRadius:14,padding:'14px 32px',fontSize:16,fontWeight:700,cursor:'pointer'}},'Reload App')
+      React.createElement('button',{onClick:()=>{this.setState({hasError:false});window.location.reload()},style:{background:'#E3000B',color:'#fff',border:'none',borderRadius:14,padding:'14px 32px',fontSize:16,fontWeight:700,cursor:'pointer'}},'Reload App')
     );
     return this.props.children;
   }
 }
 
-const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#FF6B35',accentDk:'#E55A2B',gold:'#FFB347',green:'#10B981',red:'#EF4444',text:'#fff',sub:'rgba(255,255,255,.75)',muted:'rgba(255,255,255,.55)',border:'rgba(255,255,255,.12)'};
+const C={bg:'#080c14',card:'#0d1320',card2:'#111827',accent:'#E3000B',accentDk:'#B80009',gold:'#FF5A60',green:'#10B981',red:'#EF4444',text:'#fff',sub:'rgba(255,255,255,.75)',muted:'rgba(255,255,255,.55)',border:'rgba(255,255,255,.12)'};
 const ff="'Inter',-apple-system,BlinkMacSystemFont,sans-serif";
 const F=(d='row',a='center',j='center',g=0)=>({display:'flex',flexDirection:d,alignItems:a,justifyContent:j,gap:g});
 
 /* ─── 8 Categories, 40 Services (from sos_categories + sos_subcategories) ─── */
 const CATS=[
-  {id:'er',name:'Emergency Roadside',icon:'\u{1F6A8}',color:'#FF6B35',services:[
+  {id:'er',name:'Emergency Roadside',icon:'\u{1F6A8}',color:'#E3000B',services:[
     {name:'Towing',desc:'Secure tow to destination',price:75,eta:'5-10 min'},
     {name:'Flat Tire Help',desc:'Spare install or patch',price:55,eta:'5-10 min'},
     {name:'Tire Concierge',desc:'Buy, pickup & install',price:85,eta:'10-20 min'},
@@ -253,7 +253,7 @@ function SOSAppInner(){
     <div style={{...W,padding:'60px 24px 24px'}}>
       <div style={{textAlign:'center',marginBottom:28}}>
         <div style={{fontWeight:900,fontSize:28,letterSpacing:-1}}>S.O.S</div>
-        <div style={{fontSize:12,color:C.accent,fontWeight:700,letterSpacing:2,marginTop:2}}>SUPERHEROES ON STANDBY</div>
+        <div style={{fontSize:12,color:C.accent,fontWeight:700,letterSpacing:2,marginTop:2}}>SUPERHEROS ON STANDBY</div>
       </div>
       {/* Role */}
       <div style={{...F('row','center','center',0),background:C.card2,borderRadius:12,padding:3,marginBottom:16}}>

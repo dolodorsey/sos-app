@@ -35,15 +35,15 @@ export default function ErrorBoundary({ error, reset }) {
           display: grid;
           place-items: center;
           margin-bottom: 22px;
-          border: 1px solid rgba(255, 107, 53, .5);
+          border: 1px solid rgba(227,0,11, .5);
           border-radius: 24px 24px 30px 30px;
           color: #fff;
-          background: linear-gradient(135deg, #ff7b45, #dc2626);
+          background: linear-gradient(135deg, #ff1f2a, #dc2626);
           box-shadow: 0 18px 44px rgba(220, 38, 38, .25);
           font-weight: 900;
         }
         .sos-route-error__eyebrow {
-          color: #ff9b68;
+          color: #ff4b52;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: .2em;
@@ -69,7 +69,7 @@ export default function ErrorBoundary({ error, reset }) {
           border: 0;
           border-radius: 14px;
           color: #fff;
-          background: linear-gradient(135deg, #ff7b45, #dc2626);
+          background: linear-gradient(135deg, #ff1f2a, #dc2626);
           font-weight: 900;
           cursor: pointer;
         }

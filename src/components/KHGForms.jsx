@@ -299,14 +299,14 @@ function FormField({ field, value, onChange }) {
     letterSpacing: '0.02em',
   };
 
-  const handleFocus = (e) => { e.target.style.borderColor = 'var(--accent, #FF6B35)'; };
+  const handleFocus = (e) => { e.target.style.borderColor = 'var(--accent, #E3000B)'; };
   const handleBlur = (e) => { e.target.style.borderColor = 'rgba(255,255,255,0.1)'; };
 
   return (
     <div style={{ marginBottom: 16 }}>
       <label style={labelStyle}>
         {field.label}
-        {field.required && <span style={{ color: 'var(--accent, #FF6B35)', marginLeft: 3 }}>*</span>}
+        {field.required && <span style={{ color: 'var(--accent, #E3000B)', marginLeft: 3 }}>*</span>}
       </label>
       {field.type === 'textarea' ? (
         <textarea
@@ -446,7 +446,7 @@ function FormModal({ formType, brandKey, onClose }) {
                 We'll be in touch soon.
               </p>
               <button onClick={onClose} style={{
-                padding: '12px 32px', background: 'var(--accent, #FF6B35)',
+                padding: '12px 32px', background: 'var(--accent, #E3000B)',
                 border: 'none', borderRadius: 10, color: '#fff', fontSize: 14,
                 fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
               }}>
@@ -468,7 +468,7 @@ function FormModal({ formType, brandKey, onClose }) {
                 disabled={status === 'submitting'}
                 style={{
                   width: '100%', padding: '14px 24px', marginTop: 8,
-                  background: status === 'submitting' ? 'rgba(255,255,255,0.1)' : 'var(--accent, #FF6B35)',
+                  background: status === 'submitting' ? 'rgba(255,255,255,0.1)' : 'var(--accent, #E3000B)',
                   border: 'none', borderRadius: 12, color: '#fff',
                   fontSize: 15, fontWeight: 600, cursor: status === 'submitting' ? 'wait' : 'pointer',
                   fontFamily: 'inherit', letterSpacing: '0.02em',
@@ -520,7 +520,7 @@ export function KHGFormButton({
   const variants = {
     default: { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' },
     outline: { background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: '#fff' },
-    accent: { background: 'var(--accent, #FF6B35)', border: '1px solid transparent', color: '#fff' },
+    accent: { background: 'var(--accent, #E3000B)', border: '1px solid transparent', color: '#fff' },
     ghost: { background: 'transparent', border: '1px solid transparent', color: 'rgba(255,255,255,0.7)' },
   };
 

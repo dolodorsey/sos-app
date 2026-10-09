@@ -163,19 +163,7 @@
   .sos-ui-v3 .sos2-mission-list { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 
-@media (min-width: 900px) {
-  :root { --sos-bottom-nav-height: 72px; }
-  .sos-ui-v3 .sos2-topbar { flex-basis: 92px !important; }
-  .sos-ui-v3 .sos2-content { width: min(100%, 1320px) !important; margin: 0 auto !important; padding: 0 32px 32px !important; }
-  .sos-ui-v3 .sos2-content { padding-bottom: 104px !important; }
-  .sos-ui-v3 .sos2-nav { min-height: 72px !important; padding: 6px max(24px, calc((100vw - 760px)/2)) !important; grid-template-columns: repeat(4, minmax(120px, 1fr)) !important; }
-  .sos-ui-v3 .sos2-nav button { height: 58px !important; min-height: 58px !important; flex-direction: row !important; }
-  .sos-ui-v3 .sos2-quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-  .sos-ui-v3 .sos2-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
-  .sos-ui-v3 .sos2-service-list,
-  .sos-ui-v3 .sos2-mission-list { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-  .sos-ui-v3 .sos2-quick-grid > button { min-height: 180px !important; }
-}
+@media (min-width: 900px) {:root{ --sos-bottom-nav-height: 72px; }}
 
 /* Standalone forms and legal/support pages must collapse before they clip. */
 @media (max-width: 680px) {
@@ -265,22 +253,22 @@
 .sos-ui-v3 .sos2-service-icon.cyan { --service-accent:#27c8e7; background:rgba(39,200,231,.15)!important; border-color:rgba(39,200,231,.42)!important; color:#5eddf2!important; }
 .sos-ui-v3 .sos2-service-icon.violet { --service-accent:#a47aff; background:rgba(164,122,255,.15)!important; border-color:rgba(164,122,255,.42)!important; color:#bea0ff!important; }
 .sos-ui-v3 .sos2-service-icon.blue { --service-accent:#4b93ff; background:rgba(75,147,255,.15)!important; border-color:rgba(75,147,255,.42)!important; color:#78afff!important; }
-.sos-ui-v3 .sos2-service-icon.amber { --service-accent:#f5aa32; background:rgba(245,170,50,.15)!important; border-color:rgba(245,170,50,.42)!important; color:#ffc05d!important; }
+.sos-ui-v3 .sos2-service-icon.amber { --service-accent:#f5aa32; background:rgba(255,90,96,.15)!important; border-color:rgba(255,90,96,.42)!important; color:#ff9095!important; }
 .sos-ui-v3 .sos2-service-icon.rose { --service-accent:#f25388; background:rgba(242,83,136,.15)!important; border-color:rgba(242,83,136,.42)!important; color:#ff7fa7!important; }
 .sos-ui-v3 .sos2-service-icon svg path:nth-child(n+2) { stroke:currentColor !important; }
 .sos-ui-v3 .sos2-quick-grid > .tone-orange { border-color:rgba(255,90,69,.38)!important; }
 .sos-ui-v3 .sos2-quick-grid > .tone-cyan { border-color:rgba(39,200,231,.38)!important; }
 .sos-ui-v3 .sos2-quick-grid > .tone-violet { border-color:rgba(164,122,255,.38)!important; }
 .sos-ui-v3 .sos2-quick-grid > .tone-blue { border-color:rgba(75,147,255,.38)!important; }
-.sos-ui-v3 .sos2-quick-grid > .tone-amber { border-color:rgba(245,170,50,.38)!important; }
+.sos-ui-v3 .sos2-quick-grid > .tone-amber { border-color:rgba(255,90,96,.38)!important; }
 .sos-ui-v3 .sos2-quick-grid > .tone-rose { border-color:rgba(242,83,136,.38)!important; }
 
 .sos2-profile-menu .sos2-hero-signup {
   min-height: 72px;
   padding: 12px;
-  border: 1px solid rgba(255,189,99,.42);
+  border: 1px solid rgba(255,106,112,.42);
   border-radius: 16px;
-  background: linear-gradient(135deg,rgba(255,107,53,.17),rgba(255,189,99,.07));
+  background: linear-gradient(135deg,rgba(227,0,11,.17),rgba(255,106,112,.07));
   color: #fff;
   display: flex;
   align-items: center;
@@ -288,7 +276,7 @@
   text-align: left;
   text-decoration: none;
 }
-.sos2-profile-menu .sos2-hero-signup > span { width:36px;height:36px;border-radius:12px;background:rgba(255,189,99,.14);color:#ffbd63;display:grid;place-items:center; }
+.sos2-profile-menu .sos2-hero-signup > span { width:36px;height:36px;border-radius:12px;background:rgba(255,106,112,.14);color:#ff6a70;display:grid;place-items:center; }
 .sos2-profile-menu .sos2-hero-signup > div { display:grid;gap:2px;flex:1; }
 .sos2-profile-menu .sos2-hero-signup strong { font-size:16px; }
 .sos2-profile-menu .sos2-hero-signup small { color:rgba(235,241,248,.55);font-size:12px; }
@@ -300,12 +288,12 @@
 .sos2-intake-head strong { font-size:14px; }
 .sos2-intake-head small { color:rgba(235,241,248,.56);font-size:10px;line-height:1.45; }
 .sos2-intake-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
-.sos2-intake-grid label { display:grid;gap:5px;color:#ffbd63;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase; }
+.sos2-intake-grid label { display:grid;gap:5px;color:#ff6a70;font-size:8px;font-weight:900;letter-spacing:.08em;text-transform:uppercase; }
 .sos2-intake-grid .wide { grid-column:1/-1; }
 .sos2-intake-grid :where(input,select,textarea) { width:100%;min-width:0;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:#07111a;color:#fff;padding:10px 11px;font-size:11px;outline:0;text-transform:none;letter-spacing:0; }
 .sos2-intake-grid :where(input,select) { min-height:44px; }
 .sos2-intake-grid textarea { min-height:72px;resize:vertical; }
-.sos2-add-vehicle { width:100%;min-height:40px;margin-top:10px;border:1px dashed rgba(255,189,99,.45);border-radius:11px;background:rgba(255,189,99,.06);color:#ffcf84;font-size:10px;font-weight:900; }
+.sos2-add-vehicle { width:100%;min-height:40px;margin-top:10px;border:1px dashed rgba(255,106,112,.45);border-radius:11px;background:rgba(255,106,112,.06);color:#ff9095;font-size:10px;font-weight:900; }
 @media (max-width: 390px) { .sos2-intake-grid { grid-template-columns:1fr; }.sos2-intake-grid .wide { grid-column:auto; } }
 
 /* Modal sheets must sit above the global legal rail instead of being covered by it. */

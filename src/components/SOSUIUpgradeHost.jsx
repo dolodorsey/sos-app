@@ -1,6 +1,9 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
+import{createPortal}from'react-dom';
+import{observeBody}from'../lib/domObserver';
+import{isCustomerAppRoute,useAppSlot}from'../lib/useAppSlot';
 
 const ASSET='https://woqlhjodiedyqfvzweoe.supabase.co/storage/v1/object/public';
 const MOTION=`${ASSET}/animations/sos-ani2.mp4`;
@@ -52,18 +55,22 @@ function legalCopy(kind){
 
 export default function SOSUIUpgradeHost(){
   const[legal,setLegal]=useState(null);
+  const profileSlot=useAppSlot('profile');
+  const[authPanel,setAuthPanel]=useState(null);
+  const[customerRoute,setCustomerRoute]=useState(false);
+  useEffect(()=>{setCustomerRoute(isCustomerAppRoute());return observeBody(()=>{const next=document.querySelector('.sos2-auth-panel,.shc-auth-card');setAuthPanel(current=>current===next?current:next)})},[]);
 
   useEffect(()=>{
     const apply=()=>{
-      document.documentElement.classList.add('sos-ui-v3');
+      if(!document.documentElement.classList.contains('sos-ui-v3'))document.documentElement.classList.add('sos-ui-v3');
       document.querySelectorAll('.sos2-brand').forEach(brand=>{
         if(brand.dataset.v3)return;
         brand.dataset.v3='1';
-        brand.innerHTML='<img class="sos3-logo" src="/brand/sos-logo.webp" alt="S.O.S. — Superheroes On Standby"/><div class="sos3-brand-copy"><strong>SUPERHEROES ON STANDBY</strong><small>Roadside Mobility Network</small></div>';
+        brand.innerHTML='<img class="sos3-logo" src="/brand/sos-logo.webp" alt=""/><div class="sos3-brand-copy"><strong>S.O.S.</strong><small>Superheros On Standby</small></div>';
       });
 
       const hero=document.querySelector('.sos2-map-hero');
-      document.documentElement.classList.toggle('sos-home-animation-first',Boolean(hero));
+      if(document.documentElement.classList.contains('sos-home-animation-first')!==Boolean(hero))document.documentElement.classList.toggle('sos-home-animation-first',Boolean(hero));
       document.querySelectorAll('.sos3-home-intro,.sos3-ad-slot').forEach(element=>element.remove());
       if(hero&&!hero.dataset.v3){
         hero.dataset.v3='1';
@@ -90,20 +97,18 @@ export default function SOSUIUpgradeHost(){
       });
 
     };
-    apply();
-    const observer=new MutationObserver(()=>requestAnimationFrame(apply));
-    observer.observe(document.body,{childList:true,subtree:true});
-    return()=>{observer.disconnect();document.documentElement.classList.remove('sos-home-animation-first')};
+    const stop=observeBody(apply);
+    return()=>{stop();document.documentElement.classList.remove('sos-home-animation-first')};
   },[]);
 
   const copy=legal?legalCopy(legal):null;
   return <>
-    <div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
+    {(profileSlot||authPanel)?createPortal(<nav className="sos-inline-legal" aria-label="S.O.S. legal and support"><button onClick={()=>setLegal('privacy')}>Privacy</button><button onClick={()=>setLegal('terms')}>Terms</button><button onClick={()=>setLegal('safety')}>Not 911</button><button onClick={()=>setLegal('support')}>Support</button></nav>,profileSlot||authPanel):customerRoute?null:<div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
       <button onClick={()=>setLegal('privacy')}>Privacy</button><i/>
       <button onClick={()=>setLegal('terms')}>Terms</button><i/>
       <button onClick={()=>setLegal('safety')}>Not 911</button><i/>
       <button onClick={()=>setLegal('support')}>Support</button>
-    </div>
+    </div>}
     {copy&&<section className="sos3-legal" role="dialog" aria-modal="true" aria-label={copy.title}>
       <header><button onClick={()=>setLegal(null)} aria-label="Back to S.O.S.">←</button><img src="/brand/sos-logo.webp" alt="S.O.S."/><span/></header>
       <div className="sos3-legal-scroll"><p className="sos3-legal-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p className="sos3-legal-intro">{copy.intro}</p><div className="sos3-legal-card">{copy.sections.map(([title,text])=><article key={title}><span className="sos3-legal-icon">{icons[title.includes('Safety')?'lock':title.includes('Account')?'home':title.includes('Information')?'bag':'home']}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div></div>

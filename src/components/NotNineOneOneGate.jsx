@@ -15,9 +15,9 @@ const STORAGE_KEY = 'sos_not911_acknowledged_v1';
 const C = {
   bg: '#080c14',
   card: '#0d1320',
-  accent: '#FF6B35',
-  accentDk: '#E55A2B',
-  gold: '#FFB347',
+  accent: '#E3000B',
+  accentDk: '#B80009',
+  gold: '#FF5A60',
   red: '#EF4444',
   text: '#fff',
   sub: 'rgba(255,255,255,.78)',
@@ -184,7 +184,7 @@ export default function NotNineOneOneGate({ onAccept, forceShow = false, onDismi
         </div>
 
         <div style={{ fontSize: 15, lineHeight: 1.6, color: C.sub, marginBottom: 16 }}>
-          <strong style={{ color: C.text }}>Superheroes on Standby (SOS)</strong> is a private roadside-assistance and mobile-service dispatch marketplace. It connects you with independent service providers ("Heroes") for non-emergency help.
+          <strong style={{ color: C.text }}>Superheros on Standby (SOS)</strong> is a private roadside-assistance and mobile-service dispatch marketplace. It connects you with independent service providers ("Heroes") for non-emergency help.
         </div>
 
         <SectionTitle>What SOS is</SectionTitle>
@@ -304,7 +304,7 @@ export default function NotNineOneOneGate({ onAccept, forceShow = false, onDismi
             borderRadius: 14,
             cursor: canContinue ? 'pointer' : 'not-allowed',
             transition: 'all .15s',
-            boxShadow: canContinue ? '0 6px 18px rgba(255,107,53,0.35)' : 'none',
+            boxShadow: canContinue ? '0 6px 18px rgba(227,0,11,0.35)' : 'none',
           }}
         >
           I Understand · Continue to SOS

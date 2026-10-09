@@ -4,9 +4,9 @@
   --sos-bg: #05080d;
   --sos-panel: #0b121d;
   --sos-panel-2: #101a29;
-  --sos-orange: #ff6b35;
-  --sos-orange-hot: #ff8a4c;
-  --sos-amber: #ffbd63;
+  --sos-orange: #e3000b;
+  --sos-orange-hot: #ff3b42;
+  --sos-amber: #ff6a70;
   --sos-green: #21c77a;
   --sos-red: #ef4444;
   --sos-text: #f7f8fa;
@@ -29,7 +29,7 @@ body {
   padding: 0;
   min-height: 100dvh;
   background:
-    radial-gradient(circle at 50% -12%, rgba(255, 107, 53, 0.2), transparent 32%),
+    radial-gradient(circle at 50% -12%, rgba(227,0,11, 0.2), transparent 32%),
     radial-gradient(circle at 14% 30%, rgba(58, 119, 184, 0.12), transparent 35%),
     linear-gradient(160deg, #020409 0%, #08111d 45%, #020409 100%);
   color: var(--sos-text);
@@ -51,7 +51,7 @@ body {
     linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px),
     radial-gradient(circle at 50% 0%, #132033 0%, #080c14 38%, #05080d 100%);
   background-size: 28px 28px, 28px 28px, auto;
-  box-shadow: 0 0 0 1px rgba(255, 107, 53, 0.2), 0 32px 110px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 0 0 1px rgba(227,0,11, 0.2), 0 32px 110px rgba(0, 0, 0, 0.72);
 }
 
 .sos-premium::before {
@@ -62,7 +62,7 @@ body {
   z-index: 800;
   pointer-events: none;
   background: linear-gradient(90deg, transparent, var(--sos-orange), var(--sos-amber), var(--sos-orange), transparent);
-  box-shadow: 0 0 30px rgba(255, 107, 53, 0.62);
+  box-shadow: 0 0 30px rgba(227,0,11, 0.62);
 }
 
 .sos-premium::after {
@@ -98,7 +98,7 @@ body {
 }
 
 .sos-premium :where(button, input, textarea, select):focus-visible {
-  outline: 3px solid rgba(255, 107, 53, 0.32) !important;
+  outline: 3px solid rgba(227,0,11, 0.32) !important;
   outline-offset: 2px !important;
 }
 
@@ -113,8 +113,8 @@ body {
 .sos-premium input:focus,
 .sos-premium textarea:focus,
 .sos-premium select:focus {
-  border-color: rgba(255, 107, 53, 0.62) !important;
-  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1), 0 14px 34px rgba(0,0,0,0.18) !important;
+  border-color: rgba(227,0,11, 0.62) !important;
+  box-shadow: 0 0 0 4px rgba(227,0,11, 0.1), 0 14px 34px rgba(0,0,0,0.18) !important;
 }
 
 /* More disciplined utility-card treatment. */
@@ -145,11 +145,11 @@ body {
   display: grid !important;
   place-items: center;
   font-size: 0 !important;
-  background-color: rgba(255, 107, 53, 0.08);
+  background-color: rgba(227,0,11, 0.08);
   background-position: center;
   background-repeat: no-repeat;
   background-size: 20px 20px;
-  border: 1px solid rgba(255, 107, 53, 0.18);
+  border: 1px solid rgba(227,0,11, 0.18);
 }
 
 .sos-premium [style*='grid-template-columns: repeat(3, 1fr)'] > div:nth-child(1) > div:first-child,
@@ -186,7 +186,7 @@ body {
 .sos-premium [style*='position: fixed'][style*='bottom: 0'],
 .sos-premium [style*='position:fixed'][style*='bottom:0'] {
   background: rgba(5, 8, 13, 0.94) !important;
-  border-top: 1px solid rgba(255, 107, 53, 0.18) !important;
+  border-top: 1px solid rgba(227,0,11, 0.18) !important;
   box-shadow: 0 -20px 56px rgba(0,0,0,0.42) !important;
   backdrop-filter: blur(26px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(26px) saturate(140%) !important;

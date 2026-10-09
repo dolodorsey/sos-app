@@ -4,6 +4,10 @@ import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 const ROOT_ROUTES = new Set(['/', '/app', '/hero', '/ops']);
+// Customer app routes render as a native-style app column on every screen size.
+const APP_FRAME_ROUTES = new Set(['/', '/app']);
+// The site is exported with trailingSlash: true, so /app arrives as /app/.
+const normalizePath = (value) => (value || '/').replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
 const AUTHORITY_ROUTES = new Set([
   '/superheros',
   '/why-superheros',
@@ -27,12 +31,13 @@ const fallbackFor = (pathname) => {
 };
 
 export default function SOSRouteShell({ children }) {
-  const pathname = usePathname() || '/';
+  const pathname = normalizePath(usePathname());
   const router = useRouter();
   const currentPath = useRef(pathname);
   const previousAppPath = useRef(null);
   const authority = AUTHORITY_ROUTES.has(pathname);
   const hasRouteHeader = !ROOT_ROUTES.has(pathname) && !authority;
+  const appFrame = APP_FRAME_ROUTES.has(pathname);
 
   useEffect(() => {
     if (currentPath.current !== pathname) {
@@ -60,7 +65,7 @@ export default function SOSRouteShell({ children }) {
   }
 
   return (
-    <div className={hasRouteHeader ? 'sos-route-frame has-route-header' : 'sos-route-frame'}>
+    <div className={['sos-route-frame', hasRouteHeader && 'has-route-header', appFrame && 'sos-app-frame'].filter(Boolean).join(' ')}>
       {hasRouteHeader && (
         <header className="sos-route-header">
           <button type="button" onClick={goBack} aria-label="Go back">

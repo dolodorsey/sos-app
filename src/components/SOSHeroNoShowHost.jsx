@@ -14,7 +14,7 @@ export default function SOSHeroNoShowHost(){
  if(!mission&&!notice)return null;const remaining=Math.max(0,Number(quote?.remainingMinutes||0));
  return <div style={{position:'fixed',left:18,bottom:190,zIndex:1480,display:'grid',gap:7}}>
   {mission&&quote&&!quote.canSettle&&<div style={{padding:'10px 13px',borderRadius:999,background:'rgba(17,27,37,.96)',color:'#fff',border:'1px solid rgba(255,255,255,.12)',fontSize:10,fontWeight:900,boxShadow:'0 12px 36px rgba(0,0,0,.32)'}}>CUSTOMER NO-SHOW · {remaining>0?`${remaining} MIN`:quote.reason||'NOT READY'}</div>}
-  {mission&&quote?.canSettle&&<button type="button" onClick={settle} disabled={busy} style={{border:'1px solid rgba(255,183,71,.35)',borderRadius:999,padding:'10px 13px',background:'#34230a',color:'#ffdca5',fontSize:10,fontWeight:900,boxShadow:'0 12px 36px rgba(0,0,0,.32)',cursor:'pointer'}}>{busy?'SETTLING…':`CUSTOMER NO-SHOW · $${Number(quote.heroCompensation||0).toFixed(2)} COMP`}</button>}
+  {mission&&quote?.canSettle&&<button type="button" onClick={settle} disabled={busy} style={{border:'1px solid rgba(255,90,96,.35)',borderRadius:999,padding:'10px 13px',background:'#34230a',color:'#ffb8bb',fontSize:10,fontWeight:900,boxShadow:'0 12px 36px rgba(0,0,0,.32)',cursor:'pointer'}}>{busy?'SETTLING…':`CUSTOMER NO-SHOW · $${Number(quote.heroCompensation||0).toFixed(2)} COMP`}</button>}
   {notice&&<div role="status" style={{maxWidth:330,padding:'10px 12px',borderRadius:12,background:'#111b25',color:'#fff',fontSize:11,boxShadow:'0 12px 36px rgba(0,0,0,.3)'}}>{notice}</div>}
  </div>;
 }

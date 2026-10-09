@@ -8,7 +8,7 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#020609",
-  "theme_color": "#e53232",
+  "theme_color": "#e3000b",
   "categories": [
     "business",
     "automotive",
@@ -17,21 +17,21 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/sos-logo-192.svg",
+      "src": "/sos-app-icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/sos-logo-512.svg",
+      "src": "/sos-app-icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/sos-logo-512.svg",
+      "src": "/sos-app-icon-512-maskable.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
