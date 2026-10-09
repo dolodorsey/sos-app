@@ -32,7 +32,7 @@ jobs:
       TESTFLIGHT_CHANGELOG: Automated SOS build from ${{ github.sha }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Prepare Apple release signing from Supabase
         shell: bash
