@@ -1,6 +1,7 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
+import{observeBody}from'../lib/domObserver';
 import{createPortal}from'react-dom';
 
 const buttonText=element=>String(element?.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
@@ -18,10 +19,7 @@ export default function SOSShellControlHost(){
       const layer=document.querySelector('.sos-subcat-backdrop, .sos2-backdrop, .sos-mobility-layer');
       setShowBack(Boolean(layer||(active&&home&&active!==home)));
     };
-    sync();
-    const observer=new MutationObserver(sync);
-    observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
-    return()=>observer.disconnect();
+    return observeBody(sync,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
   },[]);
 
   const goBack=()=>{
@@ -46,7 +44,7 @@ export default function SOSShellControlHost(){
       .sos2-content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;scroll-padding-top:68px!important}
       .sos2-nav{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;width:100%!important;max-width:none!important;flex:0 0 auto!important;z-index:80!important}
       .sos2-search{position:sticky!important;top:0!important;z-index:65!important}
-      .sos-shell-back{height:39px;min-width:58px;padding:0 9px;border-radius:12px;border:1px solid rgba(255,138,76,.2);background:#101722;color:#ffbd63;display:flex;align-items:center;justify-content:center;gap:4px;font:900 7px 'DM Sans',sans-serif;letter-spacing:.08em;flex:0 0 auto}
+      .sos-shell-back{height:39px;min-width:58px;padding:0 9px;border-radius:12px;border:1px solid rgba(255,59,66,.2);background:#101722;color:#ff6a70;display:flex;align-items:center;justify-content:center;gap:4px;font:900 7px 'DM Sans',sans-serif;letter-spacing:.08em;flex:0 0 auto}
       .sos-shell-back span{font-size:19px;line-height:1;margin-top:-2px}
       @media(max-width:390px){.sos2-topbar{padding-left:10px!important;padding-right:10px!important}.sos-shell-back{min-width:42px;padding:0 7px;font-size:0}.sos-shell-back span{font-size:22px}.sos2-brand small{display:none}}
     `}</style>

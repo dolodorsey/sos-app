@@ -1,6 +1,8 @@
 'use client';
 
 import React,{useEffect,useState}from'react';
+import{createPortal}from'react-dom';
+import{isCustomerAppRoute,useAppSlot}from'../lib/useAppSlot';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
@@ -8,6 +10,7 @@ const storedSession=()=>{try{const s=JSON.parse(localStorage.getItem('sos_sessio
 const toBytes=base64=>{const padding='='.repeat((4-base64.length%4)%4);const raw=atob((base64+padding).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...raw].map(ch=>ch.charCodeAt(0)))};
 
 export default function SOSPushRegistrationHost(){
+ const profileSlot=useAppSlot('profile');
  const[supported,setSupported]=useState(false);const[permission,setPermission]=useState('default');const[ready,setReady]=useState(false);const[busy,setBusy]=useState(false);const[notice,setNotice]=useState('');
  const register=async(requestPermission=false)=>{
    if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window))return;
@@ -24,6 +27,11 @@ export default function SOSPushRegistrationHost(){
    }catch(error){setReady(false);setNotice(error?.message||'Background alerts could not be enabled.')}finally{setBusy(false)}
  };
  useEffect(()=>{const ok='serviceWorker'in navigator&&'PushManager'in window&&'Notification'in window;setSupported(ok);if(ok){setPermission(Notification.permission);if(Notification.permission==='granted')register(false).catch(()=>{})}},[]);
- if(!supported||permission==='denied')return null;if(ready&&!notice)return null;
- return <div style={{position:'fixed',right:12,bottom:52,zIndex:2450,width:'min(340px,calc(100vw - 24px))',display:'flex',justifyContent:'flex-end',pointerEvents:'none'}}><div style={{pointerEvents:'auto',padding:'9px 11px',borderRadius:14,background:'rgba(5,8,13,.94)',border:'1px solid rgba(255,138,76,.22)',boxShadow:'0 14px 42px rgba(0,0,0,.28)',color:'#fff',fontSize:9,lineHeight:1.4}}>{permission==='default'?<button type="button" onClick={()=>register(true)} disabled={busy} style={{border:0,borderRadius:10,padding:'9px 11px',background:'#ff8a4c',color:'#160c05',fontWeight:900,cursor:'pointer'}}>{busy?'ENABLING…':'ENABLE BACKGROUND S.O.S. ALERTS'}</button>:<span>{notice||'Background S.O.S. alerts connected.'}</span>}</div></div>;
+ if(profileSlot){
+   const state=!supported?'Not supported on this device':permission==='denied'?'Blocked in device settings':ready?'On — mission updates arrive in the background':busy?'Enabling…':notice||'Off — tap to get mission updates';
+   return createPortal(<button type="button" className="sos-profile-row" disabled={busy||ready||!supported||permission==='denied'} onClick={()=>register(true)}><span>◉</span><div><strong>Background alerts</strong><small>{state}</small></div><em>{ready?'✓':'›'}</em></button>,profileSlot);
+ }
+ if(isCustomerAppRoute())return null;
+ if(!supported||permission==='denied')return null;if(ready&&!notice)return null;if(!storedSession())return null;
+ return <div style={{position:'fixed',right:12,bottom:52,zIndex:2450,width:'min(340px,calc(100vw - 24px))',display:'flex',justifyContent:'flex-end',pointerEvents:'none'}}><div style={{pointerEvents:'auto',padding:'9px 11px',borderRadius:14,background:'rgba(5,8,13,.94)',border:'1px solid rgba(255,59,66,.22)',boxShadow:'0 14px 42px rgba(0,0,0,.28)',color:'#fff',fontSize:9,lineHeight:1.4}}>{permission==='default'?<button type="button" onClick={()=>register(true)} disabled={busy} style={{border:0,borderRadius:10,padding:'9px 11px',background:'#e3000b',color:'#fff',fontWeight:900,cursor:'pointer'}}>{busy?'ENABLING…':'ENABLE BACKGROUND S.O.S. ALERTS'}</button>:<span>{notice||'Background S.O.S. alerts connected.'}</span>}</div></div>;
 }

@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
+import { observeBody } from '../lib/domObserver';
 
 const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/marketplace-public-coverage';
 
 export default function SOSMarketplaceTruthHost(){
   useEffect(()=>{
     let stopped=false;
-    let observer;
+    let stopObserving=()=>{};
     const applyTruth=hasVerifiedSupply=>{
       if(stopped)return;
       document.querySelectorAll('p,small,span').forEach(node=>{
@@ -23,10 +24,9 @@ export default function SOSMarketplaceTruthHost(){
         if(response.ok)hasVerifiedSupply=Boolean(data?.sos?.has_verified_supply);
       }catch{}
       applyTruth(hasVerifiedSupply);
-      observer=new MutationObserver(()=>applyTruth(hasVerifiedSupply));
-      observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+      if(!stopped)stopObserving=observeBody(()=>applyTruth(hasVerifiedSupply));
     })();
-    return()=>{stopped=true;observer?.disconnect();};
+    return()=>{stopped=true;stopObserving();};
   },[]);
   return null;
 }

@@ -1,14 +1,14 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {observeBody} from '../lib/domObserver';
 import {createPortal} from 'react-dom';
 
 export default function SOSHeroRecruitmentWidget(){
   const[open,setOpen]=useState(false);
   const[authPanel,setAuthPanel]=useState(null);
+  const[inApp,setInApp]=useState(false);
   useEffect(()=>{
-    const sync=()=>setAuthPanel(document.querySelector('.sos2-auth-panel'));
-    sync();const observer=new MutationObserver(sync);observer.observe(document.body,{childList:true,subtree:true});
-    return()=>observer.disconnect();
+    return observeBody(()=>{setAuthPanel(document.querySelector('.sos2-auth-panel'));setInApp(Boolean(document.querySelector('.sos2-app')))});
   },[]);
   useEffect(()=>{
     try{
@@ -16,21 +16,21 @@ export default function SOSHeroRecruitmentWidget(){
       const last=Number(localStorage.getItem(key)||0);
       const week=7*24*60*60*1000;
       if(Date.now()-last>week){
-        const t=setTimeout(()=>{if(!document.querySelector('.sos2-auth-panel'))setOpen(true)},6500);
+        const t=setTimeout(()=>{if(!document.querySelector('.sos2-auth-panel,.sos2-app'))setOpen(true)},6500);
         return()=>clearTimeout(t);
       }
     }catch{}
   },[]);
   const close=()=>{setOpen(false);try{localStorage.setItem('sos_hero_recruitment_seen_at',String(Date.now()))}catch{}};
   return <>
-    {authPanel?createPortal(<a href="/hero/apply" aria-label="Apply to become an SOS Hero" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:44,marginTop:12,color:'#ffbd90',fontSize:13,textDecoration:'underline',textUnderlineOffset:4}}>Become an SOS Hero</a>,authPanel):(<a href="/hero/apply" aria-label="Apply to become an SOS Hero" style={{position:'fixed',right:16,bottom:84,zIndex:80,textDecoration:'none',background:'#111',color:'#fff',border:'1px solid rgba(255,255,255,.18)',borderRadius:999,padding:'10px 14px',fontSize:11,fontWeight:900,letterSpacing:'.08em',boxShadow:'0 10px 28px rgba(0,0,0,.24)'}}>EARN WITH S.O.S. · BECOME A HERO</a>)}
+    {inApp&&!authPanel?null:authPanel?createPortal(<a href="/hero/apply" aria-label="Apply to become an SOS Hero" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:44,marginTop:12,color:'#ff6a70',fontSize:13,textDecoration:'underline',textUnderlineOffset:4}}>Become an SOS Hero</a>,authPanel):(<a href="/hero/apply" aria-label="Apply to become an SOS Hero" style={{position:'fixed',right:16,bottom:84,zIndex:80,textDecoration:'none',background:'#111',color:'#fff',border:'1px solid rgba(255,255,255,.18)',borderRadius:999,padding:'10px 14px',fontSize:11,fontWeight:900,letterSpacing:'.08em',boxShadow:'0 10px 28px rgba(0,0,0,.24)'}}>EARN WITH S.O.S. · BECOME A HERO</a>)}
     {open&&!authPanel&&<div role="dialog" aria-modal="true" aria-label="Become an SOS Hero" style={{position:'fixed',inset:0,zIndex:200,display:'grid',placeItems:'center',padding:20,background:'rgba(0,0,0,.58)'}} onMouseDown={close}>
       <section onMouseDown={e=>e.stopPropagation()} style={{width:'min(430px,100%)',background:'#101010',color:'#fff',border:'1px solid rgba(255,255,255,.15)',borderRadius:24,padding:24,boxShadow:'0 24px 80px rgba(0,0,0,.5)'}}>
         <div style={{fontSize:10,fontWeight:900,letterSpacing:'.16em',opacity:.65}}>S.O.S. HERO NETWORK</div>
         <h2 style={{fontSize:28,lineHeight:1.05,margin:'10px 0 10px'}}>Got the skills? Get paid to help.</h2>
         <p style={{fontSize:14,lineHeight:1.5,opacity:.72,margin:'0 0 18px'}}>Roadside pros, tow operators, mobile mechanics, detailers and vehicle-service specialists can apply, upload credentials, and join the approval waitlist.</p>
         <div style={{display:'flex',gap:10,flexWrap:'wrap'}}>
-          <a href="/hero/apply" style={{flex:'1 1 190px',textAlign:'center',textDecoration:'none',background:'#ff6b35',color:'#fff',borderRadius:14,padding:'13px 16px',fontWeight:900}}>APPLY AS A HERO</a>
+          <a href="/hero/apply" style={{flex:'1 1 190px',textAlign:'center',textDecoration:'none',background:'#e3000b',color:'#fff',borderRadius:14,padding:'13px 16px',fontWeight:900}}>APPLY AS A HERO</a>
           <button type="button" onClick={close} style={{border:'1px solid rgba(255,255,255,.15)',background:'transparent',color:'#fff',borderRadius:14,padding:'13px 16px',fontWeight:800}}>NOT NOW</button>
         </div>
       </section>

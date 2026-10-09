@@ -19,7 +19,7 @@ const statusLabel=s=>({requested:'Requested',matching:'Matching',assigned:'Accep
 const paymentReady=s=>['authorized','captured','released'].includes(s||'');
 const nextStatus={assigned:['en_route','Start route'],en_route:['on_site','I arrived'],on_site:['working','Start service']};
 
-function Brand(){return <div className="shc-brand"><div className="shc-mark">SOS</div><div><strong>HERO COMMAND</strong><span>SUPERHEROES ON STANDBY</span></div></div>}
+function Brand(){return <div className="shc-brand"><div className="shc-mark">SOS</div><div><strong>HERO COMMAND</strong><span>SUPERHEROS ON STANDBY</span></div></div>}
 function Button({children,onClick,disabled=false,tone='orange',className=''}){return <button type="button" className={`shc-button ${tone} ${className}`} disabled={disabled} onClick={onClick}>{children}</button>}
 
 function Login({onLogin,error,setError}){

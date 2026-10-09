@@ -19,7 +19,7 @@ export default function SOSLoading({ label = 'Connecting roadside support' }) {
           text-align: center;
           color: #fff;
           background:
-            radial-gradient(circle at 50% 24%, rgba(255, 107, 53, .2), transparent 28%),
+            radial-gradient(circle at 50% 24%, rgba(227,0,11, .2), transparent 28%),
             linear-gradient(180deg, #111a29 0%, #05080d 78%);
           font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
@@ -29,9 +29,9 @@ export default function SOSLoading({ label = 'Connecting roadside support' }) {
           display: grid;
           place-items: center;
           margin-bottom: 24px;
-          border: 1px solid rgba(255, 107, 53, .3);
+          border: 1px solid rgba(227,0,11, .3);
           border-radius: 50%;
-          background: repeating-radial-gradient(circle, transparent 0 15px, rgba(255, 107, 53, .1) 16px 17px);
+          background: repeating-radial-gradient(circle, transparent 0 15px, rgba(227,0,11, .1) 16px 17px);
           animation: sos-radar 1.8s ease-in-out infinite;
         }
         .sos-runtime-loading__core {
@@ -41,13 +41,13 @@ export default function SOSLoading({ label = 'Connecting roadside support' }) {
           place-items: center;
           border-radius: 19px;
           color: #fff;
-          background: linear-gradient(135deg, #ff7b45, #e5432f);
-          box-shadow: 0 16px 38px rgba(229, 67, 47, .32);
+          background: linear-gradient(135deg, #ff1f2a, #b80009);
+          box-shadow: 0 16px 38px rgba(184,0,9, .32);
           font-weight: 900;
           letter-spacing: -.04em;
         }
         .sos-runtime-loading__eyebrow {
-          color: #ff9b68;
+          color: #ff4b52;
           font-size: 10px;
           font-weight: 900;
           letter-spacing: .2em;

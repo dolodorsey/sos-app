@@ -2,7 +2,7 @@
 import React,{useEffect,useRef,useState}from'react';
 
 /* ═══════════════════════════════════════════════════════════
-   S.O.S — SUPERHEROES ON STANDBY
+   S.O.S — SUPERHEROS ON STANDBY
    Landing / Front Door — "Rescue Noir"
    Signature interaction: the dispatch beacon (radar sweep)
    ═══════════════════════════════════════════════════════════ */
@@ -21,7 +21,7 @@ const QUICK=[
 ];
 
 const CATS=[
-  {n:'Emergency Roadside',c:'#FF6B35',k:8,d:'Tow, tire, jump, battery, fuel, lockout, winch-out, tire concierge.'},
+  {n:'Emergency Roadside',c:'#E3000B',k:8,d:'Tow, tire, jump, battery, fuel, lockout, winch-out, tire concierge.'},
   {n:'Mobile Maintenance',c:'#14b8a6',k:6,d:'Oil, fluids, OBD diagnostics, bulbs, belts, brake pads — at your curb.'},
   {n:'Glass & Body',c:'#3B82F6',k:4,d:'Windshield repair & replacement, paintless dent removal, scratch buff.'},
   {n:'Car Wash & Detailing',c:'#8b5cf6',k:5,d:'Express wash, interior deep clean, full detail, ceramic, sanitization.'},
@@ -108,7 +108,7 @@ export default function SOSLanding(){
     <header className={'hdr'+(scrolled?' hdr-on':'')}>
       <a href="/" className="mark" aria-label="SOS home">
         <span className="mark-s">S.O.S</span>
-        <span className="mark-sub">SUPERHEROES ON STANDBY</span>
+        <span className="mark-sub">SUPERHEROS ON STANDBY</span>
       </a>
       <nav className="hdr-nav">
         <a href="#services">Services</a>
@@ -132,7 +132,7 @@ export default function SOSLanding(){
           <span className="dot"/> ATLANTA &amp; METRO &nbsp;·&nbsp; REQUESTS ACCEPTED 24/7
         </div>
         <h1 className="h1" data-rv style={{'--d':'.06s'}}>
-          <span className="l1">SUPERHEROES</span>
+          <span className="l1">SUPERHEROS</span>
           <span className="l2">ON STANDBY</span>
         </h1>
         <p className="lede" data-rv style={{'--d':'.14s'}}>
@@ -287,7 +287,7 @@ export default function SOSLanding(){
       <div className="ftr-cols">
         <div>
           <div className="ftr-mark">S.O.S</div>
-          <div className="ftr-sub">SUPERHEROES ON STANDBY</div>
+          <div className="ftr-sub">SUPERHEROS ON STANDBY</div>
         </div>
         <div>
           <span className="ftr-h">Get Help</span>
@@ -309,7 +309,7 @@ export default function SOSLanding(){
         </div>
       </div>
       <div className="ftr-btm">
-        <span>© {new Date().getFullYear()} S.O.S — Superheroes On Standby. A Kollective Hospitality Group company.</span>
+        <span>© {new Date().getFullYear()} S.O.S — Superheros On Standby. A Kollective Hospitality Group company.</span>
         <span>Not an emergency service. For emergencies dial 911.</span>
       </div>
     </footer>
@@ -319,7 +319,7 @@ export default function SOSLanding(){
 const CSS=`
 .sos{
   --bg:#080c14; --bg2:#0b1120; --card:#0d1320; --card2:#111827;
-  --acc:#FF6B35; --acc-dk:#E55A2B; --gold:#FFB347; --green:#10B981;
+  --acc:#E3000B; --acc-dk:#B80009; --gold:#FF5A60; --green:#10B981;
   --tx:#ffffff; --sub:rgba(255,255,255,.72); --mut:rgba(255,255,255,.46); --bd:rgba(255,255,255,.10);
   --ff:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --fd:'Barlow Condensed','DM Sans',sans-serif;
@@ -341,8 +341,8 @@ const CSS=`
   background:linear-gradient(135deg,var(--acc),var(--acc-dk));color:#fff;border:none;cursor:pointer;
   padding:14px 24px;border-radius:14px;font-size:14px;letter-spacing:.02em;
   transition:transform .18s var(--e),box-shadow .18s var(--e),filter .18s var(--e);
-  box-shadow:0 8px 30px -12px rgba(255,107,53,.7)}
-.btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(255,107,53,.85);filter:brightness(1.06)}
+  box-shadow:0 8px 30px -12px rgba(227,0,11,.7)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(227,0,11,.85);filter:brightness(1.06)}
 .btn-lg{padding:19px 34px;font-size:15px;border-radius:16px}
 .btn-sm{padding:11px 20px;font-size:13px;border-radius:12px}
 .btn-ghost{background:transparent;border:1px solid var(--bd);box-shadow:none;color:var(--sub)}
@@ -370,7 +370,7 @@ const CSS=`
 .hero{position:relative;min-height:100svh;display:flex;align-items:center;
   padding:124px clamp(20px,5vw,64px) 96px;overflow:hidden;
   background:
-    radial-gradient(120% 80% at 78% 40%,rgba(255,107,53,.16),transparent 60%),
+    radial-gradient(120% 80% at 78% 40%,rgba(227,0,11,.16),transparent 60%),
     radial-gradient(90% 70% at 10% 90%,rgba(59,130,246,.10),transparent 62%),
     linear-gradient(180deg,#070a11 0%,var(--bg) 55%,#070a11 100%)}
 .hero-inner{position:relative;z-index:3;max-width:min(880px,62vw)}
@@ -396,14 +396,14 @@ const CSS=`
   width:min(760px,62vw);aspect-ratio:1;display:grid;place-items:center;opacity:.9}
 @media(max-width:1080px){.beacon-wrap{right:-32vw;opacity:.4;width:110vw}}
 .beacon{position:relative;width:100%;height:100%;display:grid;place-items:center}
-.ring{position:absolute;border-radius:50%;border:1px solid rgba(255,107,53,.34);width:26%;height:26%;
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(227,0,11,.34);width:26%;height:26%;
   animation:rp 4.6s var(--e) infinite}
 .ring.r2{animation-delay:1.53s}
 .ring.r3{animation-delay:3.06s}
 @keyframes rp{0%{transform:scale(1);opacity:0}12%{opacity:.85}100%{transform:scale(3.85);opacity:0}}
-.core{width:16px;height:16px;border-radius:50%;background:var(--acc);box-shadow:0 0 44px 10px rgba(255,107,53,.6)}
+.core{width:16px;height:16px;border-radius:50%;background:var(--acc);box-shadow:0 0 44px 10px rgba(227,0,11,.6)}
 .sweep{position:absolute;width:52%;height:52%;border-radius:50%;
-  background:conic-gradient(from 0deg,rgba(255,107,53,.30),rgba(255,107,53,0) 34%);
+  background:conic-gradient(from 0deg,rgba(227,0,11,.30),rgba(227,0,11,0) 34%);
   animation:sw 5.5s linear infinite;filter:blur(2px)}
 @keyframes sw{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.ring,.sweep,.pulse-dot,.dot{animation:none}}
@@ -429,9 +429,9 @@ const CSS=`
 .q{position:relative;display:flex;flex-direction:column;padding:26px 22px 22px;border-radius:20px;
   background:linear-gradient(180deg,var(--card),#0a0f1a);border:1px solid var(--bd);overflow:hidden;
   transition:transform .35s var(--e),border-color .35s var(--e),background .35s var(--e)}
-.q:before{content:'';position:absolute;inset:0;background:radial-gradient(90% 70% at 50% 0%,rgba(255,107,53,.16),transparent 65%);
+.q:before{content:'';position:absolute;inset:0;background:radial-gradient(90% 70% at 50% 0%,rgba(227,0,11,.16),transparent 65%);
   opacity:0;transition:opacity .35s var(--e)}
-.q:hover{transform:translateY(-6px);border-color:rgba(255,107,53,.45)}
+.q:hover{transform:translateY(-6px);border-color:rgba(227,0,11,.45)}
 .q:hover:before{opacity:1}
 .q-emoji{font-size:26px;margin-bottom:16px;position:relative}
 .q-name{font-family:var(--fd);font-size:25px;font-weight:700;text-transform:uppercase;letter-spacing:.01em;position:relative}
@@ -507,7 +507,7 @@ const CSS=`
 
 /* ── close ── */
 .close{padding:clamp(90px,12vw,170px) clamp(20px,5vw,64px);text-align:center;
-  background:radial-gradient(80% 90% at 50% 100%,rgba(255,107,53,.20),transparent 65%),#070a11}
+  background:radial-gradient(80% 90% at 50% 100%,rgba(227,0,11,.20),transparent 65%),#070a11}
 .close-mark{font-family:var(--fd);font-weight:800;font-size:clamp(72px,17vw,240px);line-height:.85;letter-spacing:.02em;
   color:transparent;-webkit-text-stroke:1.4px rgba(255,255,255,.26);text-stroke:1.4px rgba(255,255,255,.26)}
 .close-h{font-family:var(--fd);font-weight:700;text-transform:uppercase;font-size:clamp(30px,5vw,66px);margin:22px 0 40px;line-height:1}

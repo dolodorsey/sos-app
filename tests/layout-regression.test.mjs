@@ -19,20 +19,43 @@ test('desktop rescue stylesheet is imported after every earlier SOS stylesheet',
   ]) assert.ok(rescueIndex > layout.indexOf(earlier), `${earlier} must load before the desktop rescue stylesheet`)
 })
 
-test('desktop customer and Hero products break out of the legacy 450px app shell', () => {
+test('customer app renders as one native-width app column on every screen; Hero Command keeps its desktop shell', () => {
+  const layout = read('src/app/layout.jsx')
+  const frame = read('src/components/sos-app-frame.css')
+  const shell = read('src/components/SOSRouteShell.jsx')
   const rescue = read('src/components/sos-root-layout-rescue.css')
-  assert.match(rescue, /@media \(min-width: 900px\)/)
-  assert.match(rescue, /\.app-shell\.sos-premium[\s\S]*?max-width:\s*none\s*!important/)
-  assert.match(rescue, /\.sos2-app[\s\S]*?max-width:\s*none\s*!important/)
+  // frame sheet loads last so it is the final authority
+  const frameIndex = layout.indexOf("import '../components/sos-app-frame.css'")
+  assert.ok(frameIndex > 0)
+  for (const m of layout.matchAll(/import '[^']+\.css'/g)) assert.ok(m.index <= frameIndex, `${m[0]} must load before sos-app-frame.css`)
+  assert.match(shell, /APP_FRAME_ROUTES = new Set\(\['\/', '\/app'\]\)/)
+  assert.match(shell, /normalizePath/)
+  assert.match(frame, /--sos-app-width:\s*480px/)
+  assert.match(frame, /\.sos-app-frame > \.app-shell[\s\S]*?max-width:\s*var\(--sos-app-width\)\s*!important/)
+  assert.match(frame, /transform:\s*translateZ\(0\)/)
+  assert.match(frame, /\.sos2-nav \{[\s\S]*?position:\s*relative\s*!important/)
+  // no wide-screen rule may stretch the customer app components again
+  for (const file of fs.readdirSync(new URL('../src/components/', import.meta.url)).filter(f => f.endsWith('.css') && f !== 'sos-app-frame.css')) {
+    const css = read(`src/components/${file}`)
+    for (const m of css.matchAll(/@media[^{]*min-width:\s*(\d+)px[^{]*\{/g)) {
+      if (Number(m[1]) < 600) continue
+      let depth = 1, i = m.index + m[0].length
+      while (depth && i < css.length) { if (css[i] === '{') depth++; else if (css[i] === '}') depth--; i++ }
+      const body = css.slice(m.index + m[0].length, i - 1)
+      for (const rule of body.matchAll(/([^{}]+)\{[^}]*\}/g)) {
+        assert.doesNotMatch(rule[1], /\.sos[23x]-|\.sos-mobility-layer/, `${file}: wide-screen rule targets customer app component: ${rule[1].trim()}`)
+      }
+    }
+  }
+  // Hero Command desktop shell remains full width
   assert.match(rescue, /\.shc-app,[\s\S]*?max-width:\s*none\s*!important/)
-  assert.match(rescue, /\.sos2-auth,[\s\S]*?max-width:\s*480px\s*!important/)
 })
 
-test('desktop SOS customer and Hero products cannot regress to micro-sized phone typography', () => {
+test('customer app typography stays readable inside the app column; Hero desktop typography floor kept', () => {
+  const frame = read('src/components/sos-app-frame.css')
   const rescue = read('src/components/sos-root-layout-rescue.css')
-  assert.match(rescue, /\.sos2-service-list strong,[\s\S]*?font-size:\s*14px\s*!important/)
-  assert.match(rescue, /\.sos2-service-list p,[\s\S]*?font-size:\s*12px\s*!important/)
-  assert.match(rescue, /\.sos2-nav button small[\s\S]*?font-size:\s*10px\s*!important/)
+  assert.match(frame, /\.sos2-nav button small \{ font-size: 11px !important/)
+  assert.match(frame, /\.sos-status-card small \{[\s\S]*?font-size:\s*12px\s*!important/)
   assert.match(rescue, /\.shc-mission-list strong,[\s\S]*?font-size:\s*13px\s*!important/)
   assert.match(rescue, /\.shc-metrics small,[\s\S]*?font-size:\s*10px\s*!important/)
 })
