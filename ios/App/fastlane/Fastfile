@@ -56,7 +56,7 @@ platform :ios do
       output_directory: "./build",
       output_name: "sos.ipa",
       xcargs: signing_args.join(" "),
-      disable_package_automatic_updates: true,
+      disable_package_automatic_updates: false,
       skip_profile_detection: true,
       result_bundle: true
     )
