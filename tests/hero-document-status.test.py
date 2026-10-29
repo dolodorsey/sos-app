@@ -23,7 +23,7 @@ with tempfile.TemporaryDirectory(prefix='sos-doc-submit-',dir='/tmp') as scratch
   sql('''create schema auth;create schema private;create schema storage;
 create function auth.uid() returns uuid language sql as $$select nullif(current_setting('test.uid'),'')::uuid$$;
 create table sos_hero_applications(id uuid primary key,source_auth_id uuid,status text,credentials_complete_at timestamptz,updated_at timestamptz);
-create table sos_hero_application_documents(application_id uuid,auth_id uuid,document_type text not null,storage_path text unique,status text default 'pending');
+'''+(ROOT/'fixtures/sos-document-table.sql').read_text()+''' 
 create table storage.objects(bucket_id text,name text);
 ''')
   sql((ROOT/'fixtures/sos-document-submit-before.sql').read_text())
@@ -39,6 +39,21 @@ create table storage.objects(bucket_id text,name text);
   for p in [path('government_id').replace(A,B),path('government_id').replace(I,B),path('insurance'),path('government_id')+'/../x']:
    deny('government_id',p,'Invalid application document path')
   deny('unsupported',path('unsupported'),'Unsupported document type')
+  sql("insert into storage.objects values('marketplace-verification','%s');"%path('government_id'))
+  before=snapshot()
+  try:
+   sql("select set_config('test.uid','%s',false);select sos_hero_submit_application_document('%s',NULL,'%s');"%(A,I,path('government_id')))
+   raise AssertionError('null type accepted')
+  except RuntimeError as x:assert 'not-null constraint' in str(x),str(x)
+  assert before==snapshot();checks.append('PASS null document type rejected with no partial writes')
+  for field in ['auth_id','storage_path','application_id']:
+   before=snapshot()
+   vals={'application_id':"'%s'"%I,'auth_id':"'%s'"%A,'document_type':"'government_id'",'storage_path':"'fixture-only'"};vals[field]='NULL'
+   try:
+    sql('insert into sos_hero_application_documents('+','.join(vals)+') values('+','.join(vals.values())+');')
+    raise AssertionError('null required field accepted')
+   except RuntimeError as x:assert 'not-null constraint' in str(x),str(x)
+   assert before==snapshot();checks.append('PASS actual NOT NULL '+field+'; no partial writes')
   for t in ['government_id','drivers_license','insurance']:
    sql("insert into storage.objects values('marketplace-verification','%s');"%path(t))
    d=call(t,path(t))
@@ -48,7 +63,7 @@ create table storage.objects(bucket_id text,name text);
   d=call('insurance',path('insurance'));assert d['required_uploaded']==2 and sql('select status from sos_hero_applications')=='documents_required';checks.append('PASS rejected document replay remains rejected and does not count')
   for current in ['approved','reviewing','needs_information','conditionally_approved','rejected']:
    for complete in [False,True]:
-    sql("update sos_hero_applications set status='%s';update sos_hero_application_documents set status='%s' where document_type='insurance';"%(current,'pending' if complete else 'rejected'))
+    sql("update sos_hero_applications set status='%s';update sos_hero_application_documents set status='%s' where document_type='insurance';"%(current,'submitted' if complete else 'rejected'))
     d=call('government_id',path('government_id'))
     assert d['status']==current and sql('select status from sos_hero_applications')==current
     assert d['required_uploaded']==(3 if complete else 2)
@@ -56,5 +71,5 @@ create table storage.objects(bucket_id text,name text);
 
  finally:
   if started:run('pg_ctl',['-D',scratch+'/data','-m','fast','stop'])
-out={'checks':checks,'completed':len(checks),'source_sha256':hashlib.sha256(migration.read_bytes()).hexdigest(),'minimal_tables':True,'auth_stub':True,'production_triggers_not_loaded':True,'cluster_removed':True,'production_writes':0}
+out={'checks':checks,'completed':len(checks),'source_sha256':hashlib.sha256(migration.read_bytes()).hexdigest(),'actual_document_columns_and_constraints':True,'minimal_application_and_storage_tables':True,'auth_stub':True,'production_triggers_not_loaded':True,'cluster_removed':True,'production_writes':0}
 print(json.dumps(out,indent=2))
