@@ -23,7 +23,7 @@ with tempfile.TemporaryDirectory(prefix='sos-doc-submit-',dir='/tmp') as scratch
   sql('''create schema auth;create schema private;create schema storage;
 create function auth.uid() returns uuid language sql as $$select nullif(current_setting('test.uid'),'')::uuid$$;
 create table sos_hero_applications(id uuid primary key,source_auth_id uuid,status text,credentials_complete_at timestamptz,updated_at timestamptz);
-'''+(ROOT/'fixtures/sos-document-table.sql').read_text()+''' 
+'''+(ROOT/'fixtures/sos-document-table.sql').read_text()+'''
 create table storage.objects(bucket_id text,name text);
 ''')
   sql((ROOT/'fixtures/sos-document-submit-before.sql').read_text())
