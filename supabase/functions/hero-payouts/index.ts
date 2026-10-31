@@ -35,7 +35,10 @@ Deno.serve(async req=>{
     }else if(accountId){
       account=await stripeV2(stripeKey,`/v2/core/accounts/${encodeURIComponent(accountId)}?include[]=configuration.recipient&include[]=requirements`,{method:'GET'});
     }
-  }catch(error){if(accountId){await admin.from('sos_heroes').update({stripe_connect_id:null,stripe_connect_api_version:null,stripe_transfer_status:null,stripe_requirements_due:[],payout_method:null,updated_at:now()}).eq('id',hero.id);await syncPayoutCheck('pending','Stripe payout account requires reconnection.')}const message=error instanceof Error?error.message:'Payout account could not be verified.';return json(req,{connected:false,payout_ready:false,requirements_due:[],error:message},409)}
+  }catch(error){
+    // A failed lookup is not evidence that the saved account should be disconnected.
+    return json(req,{verification_unavailable:true,error:'Payout account could not be verified. Your saved connection has been retained. Try again later.'},503);
+  }
   if(!accountId){await syncPayoutCheck('pending','Stripe payout setup has not started.');return json(req,{connected:false,payout_ready:false,requirements_due:[],message:'Stripe payout setup is required before going on patrol.'});}
   const transfers=transferStatus(account);const requirements=dueList(account);const ready=transfers==='active';
   await admin.from('sos_heroes').update({stripe_connect_id:accountId,stripe_connect_api_version:'v2',stripe_transfer_status:transfers,stripe_requirements_due:requirements,payout_method:'stripe_connect',updated_at:now()}).eq('id',hero.id);
