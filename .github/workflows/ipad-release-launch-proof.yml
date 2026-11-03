@@ -1,0 +1,129 @@
+name: iPad Release Cold Launch Proof
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/ipad-release-launch-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ipad-release-launch-proof-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ipad-release-cold-launch:
+    name: Release build + iPad cold launch
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact tested source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record source identity and Xcode
+        run: |
+          mkdir -p launch-proof
+          echo "tested_commit=$GITHUB_SHA" | tee launch-proof/source.txt
+          echo "tested_ref=$GITHUB_REF" | tee -a launch-proof/source.txt
+          xcodebuild -version | tee launch-proof/xcode-version.txt
+          xcrun simctl list runtimes | tee launch-proof/simulator-runtimes.txt
+
+      - name: Select and boot iPadOS 26 simulator
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEVICE_JSON="$(xcrun simctl list devices available -j)"
+          UDID="$(python3 -c 'import json,sys; d=json.load(sys.stdin); xs=[x for group,ds in d["devices"].items() if "iOS-26" in group for x in ds if x["isAvailable"] and "iPad" in x["name"]]; print(xs[0]["udid"] if xs else "")' <<< "$DEVICE_JSON")"
+          if [ -z "$UDID" ]; then
+            echo "::error::No available iPad simulator on iOS 26 runtime"
+            exit 1
+          fi
+          DEVICE_NAME="$(xcrun simctl list devices available | grep "$UDID" | sed 's/.*(//' | sed 's/).*//')"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "Selected iPad simulator UDID: $UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time '9:41' --batteryState charged --batteryLevel 100
+
+      - name: Install dependencies and sync Capacitor iOS
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          npx cap sync ios
+
+      - name: Resolve Swift packages and build Release for iPad Simulator
+        run: |
+          set -o pipefail
+          xcodebuild -resolvePackageDependencies -project ios/App/App.xcodeproj -scheme App
+          xcodebuild -project ios/App/App.xcodeproj -scheme App \
+            -configuration Release \
+            -destination "id=${{ steps.simulator.outputs.udid }}" \
+            -derivedDataPath "$RUNNER_TEMP/SOSDerivedData" \
+            CODE_SIGNING_ALLOWED=NO build | tee launch-proof/xcodebuild-release.log
+
+      - name: Install, cold launch, capture first screen and diagnostics
+        id: launch
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -uo pipefail
+          APP="$RUNNER_TEMP/SOSDerivedData/Build/Products/Release-iphonesimulator/App.app"
+          if [ ! -d "$APP" ]; then
+            echo "::error::Release simulator app bundle missing: $APP"
+            exit 1
+          fi
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")
+          echo "bundle_id=$BUNDLE_ID" | tee launch-proof/app-identity.txt
+          xcrun simctl install "${{ steps.simulator.outputs.udid }}" "$APP"
+          xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" >/dev/null 2>&1 || true
+          xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log stream --style compact --level info --predicate "process == \"$BUNDLE_ID\"" > launch-proof/launch-log-stream.txt 2>&1 &
+          LOG_PID=$!
+          python3 -c 'import time; time.sleep(2)'
+          START_NS=$(python3 -c 'import time; print(time.time_ns())')
+          set +e
+          xcrun simctl launch --terminate-running-process "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" 2>&1 | tee launch-proof/launch-command.log
+          LAUNCH_RC=${PIPESTATUS[0]}
+          set -e
+          echo "launch_exit_code=$LAUNCH_RC" | tee launch-proof/launch-result.txt
+          python3 -c 'import time; time.sleep(15)'
+          END_NS=$(python3 -c 'import time; print(time.time_ns())')
+          ELAPSED_MS=$(( (END_NS - START_NS) / 1000000 ))
+          echo "first_screen_capture_elapsed_ms=$ELAPSED_MS" | tee -a launch-proof/launch-result.txt
+          xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot launch-proof/first-rendered-screen.png
+          xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" > launch-proof/launch-log-show.txt 2>&1 || true
+          kill "$LOG_PID" >/dev/null 2>&1 || true
+          mkdir -p launch-proof/crash-reports
+          find "$HOME/Library/Logs/DiagnosticReports" -type f -mmin -15 \( -iname '*App*' -o -iname '*SOS*' \) -exec cp {} launch-proof/crash-reports/ \; 2>/dev/null || true
+          xcrun simctl list devices | grep "${{ steps.simulator.outputs.udid }}" > launch-proof/device-final-state.txt
+          if [ "$LAUNCH_RC" -ne 0 ]; then exit "$LAUNCH_RC"; fi
+          if [ ! -s launch-proof/first-rendered-screen.png ]; then
+            echo "::error::No first-screen screenshot captured"
+            exit 1
+          fi
+
+      - name: Upload launch proof, logs and crash reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sos-ipad-release-launch-proof-${{ github.run_id }}
+          path: launch-proof/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Require successful cold launch and rendered screen
+        if: always()
+        run: |
+          if [ "${{ steps.launch.outcome }}" != "success" ]; then
+            echo "::error::S.O.S. failed iPad Release cold-launch proof. Inspect uploaded logs and crash reports."
+            exit 1
+          fi
