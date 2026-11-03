@@ -31,7 +31,7 @@ export default function DownloadPage() {
           SOS
         </h1>
         <p style={{ color: "#E53E3E", fontSize: "1rem", margin: 0 }}>
-          Emergency services. One tap away.
+          Roadside help in Atlanta. One tap away.
         </p>
       </div>
 
