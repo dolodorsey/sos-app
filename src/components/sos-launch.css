@@ -1,0 +1,66 @@
+/* S.O.S. Atlanta core launch — unavailable services + launch banner.
+   Loaded last in app/layout.jsx so it wins over earlier layers. */
+
+.sos2-service-list > button.sos2-unavailable,
+.sos-subcat-card.sos-unavailable,
+.sos-launch-card.is-soon {
+  opacity: .5;
+  filter: grayscale(.85);
+  cursor: default;
+}
+.sos2-service-list > button.sos2-unavailable em,
+.sos-subcat-card.sos-unavailable em {
+  color: rgba(255, 255, 255, .62) !important;
+  font-size: 9px !important;
+  letter-spacing: .14em;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.sos2-unavailable-note {
+  margin: 16px 0 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+.sos2-unavailable-note strong {
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.sos2-unavailable-note small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(235, 241, 248, .7);
+}
+
+.sos2-membership.sos2-launch-banner {
+  min-height: 0 !important;
+  background-image: linear-gradient(135deg, #3a0b0e, #0b0f17 72%) !important;
+  border-color: rgba(255, 75, 82, .35) !important;
+}
+.sos2-membership.sos2-launch-banner h2 { font-size: 32px !important; }
+.sos2-membership.sos2-launch-banner p { font-size: 12px; color: rgba(255, 255, 255, .75) !important; }
+
+/* Quick rescue: 5 tiles instead of 6 — keep the grid balanced. */
+.sos2-quick-grid > button:nth-child(5):last-child { grid-column: 1 / -1; }
+
+/* Website — service availability badges */
+.sos-launch-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font: 800 10px/1 Inter, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+.sos-launch-badge.live { background: rgba(16, 185, 129, .16); color: #34d399; border: 1px solid rgba(16, 185, 129, .4); }
+.sos-launch-badge.soon { background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .6); border: 1px solid rgba(255, 255, 255, .18); }

@@ -1,5 +1,7 @@
 import React,{useState,useEffect}from'react';
 import NotNineOneOneGate,{hasAcknowledgedNot911}from'./NotNineOneOneGate';
+import{requestCustomerMission}from'../lib/sosMissionClient';
+import{isLaunchService,launchServiceId,notAvailableMessage,inLaunchMarket,OUT_OF_MARKET_MESSAGE,NOT_AVAILABLE_LABEL,LAUNCH_MARKET}from'../lib/sosLaunch';
 
 // Haptic feedback for native iOS
 const tap=async(style='Medium')=>{try{const{Haptics,ImpactStyle}=await import('@capacitor/haptics');await Haptics.impact({style:ImpactStyle[style]||ImpactStyle.Medium});}catch{}};
@@ -8,7 +10,7 @@ const tapLight=()=>tap('Light');
 
 /* ═══════════════════════════════════════════
    S.O.S — SUPERHEROS ON STANDBY — MOBILE APP
-   8 categories, 40 services, citizen/hero portals
+   Atlanta launch: 5 live services, the rest shown as not available yet
    ═══════════════════════════════════════════ */
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
@@ -111,12 +113,11 @@ const CATS=[
 ];
 
 const QUICK=[
-  {name:'Flat Tire',emoji:'\u{1F6DE}',price:55,eta:'5-10 min',desc:'Spare install or patch'},
-  {name:'Jump Start',emoji:'\u{1F50B}',price:45,eta:'5-10 min',desc:'Battery boost'},
-  {name:'Lockout',emoji:'\u{1F511}',price:50,eta:'5-10 min',desc:'Non-destructive unlock'},
   {name:'Towing',emoji:'\u{1F69B}',price:75,eta:'5-10 min',desc:'Secure tow'},
-  {name:'Fuel',emoji:'\u26FD',price:55,eta:'5-10 min',desc:'Gas, diesel, EV'},
-  {name:'Battery',emoji:'\u{1F50B}',price:95,eta:'10-20 min',desc:'Deliver & install'},
+  {name:'Fuel Delivery',emoji:'\u26FD',price:55,eta:'5-10 min',desc:'Gas or diesel'},
+  {name:'Jump Start',emoji:'\u{1F50B}',price:45,eta:'5-10 min',desc:'Battery boost'},
+  {name:'Flat Tire Help',emoji:'\u{1F6DE}',price:55,eta:'5-10 min',desc:'Spare install or patch'},
+  {name:'Lockout',emoji:'\u{1F511}',price:50,eta:'5-10 min',desc:'Non-destructive unlock'},
 ];
 
 /* The full not-911 disclaimer is an App Store compliance requirement for NATIVE
@@ -222,19 +223,20 @@ function SOSAppInner(){
     window.location.assign(target.toString());
   };
 
-  const request=(svc)=>{tapLight();setDispatch({phase:'confirm',service:svc});};
+  const request=(svc)=>{tapLight();if(!isLaunchService(svc.name)){setDispatch({phase:'error',service:svc,message:notAvailableMessage(svc.name),unavailable:true});return;}setDispatch({phase:'confirm',service:svc});};
   const confirmReq=async()=>{tapHeavy();
     setDispatch(p=>({...p,phase:'finding'}));
     const loc=await getLocation();
-    let saved=false;
-    if(session&&sosUser){
-      try{const r=await fetch(`${SB}/rest/v1/sos_missions`,{method:'POST',headers:{'Content-Type':'application/json',apikey:SK,Authorization:`Bearer ${session.access_token}`,Prefer:'return=minimal'},
-        body:JSON.stringify({citizen_id:sosUser.id,status:'requested',pickup_address:loc.address,estimated_price:dispatch.service.price||0,request_type:'now'})});saved=r.ok;}catch{saved=false;}
-    }
-    // Truthful flow: the request is recorded server-side, but no Hero is
-    // matched in real time yet. Do NOT fabricate "Hero Found / En Route /
-    // live GPS / ETA" — show an honest "request received" state instead.
-    setDispatch(p=>({...p,phase:saved?'requested':'error'}));
+    let saved=false;let message='';
+    try{
+      if(!session||!sosUser)throw new Error('Sign in to request a Hero.');
+      if(loc.lat==null)throw new Error('Allow precise location so S.O.S. can dispatch a Hero to you.');
+      if(!inLaunchMarket(loc.lat,loc.lng))throw new Error(OUT_OF_MARKET_MESSAGE);
+      await requestCustomerMission({token:session.access_token,serviceId:launchServiceId(dispatch.service.name),serviceName:dispatch.service.name,location:loc});
+      saved=true;
+    }catch(e){message=e?.message||'';}
+    // Truthful flow: show "request received" only after the server accepted it.
+    setDispatch(p=>({...p,phase:saved?'requested':'error',message}));
   };
   const finishMission=()=>{tap();setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
   const authorizeMission=async(mission)=>{setLoading(true);setErr('');try{const d=await api('/functions/v1/create-mission-checkout',session.access_token,{method:'POST',body:JSON.stringify({mission_id:mission.id})});if(!d?.checkout_url)throw new Error('Secure checkout is unavailable');await openPaymentUrl(d.checkout_url);}catch(e){setErr(e.message)}finally{setLoading(false)}};
@@ -320,9 +322,9 @@ function SOSAppInner(){
         </div>)}
         {dispatch.phase==='error'&&(<div style={{background:C.card,borderRadius:20,padding:24,width:'100%',maxWidth:340,textAlign:'center',border:`1px solid ${C.border}`}}>
           <div style={{width:80,height:80,borderRadius:'50%',background:`${C.red}20`,margin:'0 auto 16px',...F('row','center','center'),fontSize:36}}>{'\u26A0\uFE0F'}</div>
-          <div style={{fontSize:20,fontWeight:800,color:C.red}}>Couldn't Send Request</div>
-          <div style={{fontSize:13,color:C.sub,margin:'8px 0 16px'}}>We couldn't reach the network. Please check your connection and try again. For a life-threatening emergency, call 911.</div>
-          <button onClick={()=>setDispatch(p=>({...p,phase:'confirm'}))} style={{width:'100%',padding:'14px',background:C.accent,color:'#fff',border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Try Again</button>
+          <div style={{fontSize:20,fontWeight:800,color:dispatch.unavailable?C.text:C.red}}>{dispatch.unavailable?NOT_AVAILABLE_LABEL:"Couldn't Send Request"}</div>
+          <div style={{fontSize:13,color:C.sub,margin:'8px 0 16px'}}>{dispatch.message||"We couldn't reach the network. Please check your connection and try again."} For a life-threatening emergency, call 911.</div>
+          {!dispatch.unavailable&&<button onClick={()=>setDispatch(p=>({...p,phase:'confirm'}))} style={{width:'100%',padding:'14px',background:C.accent,color:'#fff',border:'none',borderRadius:12,fontSize:15,fontWeight:700,cursor:'pointer',fontFamily:ff}}>Try Again</button>}
           <button onClick={()=>setDispatch(null)} style={{background:'none',border:'none',color:C.sub,marginTop:10,cursor:'pointer',fontSize:13,fontFamily:ff}}>Cancel</button>
         </div>)}
       </div>
@@ -351,7 +353,7 @@ function SOSAppInner(){
           {tab==='home'&&(<div style={{padding:'20px 20px 0'}}>
             <div style={{...F('row','center','space-between'),marginBottom:20}}>
               <div><div style={{fontWeight:900,fontSize:22}}>S.O.S</div><div style={{fontSize:11,color:C.sub}}>Hi {sosUser?.full_name?.split(' ')[0]||session?.user?.user_metadata?.full_name?.split(' ')[0]||'there'} {'\u{1F44B}'}</div></div>
-              <div style={{background:`${C.accent}15`,borderRadius:10,padding:'6px 12px',fontSize:11,fontWeight:700,color:C.accent}}>Shield Free</div>
+              <div style={{background:`${C.accent}15`,borderRadius:10,padding:'6px 12px',fontSize:11,fontWeight:700,color:C.accent}}>Live in {LAUNCH_MARKET.short}</div>
             </div>
             {/* SOS Button */}
             <div style={{textAlign:'center',margin:'20px 0 28px'}}>
@@ -372,7 +374,7 @@ function SOSAppInner(){
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
               {CATS.map(c=>(<div key={c.id} onClick={()=>{setTab('services');setOpenCat(c.id)}} style={{background:C.card,borderRadius:14,padding:14,cursor:'pointer',border:`1px solid ${C.border}`,...F('row','center','flex-start',10)}}>
                 <div style={{width:36,height:36,borderRadius:10,background:`${c.color}15`,fontSize:18,...F('row','center','center'),flexShrink:0}}>{c.icon}</div>
-                <div><div style={{fontWeight:700,fontSize:12}}>{c.name}</div><div style={{fontSize:10,color:C.muted}}>{c.services.length} services</div></div>
+                <div><div style={{fontWeight:700,fontSize:12}}>{c.name}</div><div style={{fontSize:10,color:C.muted}}>{c.services.filter(x=>isLaunchService(x.name)).length?`${c.services.filter(x=>isLaunchService(x.name)).length} live now`:NOT_AVAILABLE_LABEL}</div></div>
               </div>))}
             </div>
           </div>)}
@@ -384,14 +386,14 @@ function SOSAppInner(){
               <div onClick={()=>setOpenCat(openCat===cat.id?null:cat.id)} style={{background:C.card,borderRadius:14,padding:'14px 16px',cursor:'pointer',border:openCat===cat.id?`1px solid ${cat.color}40`:`1px solid ${C.border}`,...F('row','center','space-between')}}>
                 <div style={F('row','center','flex-start',10)}>
                   <div style={{width:36,height:36,borderRadius:10,background:`${cat.color}15`,fontSize:18,...F('row','center','center'),flexShrink:0}}>{cat.icon}</div>
-                  <div><div style={{fontWeight:700,fontSize:14}}>{cat.name}</div><div style={{fontSize:11,color:C.sub}}>{cat.services.length} services</div></div>
+                  <div><div style={{fontWeight:700,fontSize:14}}>{cat.name}</div><div style={{fontSize:11,color:C.sub}}>{cat.services.filter(x=>isLaunchService(x.name)).length?`${cat.services.filter(x=>isLaunchService(x.name)).length} live · ${cat.services.length-cat.services.filter(x=>isLaunchService(x.name)).length} coming soon`:NOT_AVAILABLE_LABEL}</div></div>
                 </div>
                 <span style={{color:C.sub,fontSize:14}}>{openCat===cat.id?'\u25BE':'\u25B8'}</span>
               </div>
               {openCat===cat.id&&(<div style={{background:C.card2,borderRadius:12,marginTop:4,overflow:'hidden'}}>
-                {cat.services.map((s,i)=>(<div key={i} onClick={()=>request(s)} style={{padding:'12px 16px',borderBottom:i<cat.services.length-1?`1px solid ${C.border}`:'none',cursor:'pointer',...F('row','center','space-between')}}>
-                  <div style={{flex:1}}><div style={{fontWeight:600,fontSize:13}}>{s.name}</div><div style={{fontSize:11,color:C.sub}}>{s.desc} {'\u00B7'} {s.eta}</div></div>
-                  <div style={{fontWeight:700,fontSize:14,color:s.quote?C.gold:C.accent,flexShrink:0,marginLeft:8}}>{s.quote?'Quote':('$'+s.price)}</div>
+                {cat.services.map((s,i)=>(<div key={i} onClick={()=>request(s)} aria-disabled={!isLaunchService(s.name)} style={{opacity:isLaunchService(s.name)?1:.45,padding:'12px 16px',borderBottom:i<cat.services.length-1?`1px solid ${C.border}`:'none',cursor:'pointer',...F('row','center','space-between')}}>
+                  <div style={{flex:1}}><div style={{fontWeight:600,fontSize:13}}>{s.name}</div><div style={{fontSize:11,color:C.sub}}>{s.desc} {'\u00B7'} {isLaunchService(s.name)?s.eta:NOT_AVAILABLE_LABEL}</div></div>
+                  <div style={{fontWeight:700,fontSize:isLaunchService(s.name)?14:10,color:isLaunchService(s.name)?(s.quote?C.gold:C.accent):C.muted,flexShrink:0,marginLeft:8}}>{!isLaunchService(s.name)?'SOON':s.quote?'Quote':('$'+s.price)}</div>
                 </div>))}
               </div>)}
             </div>))}
@@ -429,7 +431,7 @@ function SOSAppInner(){
               <div style={{width:64,height:64,borderRadius:'50%',background:`${C.accent}15`,margin:'0 auto 10px',...F('row','center','center'),fontSize:28}}>{'\u{1F464}'}</div>
               <div style={{fontWeight:700,fontSize:16}}>{sosUser?.full_name||session?.user?.user_metadata?.full_name||'Citizen'}</div>
               <div style={{fontSize:13,color:C.sub,marginTop:2}}>{session?.user?.email}</div>
-              <div style={{fontSize:11,color:C.accent,fontWeight:600,marginTop:4}}>Shield Free Member</div>
+              <div style={{fontSize:11,color:C.accent,fontWeight:600,marginTop:4}}>Pay per service</div>
             </div>
             {[{l:'Payment Methods',icon:'\u{1F4B3}'},{l:'Safety Settings',icon:'\u{1F512}'},{l:'Notifications',icon:'\u{1F514}'},{l:'Help & Support',icon:'\u2753'}].map((item,i)=>(
               <div key={i} style={{background:C.card,borderRadius:12,padding:'14px 16px',marginBottom:6,border:`1px solid ${C.border}`,...F('row','center','space-between'),cursor:'pointer'}}>
