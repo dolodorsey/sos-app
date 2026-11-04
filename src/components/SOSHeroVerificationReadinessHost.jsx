@@ -30,7 +30,7 @@ export default function SOSHeroVerificationReadinessHost(){
  };
  useEffect(()=>{mounted.current=true;const refresh=()=>load().catch(()=>{});refresh();const t=setInterval(refresh,12000);return()=>{mounted.current=false;++requestSequence.current;clearInterval(t)}},[]);
  const ready=Boolean(state?.dispatch_ready);
- useEffect(()=>{if(state?.state!=='hero')return;document.documentElement.dataset.sosHeroVerificationUi='1';document.documentElement.dataset.sosHeroDispatchReady=ready?'true':'false';if(!ready)setOpen(true);return()=>{delete document.documentElement.dataset.sosHeroVerificationUi;delete document.documentElement.dataset.sosHeroDispatchReady}},[state?.state,ready]);
+ useEffect(()=>{document.documentElement.dataset.sosHeroDispatchReady=state?.state==='hero'&&ready?'true':'false';if(state?.state==='hero'){document.documentElement.dataset.sosHeroVerificationUi='1';if(!ready)setOpen(true)}return()=>{delete document.documentElement.dataset.sosHeroVerificationUi;delete document.documentElement.dataset.sosHeroDispatchReady}},[state?.state,ready]);
  if(state?.state!=='hero'||ready)return null;
  const checks=state.checks||[];const payout=checks.find(c=>c.check_type==='payout_account');
  const onboard=async()=>{const s=session();if(!s)return;setBusy(true);setError('');try{const r=await fetch(`${SB}/functions/v1/hero-payouts`,{method:'POST',headers:headers(s.access_token),body:JSON.stringify({action:'onboard'})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d?.error||'Payout setup unavailable');if(d.onboarding_url)window.location.assign(d.onboarding_url);else await load()}catch(e){setError(e.message)}finally{setBusy(false)}};
