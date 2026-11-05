@@ -1,0 +1,1927 @@
+[
+  {
+    "table_name": "sos_disputes",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "opened_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "opened_by_role",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "reason",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "description",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "evidence_urls",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolution",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolution_amount",
+    "type": "numeric(8,2)"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolved_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolved_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "owner_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "company_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "fleet_size",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "plan",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "contract_start",
+    "type": "date"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "contract_end",
+    "type": "date"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "monthly_rate",
+    "type": "numeric(8,2)"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "sla_response_minutes",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "stripe_subscription_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_accounts",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_fleet_members",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_members",
+    "column_name": "fleet_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_members",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_members",
+    "column_name": "role",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_members",
+    "column_name": "added_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "vehicle_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "make",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "model",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "year",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "vin",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "license_plate",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "state",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "insurance_provider",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "insurance_policy",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "insurance_expiry",
+    "type": "date"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "registration_expiry",
+    "type": "date"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "last_inspection",
+    "type": "date"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "mileage",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "gps_tracker_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_fleet_vehicles",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "first_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "last_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "city",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "state",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "services_requested",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "tools_available",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "vehicle_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "vehicle_make",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "vehicle_model",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "vehicle_year",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "years_experience",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "experience_summary",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "license_attested",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "insurance_attested",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "background_consent",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "terms_accepted",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "operator_note",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "reviewed_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "reviewed_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "source_user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "source_hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "candidate_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "submitted_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "status_token_hash",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "khg_bridge_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "khg_bridge_synced_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "khg_bridge_last_attempt_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "khg_bridge_last_error",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "source_auth_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "credentials_complete_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "column_name": "status_entered_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "check_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "required",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "evidence_urls",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "expires_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "reviewed_by",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "reviewed_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_hero_verification_checks",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "level",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "rating",
+    "type": "numeric(2,1)"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "total_missions",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "completion_rate",
+    "type": "numeric(4,1)"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "on_time_rate",
+    "type": "numeric(4,1)"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "on_duty",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "zone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "last_lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "last_lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "last_gps_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "services_enabled",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "tools_available",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "vehicle_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "vehicle_make",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "vehicle_model",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "vehicle_year",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "vehicle_plate",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "license_verified",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "insurance_verified",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "background_cleared",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "id_verified",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "test_mission_passed",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "verification_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "stripe_connect_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "payout_method",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "badges",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "is_demo",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "stripe_connect_api_version",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "stripe_transfer_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_heroes",
+    "column_name": "stripe_requirements_due",
+    "type": "jsonb"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "event_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "old_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "new_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "payload",
+    "type": "jsonb"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "actor",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "citizen_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "vehicle_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "category_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "subcategory_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "request_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "pickup_lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "pickup_lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "pickup_address",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "dropoff_lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "dropoff_lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "dropoff_address",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "estimated_price",
+    "type": "numeric(8,2)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "final_price",
+    "type": "numeric(8,2)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "distance_miles",
+    "type": "numeric(6,1)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "surge_multiplier",
+    "type": "numeric(3,1)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "scheduled_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "scheduled_window_minutes",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "matched_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "accepted_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "en_route_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "arrived_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "started_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "completed_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "canceled_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "citizen_notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "citizen_photos",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "cancel_reason",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "eta_minutes",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "requested_service_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "client_estimate_amount",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "pricing_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "intake_payload",
+    "type": "jsonb"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "dispatch_radius_miles",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "dispatch_attempts",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "last_dispatch_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "cancellation_fee",
+    "type": "numeric(10,2)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "cancellation_hero_compensation",
+    "type": "numeric(10,2)"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "cancellation_policy_version",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "reassignment_count",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "tax_amount",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "tip_amount",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_missions",
+    "column_name": "tax_rate_percent",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "title",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "body",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "data",
+    "type": "jsonb"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "channel",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "read",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "sent_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "read_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_notifications",
+    "column_name": "push_sent_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "required_items",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "submitted_items",
+    "type": "jsonb"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "media_urls",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validation_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validated_by",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "full_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "company_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "service_types",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "service_area",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "years_experience",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "license_number",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "insured",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "source",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_provider_applications",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "token",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "platform",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "is_active",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_push_tokens",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rated_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rated_user",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rating",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "review_text",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "tags",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "is_public",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "source_hero_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "source_user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "candidate_source",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "first_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "last_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "target_zone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "services_enabled",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "tools_available",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "vehicle_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "source_rating",
+    "type": "numeric(4,2)"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "source_review_count",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "priority_score",
+    "type": "numeric(5,2)"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "pipeline_stage",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "outreach_status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "next_action_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "locked_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "locked_by",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "attempt_count",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "last_outreach_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "last_outcome",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "is_demo",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "company_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "website",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "city",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "state_code",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "zip_code",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "contactability_score",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "service_fit_score",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "zone_fit_score",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "reputation_score",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "final_recruiting_score",
+    "type": "numeric"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "do_not_contact",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "consent_basis",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "preferred_channel",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "assigned_owner",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "application_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "converted_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "dedupe_key",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "pipeline_stage_entered_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "column_name": "outreach_status_entered_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "triggered_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "event_type",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "lat",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "lng",
+    "type": "double precision"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "contacts_notified",
+    "type": "text[]"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "plan",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "stripe_subscription_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "stripe_price_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "monthly_price",
+    "type": "numeric(6,2)"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "included_services",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "used_services",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "discount_percent",
+    "type": "numeric(4,1)"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "trial_ends_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "current_period_start",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "current_period_end",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "canceled_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_subscriptions",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "ticket_number",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "category",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "priority",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "subject",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "description",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "column_name": "resolved_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "mission_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "shared_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "share_token",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "shared_with_phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "shared_with_email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "shared_with_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "is_active",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "expires_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_trip_shares",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "auth_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "role",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "first_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "last_name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "avatar_url",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "trust_score",
+    "type": "numeric(3,1)"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "shield_plan",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "stripe_customer_id",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "referral_code",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "referred_by",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "city",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "state",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "updated_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "deleted_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "trust_rating_count",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_users",
+    "column_name": "is_demo",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "user_id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "make",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "model",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "year",
+    "type": "integer"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "trim",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "color",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "plate",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "vin",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "is_ev",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "is_default",
+    "type": "boolean"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_vehicles",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "id",
+    "type": "uuid"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "email",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "phone",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "name",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "city",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "interest",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "source",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "utm_source",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "utm_medium",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "utm_campaign",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "notes",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "status",
+    "type": "text"
+  },
+  {
+    "table_name": "sos_waitlist",
+    "column_name": "created_at",
+    "type": "timestamp with time zone"
+  }
+]
