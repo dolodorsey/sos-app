@@ -1,0 +1,350 @@
+[
+  {
+    "table_name": "sos_disputes",
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "mission_id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "opened_by",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "opened_by_role",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "reason",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "description",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "evidence_urls",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "status",
+    "is_nullable": "NO",
+    "column_default": "'open'::text"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolution",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolution_amount",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolved_by",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "resolved_at",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "sos_disputes",
+    "column_name": "updated_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "mission_id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "event_type",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "old_status",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "new_status",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "payload",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "lat",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "lng",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "actor",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_mission_events",
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "mission_id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "hero_id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "required_items",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "submitted_items",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "media_urls",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "notes",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "lat",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "lng",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validation_status",
+    "is_nullable": "YES",
+    "column_default": "'pending'::text"
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validated_at",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "validated_by",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_proof_of_service",
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "mission_id",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rated_by",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rated_user",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "rating",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "review_text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "tags",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "is_public",
+    "is_nullable": "YES",
+    "column_default": "true"
+  },
+  {
+    "table_name": "sos_ratings",
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "id",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "mission_id",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "triggered_by",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "event_type",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "lat",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "lng",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "notes",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "contacts_notified",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved_by",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "resolved_at",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "sos_safety_events",
+    "column_name": "created_at",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  }
+]

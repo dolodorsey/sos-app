@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import styles from './SOSHeroVerificationReadinessHost.module.css';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
@@ -13,10 +13,24 @@ const extension=file=>{const fromName=file.name?.split('.').pop()?.toLowerCase()
 
 export default function SOSHeroVerificationReadinessHost(){
  const[state,setState]=useState(null),[open,setOpen]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false),[uploading,setUploading]=useState('');
- const load=async()=>{const s=session();if(!s)return;const r=await fetch(`${SB}/rest/v1/rpc/sos_hero_verification_status`,{method:'POST',headers:headers(s.access_token),body:'{}'});const d=await r.json().catch(()=>null);if(!r.ok)throw new Error(d?.message||d?.error||'Hero verification status unavailable');setState(d)};
- useEffect(()=>{const refresh=()=>load().catch(()=>{});refresh();const t=setInterval(refresh,12000);return()=>clearInterval(t)},[]);
+ const requestSequence=useRef(0),mounted=useRef(false);
+ const load=async()=>{
+  const requestId=++requestSequence.current,s=session();
+  if(!mounted.current)return;
+  if(!s){setState(null);return}
+  const isLatest=()=>mounted.current&&requestId===requestSequence.current;
+  try{
+   const r=await fetch(`${SB}/rest/v1/rpc/sos_hero_verification_status`,{method:'POST',headers:headers(s.access_token),body:'{}'});
+   const d=await r.json().catch(()=>null);
+   if(!isLatest())return;
+   if(session()?.access_token!==s.access_token){setState(null);return}
+   if(!r.ok)throw new Error(d?.message||d?.error||'Hero verification status unavailable');
+   setState(d);
+  }catch(e){if(!isLatest())return;setState(null);throw e}
+ };
+ useEffect(()=>{mounted.current=true;const refresh=()=>load().catch(()=>{});refresh();const t=setInterval(refresh,12000);return()=>{mounted.current=false;++requestSequence.current;clearInterval(t)}},[]);
  const ready=Boolean(state?.dispatch_ready);
- useEffect(()=>{if(state?.state!=='hero')return;document.documentElement.dataset.sosHeroVerificationUi='1';document.documentElement.dataset.sosHeroDispatchReady=ready?'true':'false';if(!ready)setOpen(true);return()=>{delete document.documentElement.dataset.sosHeroVerificationUi;delete document.documentElement.dataset.sosHeroDispatchReady}},[state?.state,ready]);
+ useEffect(()=>{document.documentElement.dataset.sosHeroDispatchReady=state?.state==='hero'&&ready?'true':'false';if(state?.state==='hero'){document.documentElement.dataset.sosHeroVerificationUi='1';if(!ready)setOpen(true)}return()=>{delete document.documentElement.dataset.sosHeroVerificationUi;delete document.documentElement.dataset.sosHeroDispatchReady}},[state?.state,ready]);
  if(state?.state!=='hero'||ready)return null;
  const checks=state.checks||[];const payout=checks.find(c=>c.check_type==='payout_account');
  const onboard=async()=>{const s=session();if(!s)return;setBusy(true);setError('');try{const r=await fetch(`${SB}/functions/v1/hero-payouts`,{method:'POST',headers:headers(s.access_token),body:JSON.stringify({action:'onboard'})});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d?.error||'Payout setup unavailable');if(d.onboarding_url)window.location.assign(d.onboarding_url);else await load()}catch(e){setError(e.message)}finally{setBusy(false)}};

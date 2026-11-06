@@ -1,0 +1,67 @@
+[
+  {
+    "schema": "private",
+    "proname": "sos_initialize_hero_verification",
+    "args": "p_hero_id uuid",
+    "acl": "{postgres=X/postgres}",
+    "security_definer": true,
+    "config": [
+      "search_path=pg_catalog, public, private"
+    ],
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "service_execute": false
+  },
+  {
+    "schema": "private",
+    "proname": "sos_recompute_hero_verification",
+    "args": "p_hero_id uuid",
+    "acl": "{postgres=X/postgres}",
+    "security_definer": true,
+    "config": [
+      "search_path=pg_catalog, public, private"
+    ],
+    "anon_execute": false,
+    "authenticated_execute": false,
+    "service_execute": false
+  },
+  {
+    "schema": "public",
+    "proname": "sos_hero_submit_verification_evidence",
+    "args": "p_check_type text, p_path text",
+    "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+    "security_definer": true,
+    "config": [
+      "search_path=pg_catalog, public, private, storage"
+    ],
+    "anon_execute": false,
+    "authenticated_execute": true,
+    "service_execute": true
+  },
+  {
+    "schema": "public",
+    "proname": "sos_hero_verification_status",
+    "args": "",
+    "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+    "security_definer": true,
+    "config": [
+      "search_path=pg_catalog, public, private"
+    ],
+    "anon_execute": false,
+    "authenticated_execute": true,
+    "service_execute": true
+  },
+  {
+    "schema": "public",
+    "proname": "sos_ops_review_verification_check",
+    "args": "p_hero_id uuid, p_check_type text, p_status text, p_notes text",
+    "acl": "{postgres=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+    "security_definer": true,
+    "config": [
+      "search_path=pg_catalog, public, private"
+    ],
+    "anon_execute": false,
+    "authenticated_execute": true,
+    "service_execute": true
+  }
+]
