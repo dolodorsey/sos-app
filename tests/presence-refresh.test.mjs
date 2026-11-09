@@ -1,8 +1,8 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
 const proposed=fs.readFileSync(new URL('../src/components/SOSHeroMobilityApp.jsx',import.meta.url),'utf8');
-async function run(source,{fail='',on=false,reject=false}={}){
+async function run(source,{fail='',on=false,reject=false,priorNotice=''}={}){
  const line=n=>source.split('\n').find(x=>x.trimStart().startsWith(`const ${n}=`)).trim();
- const state={error:'',notice:'',busy:'',calls:[],hero:{on_duty:on}};
+ const state={error:'',notice:priorNotice,busy:'',calls:[],hero:{on_duty:on}};
  const c={SB:'https://fixture.invalid',REQUEST_TIMEOUT_MS:1000,headers:()=>({}),AbortController,setTimeout,clearTimeout,Error,useCallback:f=>f,
  session:{access_token:'fixture',user:{id:'fixture'}},hero:{on_duty:on},payout:{payout_ready:true},
  setError:x=>state.error=x,setNotice:x=>state.notice=x,setBusy:x=>state.busy=x,setHero:x=>state.hero=x,
@@ -13,8 +13,10 @@ async function run(source,{fail='',on=false,reject=false}={}){
 }
 const results=[];
 let x;
-for(const fail of ['sos_users?','sos_heroes?','sos_mission_offers?']){x=await run(proposed,{fail});assert.equal(x.error,'Fixture refresh failed');assert.equal(x.notice,'');assert.equal(x.busy,'');assert.equal(x.calls.filter(v=>v.includes('/rpc/')).length,1);results.push('Proposed suppresses success after '+fail+' failure without retry');}
+for(const fail of ['sos_users?','sos_heroes?','sos_mission_offers?']){x=await run(proposed,{fail});assert.equal(x.error,'Your patrol update was accepted, but the current status could not be refreshed. The displayed status may be outdated. Refresh this page before changing patrol again.');assert.equal(x.notice,'');assert.equal(x.busy,'');assert.equal(x.calls.filter(v=>v.includes('/rpc/')).length,1);results.push('Proposed suppresses success after '+fail+' failure without retry');}
 x=await run(proposed);assert.equal(x.notice,'Your patrol status was updated.');assert.equal(x.hero.on_duty,true);results.push('Successful refresh shows bounded status receipt');
 x=await run(proposed,{on:true});assert.equal(x.notice,'You are off patrol.');assert.equal(x.hero.on_duty,false);results.push('Off-duty success preserved');
 x=await run(proposed,{reject:true});assert.equal(x.notice,'');assert.equal(x.error,'Hero verification checklist is incomplete');assert.equal(x.calls.length,1);results.push('Checklist denial prevents subsequent reads');
+x=await run(proposed,{fail:'sos_users?',on:true,priorNotice:'Previous success'});assert.match(x.error,/update was accepted/);assert.equal(x.notice,'');assert.equal(x.calls.filter(v=>v.includes('/rpc/')).length,1);results.push('Off-duty refresh failure warns of stale display and clears prior success');
+x=await run(proposed,{reject:true,priorNotice:'Previous success'});assert.equal(x.error,'Hero verification checklist is incomplete');assert.equal(x.notice,'');results.push('Rejected write retains exact denial and clears prior success');
 console.log(JSON.stringify({checks:results.length,results,external_network_calls:0},null,2));
