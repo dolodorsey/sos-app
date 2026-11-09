@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import SOSInstallCoach, { detectInstallFlow } from './SOSInstallCoach';
 
 
 function forceInstall(){try{return new URLSearchParams(location.search).get('install')==='1'}catch{return false}}
@@ -11,7 +12,7 @@ function InstallQr(){
   return <aside aria-label="Scan to install app" style={{position:'fixed',right:22,bottom:22,zIndex:2147483002,width:188,padding:12,borderRadius:20,background:'rgba(7,8,11,.97)',border:'1px solid rgba(255,255,255,.16)',boxShadow:'0 24px 70px rgba(0,0,0,.48)',color:'#fff',fontFamily:'Arial,sans-serif'}}>
     <img src={qr} alt="QR code to install this app" width="164" height="164" style={{display:'block',width:'100%',height:'auto',borderRadius:12,background:'#fff',padding:6}}/>
     <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>PROVIDERS — SCAN TO GET S.O.S.</strong>
-    <small style={{display:'block',marginTop:5,color:'rgba(255,255,255,.62)',fontSize:9,lineHeight:1.45}}>iPhone: Share → Add to Home Screen → Open as Web App → Add. Android: tap Install App.</small>
+    <small style={{display:'block',marginTop:5,color:'rgba(255,255,255,.62)',fontSize:9,lineHeight:1.45}}>iPhone: ••• → Share → Add to Home Screen → Add. Android: ⋮ → Install app.</small>
   </aside>
 }
 
@@ -32,6 +33,7 @@ export default function SOSInstallAppPrompt() {
   const [steps, setSteps] = useState(false);
   const [apple, setApple] = useState(false);
   const [installed, setInstalled] = useState(false);
+  const [coach, setCoach] = useState(null);
 
   useEffect(() => {
     const native = Boolean(window.Capacitor?.isNativePlatform?.());
@@ -81,6 +83,7 @@ export default function SOSInstallAppPrompt() {
   const pathNow=typeof window!=='undefined'?window.location.pathname.toLowerCase():'';
   const providerIntentNow=providerRoutes.some(prefix=>pathNow===prefix||pathNow.startsWith(prefix+'/'));
   if (!providerIntentNow) return null;
+  if (coach) return <SOSInstallCoach flow={coach} onClose={()=>{setCoach(null);track('cta_click',{cta:'install_coach_close'})}} onDone={()=>{setCoach(null);set('sos:pwa-dismissed',String(Date.now()));track('cta_click',{cta:'install_coach_done',flow:coach})}}/>;
   if (!show) return <button aria-label="Get S.O.S. provider app" onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:'provider_persistent_get_app'})}} style={{position:'fixed',right:16,bottom:18,zIndex:2147482500,border:'1px solid rgba(255,106,112,.55)',borderRadius:999,padding:'13px 17px',background:'linear-gradient(100deg,#ff6a70,#e3000b)',color:'#ffffff',font:'900 11px/1 Arial',letterSpacing:'.08em',boxShadow:'0 16px 44px rgba(0,0,0,.4)',cursor:'pointer'}}>SERVICE PROVIDERS — GET S.O.S. ↗</button>;
 
   const close = () => {
@@ -97,7 +100,11 @@ export default function SOSInstallAppPrompt() {
       if (result.outcome === 'accepted') setShow(false);
       return;
     }
-    setSteps(true);
+    // No one-tap install available: walk them through it, pointing at each button.
+    const flow = detectInstallFlow();
+    setShow(false);
+    setCoach(flow);
+    track('cta_click', { cta:'install_coach_start', flow });
   };
 
   return <div className="sos-pwa-install" role="dialog" aria-modal="true" aria-label="Install S.O.S.">
