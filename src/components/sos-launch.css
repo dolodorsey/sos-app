@@ -131,3 +131,8 @@ html body .sos2-quick-grid > button:not([data-verified-coverage="active"]) [clas
 /* Services tab — main (live) services above the category grid */
 .sos2-main-services { margin: 4px 0 24px; }
 .sos2-all-categories { margin: 0 0 12px; }
+
+/* Quick rescue "coming soon" teaser tile (6th tile → clean 3 + 3 grid). */
+html body .sos2-quick-grid > button.sos2-quick-soon { opacity: .78 !important; border-style: dashed !important; border-color: rgba(255, 255, 255, .22) !important; }
+html body .sos2-quick-grid > button.sos2-quick-soon small { color: rgba(255, 255, 255, .62) !important; }
+html body .sos2-quick-grid > button.sos2-quick-soon em { color: rgba(255, 255, 255, .55) !important; letter-spacing: .14em; font-size: 14px !important; }

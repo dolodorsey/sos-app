@@ -52,6 +52,7 @@ export default function SOSCustomerTruthHost(){
       setText(quickTitle,coverageCount>0?'Get help now':'Browse roadside help');
 
       for(const button of document.querySelectorAll('.sos2-service-list>button,.sos2-quick-grid>button')){
+        if(button.classList.contains('sos2-quick-soon'))continue;
         const subline=button.querySelector('small');
         if(!subline)continue;
         if(!subline.dataset.sosOriginalCopy)setData(subline,'sosOriginalCopy',subline.textContent||'');

@@ -41,6 +41,7 @@ export default function SOSCustomerCoverageStatusHost(){
  useEffect(()=>{
   const apply=()=>{
    for(const button of document.querySelectorAll('.sos2-service-list>button,.sos2-quick-grid>button')){
+    if(button.classList.contains('sos2-quick-soon'))continue;
     const strong=button.querySelector('strong');if(!strong)continue;
     const key=normalize(strong.textContent);
     const available=map.has(key)&&Boolean(map.get(key));
