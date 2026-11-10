@@ -3,6 +3,8 @@
 import {useEffect,useState} from 'react';
 import {observeBody,setAttr,setData,setText} from '../lib/domObserver';
 
+const QUICK_ETA_COPY='15–30 minutes';
+
 const COVERAGE_URL='https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-public-coverage';
 
 function mapUrl(lat,lng){
@@ -53,9 +55,10 @@ export default function SOSCustomerTruthHost(){
         const subline=button.querySelector('small');
         if(!subline)continue;
         if(!subline.dataset.sosOriginalCopy)setData(subline,'sosOriginalCopy',subline.textContent||'');
-        if(button.dataset.verifiedCoverage==='active')setText(subline,subline.dataset.sosOriginalCopy);
-        else if(button.dataset.verifiedCoverage==='activating')setText(subline,button.parentElement?.classList.contains('sos2-quick-grid')?'Coverage soon':'Verified Hero coverage not active yet');
-        else setText(subline,button.parentElement?.classList.contains('sos2-quick-grid')?'Checking…':'Checking verified Hero coverage');
+        if(button.parentElement?.classList.contains('sos2-quick-grid'))setText(subline,QUICK_ETA_COPY);
+        else if(button.dataset.verifiedCoverage==='active')setText(subline,subline.dataset.sosOriginalCopy);
+        else if(button.dataset.verifiedCoverage==='activating')setText(subline,'Verified Hero coverage not active yet');
+        else setText(subline,'Checking verified Hero coverage');
       }
     };
 

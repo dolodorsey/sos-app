@@ -49,8 +49,20 @@
 .sos2-membership.sos2-launch-banner h2 { font-size: 32px !important; }
 .sos2-membership.sos2-launch-banner p { font-size: 12px; color: rgba(255, 255, 255, .75) !important; }
 
-/* Quick rescue: 5 tiles instead of 6 — keep the grid balanced. */
-.sos2-quick-grid > button:nth-child(5):last-child { grid-column: 1 / -1; }
+/* Quick rescue: 5 launch tiles laid out 3 + 2 (no orphan tile, no full-width stray).
+   6-column track: top row tiles span 2, bottom row tiles span 3. */
+html body .sos-ui-v3 .sos2-quick-grid:has(> button:nth-child(5):last-child),
+html body .sos2-quick-grid:has(> button:nth-child(5):last-child) {
+  grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+}
+html body .sos2-quick-grid:has(> button:nth-child(5):last-child) > button { grid-column: span 2 !important; }
+html body .sos2-quick-grid:has(> button:nth-child(5):last-child) > button:nth-child(n+4) { grid-column: span 3 !important; }
+
+/* Quick rescue tiles read as ready to book: no greyed-out filter, no red alert dot.
+   (Requests are still guarded until verified Hero coverage is live.) */
+html body .sos2-quick-grid > button[data-verified-coverage] { opacity: 1 !important; filter: none !important; }
+html body .sos-route-frame.sos-app-frame .sos2-quick-grid > button:not([data-verified-coverage="active"]) [class*="badge"],
+html body .sos2-quick-grid > button:not([data-verified-coverage="active"]) [class*="badge"] { display: none !important; }
 
 /* Website — service availability badges */
 .sos-launch-badge {
