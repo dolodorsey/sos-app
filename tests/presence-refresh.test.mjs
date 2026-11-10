@@ -3,7 +3,7 @@ const proposed=fs.readFileSync(new URL('../src/components/SOSHeroMobilityApp.jsx
 async function run(source,{fail='',on=false,reject=false,priorNotice=''}={}){
  const line=n=>source.split('\n').find(x=>x.trimStart().startsWith(`const ${n}=`)).trim();
  const state={error:'',notice:priorNotice,busy:'',calls:[],hero:{on_duty:on}};
- const c={SB:'https://fixture.invalid',REQUEST_TIMEOUT_MS:1000,headers:()=>({}),AbortController,setTimeout,clearTimeout,Error,useCallback:f=>f,
+ const c={loadGeneration:{current:0},loadSession:{current:{access_token:'fixture',user:{id:'fixture'}}},SB:'https://fixture.invalid',REQUEST_TIMEOUT_MS:1000,headers:()=>({}),AbortController,setTimeout,clearTimeout,Error,useCallback:f=>f,
  session:{access_token:'fixture',user:{id:'fixture'}},hero:{on_duty:on},payout:{payout_ready:true},
  setError:x=>state.error=x,setNotice:x=>state.notice=x,setBusy:x=>state.busy=x,setHero:x=>state.hero=x,
  setUser:()=>{},setOffers:()=>{},setMissions:()=>{},setPayments:()=>{},setPayout:()=>{},locate:async()=>({lat:33,lng:-84}),window:{location:{replace:()=>{}}},
