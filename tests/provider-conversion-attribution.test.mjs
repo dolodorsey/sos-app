@@ -34,8 +34,8 @@ test('application attribution only links a uniquely matched, positively contacte
 
 test('canonical Hero intake uses the live application state machine and attempts attribution without blocking submission',()=>{
   const edge=submit()
-  assert.match(edge,/ACTIVE_APPLICATION_STATUSES=\['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'\]/)
-  assert.match(edge,/status:'documents_required'/)
+  assert.match(edge,/ACTIVE_APPLICATION_STATUSES=\['standby_pending','standby','documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'\]/)
+  assert.match(edge,/status:'standby_pending'/)
   assert.doesNotMatch(edge,/status:'submitted'/)
   assert.match(edge,/\.in\('status',ACTIVE_APPLICATION_STATUSES\)/)
   assert.match(edge,/const linkRecruitingCandidate=/)

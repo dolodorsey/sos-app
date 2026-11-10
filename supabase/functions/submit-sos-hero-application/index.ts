@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 
 const ALLOWED=new Set(['https://thesuperherosonstandby.com','https://www.thesuperherosonstandby.com','https://superherosonstandby.com','https://www.superherosonstandby.com']);
 const KHG_BRIDGE_URL='https://dzlmtvodpyhetvektfuo.supabase.co/functions/v1/khg-sos-hero-bridge';
-const ACTIVE_APPLICATION_STATUSES=['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'];
+const ACTIVE_APPLICATION_STATUSES=['standby_pending','standby','documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'];
 const cors=(origin:string)=>({'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://thesuperherosonstandby.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'});
 const json=(origin:string,body:unknown,status=200)=>Response.json(body,{status,headers:{...cors(origin),'Cache-Control':'no-store'}});
 const text=(v:unknown,max=3000)=>String(v??'').trim().slice(0,max);
@@ -11,6 +11,8 @@ const list=(v:unknown,max=30)=>Array.isArray(v)?v.map(x=>text(x,100)).filter(Boo
 const sha256=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
 const trackingToken=()=>{const bytes=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const MAX_BODY_BYTES=32768;
+const ZONES=new Set(['east','south','west','downtown','midtown','buckhead']);
+const AVAILABILITY=new Set(['weekday_days','weekday_evenings','overnight','weekends']);
 
 const syncKHG=async(admin:any,applicationId:string)=>{
   const attemptedAt=new Date().toISOString();
@@ -58,6 +60,10 @@ Deno.serve(async req=>{
     const claimReady=['conditionally_approved','approved'].includes(data.status);
     const nextAction = claimReady
       ? 'Create or sign in with the same email and continue Hero activation.'
+      : data.status==='standby_pending'
+        ? 'Create your Hero login with the same email to become an active standby Hero.'
+      : data.status==='standby'
+        ? 'You are an active standby Hero. Your full onboarding packet arrives 14 days before customers go live.'
       : data.status==='documents_required'
         ? 'Secure your application with the same email, then upload Government ID, driver license, and current insurance.'
         : data.status==='waitlisted'
@@ -74,6 +80,10 @@ Deno.serve(async req=>{
   const email=text(b.email,254).toLowerCase(),phone=text(b.phone,40),first=text(b.firstName,80),last=text(b.lastName,80);
   if(!first||!last||!/^\S+@\S+\.\S+$/.test(email)||phone.length<7)return json(origin,{error:'Name, valid email, and phone are required.'},422);
   if(!b.licenseAttested||!b.insuranceAttested||!b.backgroundConsent||!b.termsAccepted)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
+  const zone=text(b.serviceZone,20).toLowerCase(),availability=list(b.availability,4).filter(v=>AVAILABILITY.has(v));
+  if(!ZONES.has(zone))return json(origin,{error:'Choose the Atlanta zone you mainly work in.'},422);
+  if(!availability.length)return json(origin,{error:'Choose when you are usually available.'},422);
+  if(!list(b.services).length)return json(origin,{error:'Choose at least one service you can perform.'},422);
   const{data:existing}=await admin.from('sos_hero_applications').select('id,status,submitted_at,khg_bridge_status,candidate_id').eq('email',email).in('status',ACTIVE_APPLICATION_STATUSES).maybeSingle();
   if(existing){
     const attribution=existing.candidate_id?{linked:true}:await linkRecruitingCandidate(admin,existing.id);
@@ -83,10 +93,10 @@ Deno.serve(async req=>{
   const source=(req.headers.get('x-forwarded-for')||req.headers.get('x-real-ip')||req.headers.get('cf-connecting-ip')||'unknown').split(',')[0].trim(),ipHash=await sha256(source);
   const{data:limit,error:limitError}=await admin.rpc('marketplace_consume_intake_rate_limit',{p_app:'sos_hero',p_ip_hash:ipHash,p_limit:8,p_window_minutes:60});if(limitError)throw limitError;if(limit?.allowed!==true)return json(origin,{error:'Too many new applications from this network. Try again later.',retry_after_minutes:60},429);
   const token=trackingToken(),hash=await sha256(token);
-  const{data,error}=await admin.from('sos_hero_applications').insert({first_name:first,last_name:last,email,phone,city:text(b.city,100)||null,state:text(b.state,50)||null,services_requested:list(b.services),tools_available:list(b.tools),vehicle_type:text(b.vehicleType,100)||null,vehicle_make:text(b.vehicleMake,100)||null,vehicle_model:text(b.vehicleModel,100)||null,vehicle_year:b.vehicleYear?Number(b.vehicleYear):null,years_experience:Math.max(0,Math.min(80,Number(b.yearsExperience)||0)),experience_summary:text(b.experienceSummary,3000)||null,license_attested:true,insurance_attested:true,background_consent:true,terms_accepted:true,status:'documents_required',status_token_hash:hash,khg_bridge_status:'pending'}).select('id,status,submitted_at').single();
+  const{data,error}=await admin.from('sos_hero_applications').insert({first_name:first,last_name:last,email,phone,city:text(b.city,100)||null,state:text(b.state,50)||null,services_requested:list(b.services),tools_available:list(b.tools),vehicle_type:text(b.vehicleType,100)||null,vehicle_make:text(b.vehicleMake,100)||null,vehicle_model:text(b.vehicleModel,100)||null,vehicle_year:b.vehicleYear?Number(b.vehicleYear):null,years_experience:Math.max(0,Math.min(80,Number(b.yearsExperience)||0)),experience_summary:text(b.experienceSummary,3000)||null,license_attested:true,insurance_attested:true,background_consent:true,terms_accepted:true,service_zone:zone,availability,market_key:'atlanta-ga-2026',status:'standby_pending',status_token_hash:hash,khg_bridge_status:'pending'}).select('id,status,submitted_at').single();
   if(error)throw error;
   const attribution=await linkRecruitingCandidate(admin,data.id);
   await syncKHG(admin,data.id);
-  return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,tracking_token:token,source_attributed:attribution?.linked===true,message:'Hero application received. This browser can now track review status. Approval does not bypass identity, license, insurance, background, test mission, or payout requirements.'},201);
+  return json(origin,{application_id:data.id,status:data.status,submitted_at:data.submitted_at,tracking_token:token,source_attributed:attribution?.linked===true,message:'Hero signup received. Create your Hero login with the same email to become an active standby Hero. Standby does not bypass identity, license, insurance, background, test mission, or payout requirements.'},201);
  }catch(error){console.error('submit-sos-hero-application',error);return json(origin,{error:'Hero application could not be processed.'},500)}
 });
