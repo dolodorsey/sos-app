@@ -25,3 +25,10 @@ test('install prompt uses native install when available, otherwise the coach', (
   assert.match(prompt, /setCoach\(flow\)/);
   assert.match(prompt, /<SOSInstallCoach flow=\{coach\}/);
 });
+
+test('install guide runs for customers as well as providers, never on internal tools', () => {
+  assert.match(prompt, /const audienceFor = path => routeMatch\(path, excludedRoutes\) \? null : routeMatch\(path, providerRoutes\) \? 'provider' : 'customer'/);
+  assert.match(prompt, /excludedRoutes = \['\/ops', '\/admin'\]/);
+  assert.match(prompt, /ATLANTA ROADSIDE HELP/);
+  assert.match(prompt, /if \(!show && !provider && signedIn\(\)\) return null;/);
+});

@@ -18,6 +18,11 @@ function InstallQr(){
 
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
 const providerRoutes = ['/hero', '/provider', '/become-a-provider', '/launch-updates'];
+// Internal tools never get the install prompt.
+const excludedRoutes = ['/ops', '/admin'];
+const routeMatch = (path, prefixes) => prefixes.some(prefix => path === prefix || path.startsWith(prefix + '/'));
+const audienceFor = path => routeMatch(path, excludedRoutes) ? null : routeMatch(path, providerRoutes) ? 'provider' : 'customer';
+const signedIn = () => { try { return Boolean(JSON.parse(localStorage.getItem('sos_session'))?.access_token); } catch { return false; } };
 const get = key => { try { return localStorage.getItem(key); } catch { return null; } };
 const set = (key, value) => { try { localStorage.setItem(key, value); } catch {} };
 const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -46,8 +51,7 @@ export default function SOSInstallAppPrompt() {
     }
 
     const path = window.location.pathname.toLowerCase();
-    const providerIntent = providerRoutes.some(prefix => path === prefix || path.startsWith(prefix + '/'));
-    if (!providerIntent) return;
+    if (!audienceFor(path)) return;
 
     const isApple = isIOS();
     setApple(isApple);
@@ -62,7 +66,7 @@ export default function SOSInstallAppPrompt() {
     const installedHandler = () => {
       setInstalled(true);
       setShow(false);
-      track('app_install', { platform:isApple ? 'ios' : 'web', variant:'sos_provider_pwa' });
+      track('app_install', { platform:isApple ? 'ios' : 'web', variant:`sos_${audienceFor(path)}_pwa` });
     };
 
     addEventListener('beforeinstallprompt', beforeInstall);
@@ -81,15 +85,17 @@ export default function SOSInstallAppPrompt() {
 
   if (installed) return null;
   const pathNow=typeof window!=='undefined'?window.location.pathname.toLowerCase():'';
-  const providerIntentNow=providerRoutes.some(prefix=>pathNow===prefix||pathNow.startsWith(prefix+'/'));
-  if (!providerIntentNow) return null;
+  const audience=audienceFor(pathNow);
+  if (!audience) return null;
+  const provider=audience==='provider';
   if (coach) return <SOSInstallCoach flow={coach} onClose={()=>{setCoach(null);track('cta_click',{cta:'install_coach_close'})}} onDone={()=>{setCoach(null);set('sos:pwa-dismissed',String(Date.now()));track('cta_click',{cta:'install_coach_done',flow:coach})}}/>;
-  if (!show) return <button aria-label="Get S.O.S. provider app" onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:'provider_persistent_get_app'})}} style={{position:'fixed',right:16,bottom:18,zIndex:2147482500,border:'1px solid rgba(255,106,112,.55)',borderRadius:999,padding:'13px 17px',background:'linear-gradient(100deg,#ff6a70,#e3000b)',color:'#ffffff',font:'900 11px/1 Arial',letterSpacing:'.08em',boxShadow:'0 16px 44px rgba(0,0,0,.4)',cursor:'pointer'}}>SERVICE PROVIDERS — GET S.O.S. ↗</button>;
+  if (!show && !provider && signedIn()) return null;
+  if (!show) return <button aria-label={provider?'Get S.O.S. provider app':'Get the S.O.S. app'} onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:`${audience}_persistent_get_app`})}} style={{position:'fixed',right:16,bottom:18,zIndex:2147482500,border:'1px solid rgba(255,106,112,.55)',borderRadius:999,padding:'13px 17px',background:'linear-gradient(100deg,#ff6a70,#e3000b)',color:'#ffffff',font:'900 11px/1 Arial',letterSpacing:'.08em',boxShadow:'0 16px 44px rgba(0,0,0,.4)',cursor:'pointer'}}>SERVICE PROVIDERS — GET S.O.S. ↗</button>;
 
   const close = () => {
     set('sos:pwa-dismissed', String(Date.now()));
     setShow(false);
-    track('cta_click', { cta:'provider_pwa_prompt_dismiss' });
+    track('cta_click', { cta:`${audience}_pwa_prompt_dismiss` });
   };
 
   const install = async () => {
@@ -126,10 +132,14 @@ export default function SOSInstallAppPrompt() {
       <button className="sos-pwa-x" onClick={close} aria-label="Close">×</button>
       <div className="sos-pwa-phone" aria-hidden="true"><i/><b>SOS</b><small>ON STANDBY</small></div>
       {!steps ? <div className="sos-pwa-copy">
-        <p className="sos-pwa-kicker">ATLANTA SERVICE PROVIDERS</p>
+        <p className="sos-pwa-kicker">{provider?'ATLANTA SERVICE PROVIDERS':'ATLANTA ROADSIDE HELP'}</p>
         <h2>PUT<br/><em>S.O.S.</em><br/>ON YOUR PHONE.</h2>
-        <p>Keep provider onboarding, verification and S.O.S. access one tap away. Installing the web app does not approve a Hero or promise jobs, earnings or service assignments.</p>
-        <div className="sos-pwa-chips"><span>APPLY</span><b>•</b><span>VERIFY</span><b>•</b><span>STAY READY</span></div>
+        {provider
+          ?<p>Keep provider onboarding, verification and S.O.S. access one tap away. Installing the web app does not approve a Hero or promise jobs, earnings or service assignments.</p>
+          :<p>Tow, gas, jump start, flat tire and lockout, one tap away when you need it. S.O.S. is roadside help, not an emergency service. For an emergency, call 911.</p>}
+        <div className="sos-pwa-chips">{provider
+          ?<><span>APPLY</span><b>•</b><span>VERIFY</span><b>•</b><span>STAY READY</span></>
+          :<><span>TOW</span><b>•</b><span>GAS</span><b>•</b><span>JUMP</span><b>•</b><span>FLAT</span><b>•</b><span>LOCKOUT</span></>}</div>
         <button className="sos-pwa-go" onClick={install}><span>{promptEvent ? 'INSTALL S.O.S.' : 'ADD S.O.S.'}</span><strong>↗</strong></button>
         <button className="sos-pwa-later" onClick={close}>Continue in browser</button>
       </div> : <div className="sos-pwa-copy">
