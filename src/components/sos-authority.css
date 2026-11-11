@@ -1,1 +1,82 @@
 .sos-authority-shell{min-height:100dvh;background:#05080d;color:#f7f8fa;font-family:var(--font-body);}.sos-authority{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:0 0 80px}.sos-authority-nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:22px 0;border-bottom:1px solid rgba(145,171,202,.16)}.sos-authority-brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none}.sos-authority-brand img{width:46px;height:46px;object-fit:contain}.sos-authority-brand strong{display:block;font:800 21px/1 var(--font-heading);letter-spacing:.04em}.sos-authority-brand small{color:var(--sos-muted);font-size:12px}.sos-authority-links{display:flex;gap:18px;flex-wrap:wrap}.sos-authority-links a{color:rgba(247,248,250,.72);text-decoration:none;font-size:13px;font-weight:700}.sos-authority-links a:hover{color:#fff}.sos-authority-hero{padding:84px 0 54px;max-width:940px}.sos-authority-kicker{color:var(--sos-orange-hot);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:800}.sos-authority h1{font:800 clamp(52px,9vw,112px)/.82 var(--font-heading);letter-spacing:-.035em;margin:18px 0 24px;text-transform:uppercase}.sos-authority .lede{font-size:clamp(19px,2.2vw,28px);line-height:1.45;color:rgba(247,248,250,.78);max-width:860px}.sos-authority-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px;margin-top:28px}.sos-authority-card{grid-column:span 6;padding:28px;border:1px solid rgba(145,171,202,.16);background:linear-gradient(145deg,rgba(20,31,48,.96),rgba(9,15,25,.98));border-radius:22px}.sos-authority-card.wide{grid-column:span 12}.sos-authority-card h2,.sos-authority-card h3{font-family:var(--font-heading);margin:0 0 12px}.sos-authority-card h2{font-size:34px}.sos-authority-card h3{font-size:26px}.sos-authority-card p,.sos-authority-card li{color:rgba(247,248,250,.72);line-height:1.75}.sos-authority-card strong{color:#fff}.sos-authority-quote{margin:28px 0;padding:28px 30px;border-left:4px solid var(--sos-orange);background:rgba(227,0,11,.07);font:500 clamp(25px,3vw,42px)/1.25 var(--font-editorial)}.sos-authority-pill{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(227,0,11,.1);border:1px solid rgba(227,0,11,.22);color:var(--sos-orange-hot);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.sos-authority-cta{display:inline-flex;margin-top:18px;padding:14px 18px;background:var(--sos-orange);color:#080b10;text-decoration:none;border-radius:12px;font-weight:800}.sos-authority-footer{margin-top:54px;padding-top:24px;border-top:1px solid rgba(145,171,202,.16);color:var(--sos-muted);font-size:12px}.sos-authority-list{margin:0;padding-left:20px}.sos-authority-definition{font-size:17px}.sos-authority-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}@media(max-width:780px){.sos-authority-nav{align-items:flex-start;flex-direction:column}.sos-authority-links{gap:12px}.sos-authority-hero{padding-top:56px}.sos-authority-card,.sos-authority-card.wide{grid-column:span 12}.sos-authority{width:min(100% - 24px,1180px)}}
+/* ── Knowledge Hub + dictionary entry (2026-11-11) ── */
+.sos-authority-navcta{padding:8px 14px;border-radius:999px;background:var(--sos-orange);color:#080b10!important}
+.sos-authority-crumbs{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:22px 0 0;padding:0;font-size:12px;color:var(--sos-muted)}
+.sos-authority-crumbs li+li::before{content:"›";margin-right:8px;opacity:.5}
+.sos-authority-crumbs a{color:rgba(247,248,250,.72);text-decoration:none}
+.sos-authority-crumbs a:hover{color:#fff;text-decoration:underline}
+.sos-authority-hero h1.sos-dict-word{font-size:clamp(64px,13vw,168px);margin-bottom:8px}
+.sos-authority-hero h1.sos-wiki-title-long{font-size:clamp(42px,7vw,88px);line-height:.9}
+.sos-authority-cta+.sos-authority-cta{margin-left:10px}
+.sos-authority-cta.ghost{background:transparent;color:#fff;border:1px solid rgba(247,248,250,.32)}
+.sos-authority-cta:focus-visible,.sos-authority a:focus-visible,.sos-wiki-searchbar input:focus-visible{outline:2px solid var(--sos-orange-hot);outline-offset:3px}
+.sos-dict-entry{max-width:940px;padding:0 0 32px;border-bottom:1px solid rgba(145,171,202,.16)}
+.sos-dict-head{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;margin:0 0 18px;color:rgba(247,248,250,.72);font-size:17px}
+.sos-dict-pron{font-family:var(--font-editorial);font-size:22px;color:#fff}
+.sos-dict-pos{font-style:italic}
+.sos-dict-forms{display:flex;gap:28px;margin:0 0 22px}
+.sos-dict-forms div{display:flex;gap:8px;align-items:baseline}
+.sos-dict-forms dt{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sos-muted);font-weight:800}
+.sos-dict-forms dd{margin:0;font:800 22px/1 var(--font-heading);letter-spacing:.03em}
+.sos-dict-def{font:500 clamp(22px,2.6vw,34px)/1.4 var(--font-editorial);color:#fff;margin:0;border-left:4px solid var(--sos-orange);padding:6px 0 6px 22px}
+.sos-dict-def span{color:var(--sos-orange-hot);margin-right:6px}
+.sos-visually-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sos-dict-ctas{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+.sos-dict-ctas .sos-authority-cta{margin:0}
+.sos-dict-services,.sos-dict-related,.sos-wiki-related{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.sos-dict-services{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.sos-dict-services a{display:flex;flex-direction:column;gap:6px;height:100%;padding:18px;border-radius:16px;border:1px solid rgba(145,171,202,.16);background:rgba(255,255,255,.02);text-decoration:none}
+.sos-dict-services a:hover{border-color:rgba(227,0,11,.5)}
+.sos-dict-services strong{font:800 20px/1.1 var(--font-heading);color:#fff}
+.sos-dict-services span{color:rgba(247,248,250,.68);font-size:14px;line-height:1.5}
+.sos-dict-note{margin:14px 0 0;font-size:14px}
+.sos-dict-examples q{font-style:italic}
+.sos-dict-related{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.sos-dict-related a,.sos-wiki-related a,.sos-wiki-article a,.sos-wiki-lexicon a{color:#fff;text-decoration:underline;text-decoration-color:rgba(227,0,11,.6);text-underline-offset:3px}
+.sos-wiki-disclosure{margin:28px 0 0;padding:14px 16px;border:1px dashed rgba(145,171,202,.28);border-radius:14px;color:rgba(247,248,250,.66);font-size:13px;line-height:1.6}
+.sos-wiki-disclosure.top{margin:0 0 24px}
+.sos-wiki-feature{margin-bottom:28px}
+.sos-wiki-feature h2 a{color:#fff;text-decoration:none}
+.sos-wiki-directory{margin-top:8px}
+.sos-wiki-searchbar{display:grid;gap:10px;margin-bottom:26px}
+.sos-wiki-searchbar label{font:800 15px/1 var(--font-heading);letter-spacing:.08em;text-transform:uppercase}
+.sos-wiki-searchbar input{width:100%;padding:16px 18px;border-radius:14px;border:1px solid rgba(145,171,202,.28);background:#0b121d;color:#fff;font-size:16px}
+.sos-wiki-count{margin:0;color:var(--sos-muted);font-size:13px}
+.sos-wiki-group{margin:0 0 30px}
+.sos-wiki-group h2{font:800 28px/1 var(--font-heading);margin:0 0 14px}
+.sos-wiki-group ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.sos-wiki-group li a{display:flex;flex-direction:column;gap:6px;height:100%;padding:18px;border-radius:16px;border:1px solid rgba(145,171,202,.16);background:linear-gradient(145deg,rgba(20,31,48,.96),rgba(9,15,25,.98));text-decoration:none}
+.sos-wiki-group li a:hover{border-color:rgba(227,0,11,.5)}
+.sos-wiki-group li strong{color:#fff;font:800 21px/1.1 var(--font-heading)}
+.sos-wiki-group li span{color:rgba(247,248,250,.68);font-size:14px;line-height:1.5}
+.sos-wiki-empty{color:rgba(247,248,250,.72)}
+.sos-wiki-lexicon{margin:0;display:grid;gap:14px}
+.sos-wiki-lexicon>div{padding:16px 18px;border-radius:14px;border:1px solid rgba(145,171,202,.14);scroll-margin-top:24px}
+.sos-wiki-lexicon>div:target{border-color:var(--sos-orange)}
+.sos-wiki-lexicon dt{font:800 20px/1.2 var(--font-heading);margin-bottom:6px}
+.sos-wiki-lexicon dd{margin:0;color:rgba(247,248,250,.74);line-height:1.65}
+.sos-wiki-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:36px;align-items:start}
+.sos-wiki-article{max-width:760px}
+.sos-wiki-article section{scroll-margin-top:24px}
+.sos-wiki-article h2{font:800 30px/1.1 var(--font-heading);margin:36px 0 12px}
+.sos-wiki-article p{color:rgba(247,248,250,.8);font-size:17px;line-height:1.8;margin:0 0 14px}
+.sos-wiki-meta{font-size:13px!important;color:var(--sos-muted)!important}
+.sos-wiki-toc{padding:16px 20px;border-radius:14px;border:1px solid rgba(145,171,202,.16);background:rgba(255,255,255,.02);margin:18px 0}
+.sos-wiki-toc ol{margin:8px 0 0;padding-left:20px;line-height:1.9}
+.sos-wiki-toc a{text-decoration:none!important}
+.sos-wiki-faq{border-bottom:1px solid rgba(145,171,202,.16);padding:14px 0}
+.sos-wiki-faq summary{cursor:pointer;font-weight:800;font-size:17px;color:#fff}
+.sos-wiki-faq p{margin:10px 0 0}
+.sos-wiki-sources{padding-left:20px;color:rgba(247,248,250,.7);line-height:1.8}
+.sos-wiki-aside{position:sticky;top:20px;display:grid;gap:16px}
+.sos-wiki-aside .sos-authority-card{grid-column:auto}
+.sos-wiki-aside .sos-authority-cta{display:flex;justify-content:center}
+.sos-wiki-alt{display:block;margin-top:14px;font-size:13px;color:rgba(247,248,250,.72)}
+.sos-authority-footer-cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;margin-bottom:24px}
+.sos-authority-footer-cols div{display:flex;flex-direction:column;gap:9px}
+.sos-authority-footer-cols strong{color:#fff;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.sos-authority-footer-cols a{color:rgba(247,248,250,.72);text-decoration:none;font-size:14px}
+.sos-authority-footer-cols a:hover{color:#fff}
+@media(max-width:900px){.sos-wiki-layout{grid-template-columns:1fr}.sos-wiki-aside{position:static}.sos-authority-footer-cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.sos-authority-cta+.sos-authority-cta{margin-left:0}.sos-dict-forms{gap:18px}.sos-authority-footer-cols{grid-template-columns:1fr}}
+.sos-authority-card p a,.sos-authority-card li a:not(.sos-authority-cta),.sos-wiki-disclosure a{color:#fff;text-decoration:underline;text-decoration-color:rgba(227,0,11,.6);text-underline-offset:3px}

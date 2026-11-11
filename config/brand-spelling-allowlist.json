@@ -1,0 +1,40 @@
+{
+  "description": "Every place the conventional plural of 'superhero' may appear in this repository. Each entry must quote the exact text and give a reason. Anything else fails scripts/check-brand-spelling.mjs and tests/brand-spelling.test.mjs. Use \"contains\": \"*\" only for the checker's own files.",
+  "entries": [
+    {
+      "file": "AGENTS.md",
+      "contains": "Never auto-correct SUPERHEROS to SUPERHEROES",
+      "reason": "Operating rule that names the forbidden spelling."
+    },
+    {
+      "file": "README.md",
+      "contains": "do **not** rewrite it as “SUPERHEROES.”",
+      "reason": "Operating rule that names the forbidden spelling."
+    },
+    {
+      "file": "docs/SUPERHEROS_AUTHORITY_OPERATIONS.md",
+      "contains": "Never auto-correct current brand usage from SUPERHEROS to SUPERHEROES.",
+      "reason": "Operating rule that names the forbidden spelling."
+    },
+    {
+      "file": "scripts/check-brand-spelling.mjs",
+      "contains": "*",
+      "reason": "The checker's own pattern."
+    },
+    {
+      "file": "tests/brand-spelling.test.mjs",
+      "contains": "*",
+      "reason": "Test fixtures for the checker."
+    },
+    {
+      "file": "supabase/migrations/20261111090000_sos_brand_content_source_of_truth.sql",
+      "contains": "*",
+      "reason": "Database guard pattern that rejects the spelling in brand content."
+    },
+    {
+      "file": "config/brand-spelling-allowlist.json",
+      "contains": "*",
+      "reason": "This allowlist quotes the allowed lines."
+    }
+  ]
+}

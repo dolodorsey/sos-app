@@ -16,7 +16,7 @@
 | Build | `npm run build` — **PASS** (static export in `out/`) |
 | Supabase | `cxdqkjvtpilvouwtbgdy.supabase.co` (dedicated SOS project, matches plan). Tables: `sos_users`, `sos_missions`. |
 | Secrets | No `service_role`/private keys in source or `out/` bundle. |
-| Product note | This app is **"S.O.S — Superheroes On Standby," a roadside-assistance marketplace** (towing, tires, oil, car wash), NOT the personal-safety/emergency platform the SOS execution plan describes. **Scope mismatch — confirm intended product** before Apple metadata/privacy work. |
+| Product note | This app is **"S.O.S — Superheros On Standby," a roadside-assistance marketplace** (towing, tires, oil, car wash), NOT the personal-safety/emergency platform the SOS execution plan describes. **Scope mismatch — confirm intended product** before Apple metadata/privacy work. |
 
 ## 2. Findings & remediation
 
