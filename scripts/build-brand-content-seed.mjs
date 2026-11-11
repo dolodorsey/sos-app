@@ -23,6 +23,15 @@ for (const t of L.TAGLINES) rows.push({ content_key: `tagline:${slug(t)}`, kind:
 rows.push({ content_key: 'boilerplate:disclosure', kind: 'boilerplate', title: 'Knowledge Hub disclosure', canonical_url: `${L.SITE}/wiki/`, status: 'in_review', approved_by: null, body: { text: L.DISCLOSURE } });
 for (const a of L.ARTICLES) rows.push({ content_key: `wiki:${a.slug}`, kind: 'wiki_article', title: a.title, canonical_url: `${L.SITE}/wiki/${a.slug}/`, status: 'in_review', approved_by: null,
   body: { meta_title: a.metaTitle, description: a.description, summary: a.summary, category: a.category, lead: a.lead, sections: a.sections, faq: a.faq || [], related: a.related, sources: a.sources, published: L.PUBLISHED, updated: L.UPDATED } });
+const VIDEO_DOC = 'https://claude.ai/artifact/9VXbwXWdcK2w3BDEnmwgKi';
+for (const [title, seconds, cta] of [
+  ['THE CITY HAS SUPERHEROS', 30, '/superheros/'],
+  ['THEY DON’T FLY. THEY PULL UP.', 15, '/app/'],
+  ['WHAT IS A SUPERHERO?', 30, '/superheros/'],
+  ['EVERY CITY NEEDS SUPERHEROS', 20, '/hero/apply/'],
+  ['STRANDED? CALL A SUPERHERO', 15, '/app/'],
+]) rows.push({ content_key: `video:${slug(title)}`, kind: 'video_package', title, canonical_url: null, status: 'draft', approved_by: null,
+  body: { duration_seconds: seconds, cta_path: cta, script_and_storyboard_doc: VIDEO_DOC, render_status: 'not_started', notes: 'Live-action recommended; generative video for previs only. Needs budget, cast releases, permits and final-cut brand QA.' } });
 rows.push({ content_key: 'wiki:index', kind: 'wiki_article', title: 'S.O.S. Knowledge Hub', canonical_url: `${L.SITE}/wiki/`, status: 'in_review', approved_by: null, body: { lexicon: L.LEXICON, glossary: L.GLOSSARY } });
 
 const q = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
