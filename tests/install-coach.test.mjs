@@ -32,3 +32,11 @@ test('install guide runs for customers as well as providers, never on internal t
   assert.match(prompt, /ATLANTA ROADSIDE HELP/);
   assert.match(prompt, /if \(!show && !provider && signedIn\(\)\) return null;/);
 });
+
+test('no fluff: coverage banner only appears when coverage cannot be checked; no browse-all launcher', () => {
+  const cov = readFileSync(new URL('../src/components/SOSCustomerCoverageStatusHost.jsx', import.meta.url), 'utf8');
+  const sub = readFileSync(new URL('../src/components/SOSSubcategoryRestoreHost.jsx', import.meta.url), 'utf8');
+  assert.match(cov, /if\(!loaded\)return null;/);
+  assert.match(cov, /covered===0&&rows\.length===0&&inSlot\(/);
+  assert.doesNotMatch(sub, /Browse all \{services\.length\} services/);
+});
