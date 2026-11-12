@@ -188,6 +188,11 @@ html body .sos-route-frame.sos-app-frame .sos2-nav button.active span { color: v
 body:has(.sos-app-frame) .sos3-legal {
   left: 0 !important;
   right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  /* The base rule used left:50% + translateX(-50%); once left is pinned to 0
+     that transform pushed the sheet half off-screen (and its close button with it). */
+  transform: none !important;
   width: auto !important;
   max-width: var(--sos-app-width) !important;
   margin-inline: auto !important;

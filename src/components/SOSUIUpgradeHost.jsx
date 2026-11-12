@@ -53,6 +53,13 @@ function legalCopy(kind){
   return common[kind]||common.support;
 }
 
+const FULL_DOCUMENT={
+  privacy:{href:'/privacy/',label:'Read the full Privacy Policy'},
+  terms:{href:'/terms/',label:'Read the full Terms of Service'},
+  safety:{href:'/legal/',label:'Read the full Not 911 notice'},
+  support:{href:'/support/',label:'Open Support'},
+};
+
 export default function SOSUIUpgradeHost(){
   const[legal,setLegal]=useState(null);
   const profileSlot=useAppSlot('profile');
@@ -101,17 +108,29 @@ export default function SOSUIUpgradeHost(){
     return()=>{stop();document.documentElement.classList.remove('sos-home-animation-first')};
   },[]);
 
+  useEffect(()=>{
+    if(!legal)return;
+    const opener=document.activeElement;
+    const root=document.documentElement;
+    root.classList.add('sos-legal-open');
+    const onKey=event=>{if(event.key==='Escape')setLegal(null)};
+    window.addEventListener('keydown',onKey);
+    requestAnimationFrame(()=>document.querySelector('.sos3-legal header button')?.focus());
+    return()=>{root.classList.remove('sos-legal-open');window.removeEventListener('keydown',onKey);if(opener&&typeof opener.focus==='function')opener.focus()};
+  },[legal]);
+
   const copy=legal?legalCopy(legal):null;
+  const full=legal?FULL_DOCUMENT[legal]||FULL_DOCUMENT.support:null;
   return <>
-    {(profileSlot||authPanel)?createPortal(<nav className="sos-inline-legal" aria-label="S.O.S. legal and support"><button onClick={()=>setLegal('privacy')}>Privacy</button><button onClick={()=>setLegal('terms')}>Terms</button><button onClick={()=>setLegal('safety')}>Not 911</button><button onClick={()=>setLegal('support')}>Support</button></nav>,profileSlot||authPanel):customerRoute?null:<div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
-      <button onClick={()=>setLegal('privacy')}>Privacy</button><i/>
-      <button onClick={()=>setLegal('terms')}>Terms</button><i/>
-      <button onClick={()=>setLegal('safety')}>Not 911</button><i/>
-      <button onClick={()=>setLegal('support')}>Support</button>
+    {(profileSlot||authPanel)?createPortal(<nav className="sos-inline-legal" aria-label="S.O.S. legal and support"><button type="button" onClick={()=>setLegal('privacy')}>Privacy</button><button type="button" onClick={()=>setLegal('terms')}>Terms</button><button type="button" onClick={()=>setLegal('safety')}>Not 911</button><button type="button" onClick={()=>setLegal('support')}>Support</button></nav>,profileSlot||authPanel):customerRoute?null:<div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
+      <button type="button" onClick={()=>setLegal('privacy')}>Privacy</button><i/>
+      <button type="button" onClick={()=>setLegal('terms')}>Terms</button><i/>
+      <button type="button" onClick={()=>setLegal('safety')}>Not 911</button><i/>
+      <button type="button" onClick={()=>setLegal('support')}>Support</button>
     </div>}
     {copy&&<section className="sos3-legal" role="dialog" aria-modal="true" aria-label={copy.title}>
-      <header><button onClick={()=>setLegal(null)} aria-label="Back to S.O.S.">←</button><img src="/brand/sos-logo.webp" alt="S.O.S."/><span/></header>
-      <div className="sos3-legal-scroll"><p className="sos3-legal-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p className="sos3-legal-intro">{copy.intro}</p><div className="sos3-legal-card">{copy.sections.map(([title,text])=><article key={title}><span className="sos3-legal-icon">{icons[title.includes('Safety')?'lock':title.includes('Account')?'home':title.includes('Information')?'bag':'home']}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div></div>
+      <header><button type="button" onClick={()=>setLegal(null)} aria-label="Close and return to S.O.S.">←</button><img src="/brand/sos-logo.webp" alt="S.O.S."/><span/></header>
+      <div className="sos3-legal-scroll"><p className="sos3-legal-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p className="sos3-legal-intro">{copy.intro}</p><div className="sos3-legal-card">{copy.sections.map(([title,text])=><article key={title}><span className="sos3-legal-icon" aria-hidden="true" dangerouslySetInnerHTML={{__html:icons[title.includes('Safety')?'lock':title.includes('Account')?'home':title.includes('Information')?'bag':'home']}}/><div><h2>{title}</h2><p>{text}</p></div></article>)}</div><div className="sos3-legal-full"><a href={full.href}>{full.label}</a><button type="button" onClick={()=>setLegal(null)}>Close</button></div></div>
     </section>}
   </>;
 }
