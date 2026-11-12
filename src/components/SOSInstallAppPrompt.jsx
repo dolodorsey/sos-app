@@ -58,10 +58,12 @@ export default function SOSInstallAppPrompt() {
     const dismissed = Number(get('sos:pwa-dismissed') || 0);
     const eligible = forceInstall() || !dismissed || Date.now() - dismissed > DISMISS_MS;
 
+    // Automatic prompts never open on top of an in-app legal sheet (Privacy/Terms/Not 911/Support).
+    const autoShow = () => { if (!document.documentElement.classList.contains('sos-legal-open')) setShow(true); };
     const beforeInstall = event => {
       event.preventDefault();
       setPromptEvent(event);
-      if (eligible) window.setTimeout(() => setShow(true), 1600);
+      if (eligible) window.setTimeout(autoShow, 1600);
     };
     const installedHandler = () => {
       setInstalled(true);
@@ -74,7 +76,7 @@ export default function SOSInstallAppPrompt() {
 
     let timer = 0;
     if (forceInstall()) timer = window.setTimeout(() => setShow(true), 120);
-    else if (eligible && isApple) timer = window.setTimeout(() => setShow(true), 4200);
+    else if (eligible && isApple) timer = window.setTimeout(autoShow, 4200);
 
     return () => {
       removeEventListener('beforeinstallprompt', beforeInstall);
