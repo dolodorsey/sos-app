@@ -52,3 +52,14 @@ test('automatic install prompt does not open over an open legal sheet', () => {
   assert.match(prompt, /classList\.contains\('sos-legal-open'\)/);
   assert.doesNotMatch(prompt, /setTimeout\(\(\) => setShow\(true\), (1600|4200)\)/);
 });
+
+test('install popup is a dismissible bottom sheet with safe copy', () => {
+  const prompt = read('src/components/SOSInstallAppPrompt.jsx');
+  assert.match(prompt, /className="sos-pwa-sheet" onClick=\{event=>event\.stopPropagation\(\)\}/, 'tapping outside closes, inside does not');
+  assert.match(prompt, /event\.key === 'Escape'/);
+  assert.match(prompt, /env\(safe-area-inset-bottom\)/);
+  assert.equal((prompt.match(/<button (?!aria-label)(?![^>]*type="button")/g) || []).length, 0, 'sheet buttons need type="button"');
+  assert.doesNotMatch(prompt, /guarantee|\$\d|minutes? away|24\/7/i, 'no unverified claims');
+  const coach = read('src/components/SOSInstallCoach.jsx');
+  assert.match(coach, /ios_chrome: \[\n\s+\{ icon: 'share'[^\n]*target: 'top-left'/, 'iOS Chrome share button is top-left');
+});

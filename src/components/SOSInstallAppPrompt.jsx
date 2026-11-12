@@ -35,7 +35,7 @@ function track(type, metadata = {}) {
 export default function SOSInstallAppPrompt() {
   const [promptEvent, setPromptEvent] = useState(null);
   const [show, setShow] = useState(false);
-  const [steps, setSteps] = useState(false);
+  const [, setSteps] = useState(false);
   const [apple, setApple] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [coach, setCoach] = useState(null);
@@ -85,6 +85,13 @@ export default function SOSInstallAppPrompt() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!show) return;
+    const onKey = event => { if (event.key === 'Escape') { set('sos:pwa-dismissed', String(Date.now())); setShow(false); } };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [show]);
+
   if (installed) return null;
   const pathNow=typeof window!=='undefined'?window.location.pathname.toLowerCase():'';
   const audience=audienceFor(pathNow);
@@ -92,7 +99,7 @@ export default function SOSInstallAppPrompt() {
   const provider=audience==='provider';
   if (coach) return <SOSInstallCoach flow={coach} onClose={()=>{setCoach(null);track('cta_click',{cta:'install_coach_close'})}} onDone={()=>{setCoach(null);set('sos:pwa-dismissed',String(Date.now()));track('cta_click',{cta:'install_coach_done',flow:coach})}}/>;
   if (!show && !provider && signedIn()) return null;
-  if (!show) return <button aria-label={provider?'Get S.O.S. provider app':'Get the S.O.S. app'} onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:`${audience}_persistent_get_app`})}} style={{position:'fixed',right:16,bottom:18,zIndex:2147482500,border:'1px solid rgba(255,106,112,.55)',borderRadius:999,padding:'13px 17px',background:'linear-gradient(100deg,#ff6a70,#e3000b)',color:'#ffffff',font:'900 11px/1 Arial',letterSpacing:'.08em',boxShadow:'0 16px 44px rgba(0,0,0,.4)',cursor:'pointer'}}>SERVICE PROVIDERS — GET S.O.S. ↗</button>;
+  if (!show) return <button aria-label={provider?'Get S.O.S. provider app':'Get the S.O.S. app'} onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:`${audience}_persistent_get_app`})}} style={{position:'fixed',right:16,bottom:'calc(16px + env(safe-area-inset-bottom))',zIndex:2147482500,display:'flex',alignItems:'center',gap:9,border:'1px solid rgba(227,0,11,.55)',borderRadius:999,padding:'7px 15px 7px 7px',background:'rgba(10,16,24,.92)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)',color:'#ffffff',font:"800 11.5px/1 'DM Sans',system-ui,sans-serif",letterSpacing:'.04em',boxShadow:'0 12px 32px rgba(0,0,0,.45)',cursor:'pointer'}}><img src="/sos-app-icon-192.png" alt="" width="26" height="26" style={{width:26,height:26,borderRadius:7}}/><span>SERVICE PROVIDERS · GET S.O.S.</span></button>;
 
   const close = () => {
     set('sos:pwa-dismissed', String(Date.now()));
@@ -115,46 +122,74 @@ export default function SOSInstallAppPrompt() {
     track('cta_click', { cta:'install_coach_start', flow });
   };
 
-  return <div className="sos-pwa-install" role="dialog" aria-modal="true" aria-label="Install S.O.S.">
+  const points = provider ? [
+    ['doc', 'Finish your application', 'Upload your info and follow your verification status.'],
+    ['bolt', 'Stay on standby', 'Mission offers go only to verified SUPERHEROS.'],
+    ['phone', 'No App Store needed', 'Opens full-screen like an app. Remove it anytime.'],
+  ] : [
+    ['tow', 'Tow, jump, flat, fuel or lockout', 'Request roadside help in metro Atlanta in a few taps.'],
+    ['pin', 'Follow it live', 'See your request move from matching to done.'],
+    ['phone', 'No App Store needed', 'Opens full-screen like an app. Remove it anytime.'],
+  ];
+
+  return <div className="sos-pwa-install" role="dialog" aria-modal="true" aria-label="Install S.O.S." onClick={close} onKeyDown={event=>{if(event.key==='Escape')close()}}>
     <InstallQr/>
     <style jsx>{`
-        .sos-pwa-install{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:end center;padding:16px;background:linear-gradient(180deg,#02060922,#020609e8);backdrop-filter:blur(12px);animation:sosPwaIn .3s ease both}
-        .sos-pwa-install section{position:relative;width:min(700px,100%);min-height:480px;overflow:hidden;border:1px solid #e3000b66;border-radius:30px;padding:31px 23px 50px;background:radial-gradient(circle at 86% 6%,#e3000b40,transparent 31%),radial-gradient(circle at 72% 22%,#4479a826,transparent 38%),linear-gradient(145deg,#101a29,#020609 72%);box-shadow:0 35px 105px #000d;color:#f7f8fa;isolation:isolate}
-        .sos-pwa-install section:after{content:'';position:absolute;inset:0;z-index:-1;opacity:.08;background:repeating-linear-gradient(116deg,transparent 0 16px,#fff2 17px,transparent 18px)}
-        .sos-pwa-x{position:absolute;right:14px;top:14px;z-index:5;width:39px;height:39px;border-radius:50%;border:1px solid #fff2;background:#fff1;color:#fff;font-size:25px}
-        section{overflow:hidden}.sos-pwa-phone{position:absolute;right:48px;top:58px;width:112px;height:222px;border:4px solid #fff;border-radius:29px;background:linear-gradient(160deg,#18283f,#020609);transform:rotate(7deg);box-shadow:0 28px 65px #000b;display:flex;flex-direction:column;align-items:center;justify-content:center}
-        .sos-pwa-phone i{position:absolute;top:7px;width:43px;height:10px;border-radius:12px;background:#000}.sos-pwa-phone b{width:64px;height:64px;border-radius:20px;background:linear-gradient(145deg,#ff3b42,#e3000b 58%,#8a0008);display:grid;place-items:center;color:#fff;font:900 18px/1 Arial;box-shadow:0 0 0 3px #fff2,0 15px 35px #e3000b4d}.sos-pwa-phone small{margin-top:13px;color:#fff;font:900 7px/1 Arial;letter-spacing:.16em}
-        .sos-pwa-copy{position:relative;z-index:2;max-width:480px;padding-right:105px}.sos-pwa-kicker{margin:0 0 11px!important;color:#ff6a70!important;font:900 10px/1 Arial!important;letter-spacing:.16em!important}.sos-pwa-copy h2{margin:0;font:900 clamp(34px,9vw,57px)/.83 'Barlow Condensed',Arial,sans-serif;letter-spacing:-.045em}.sos-pwa-copy h2 em{font-style:normal;background:linear-gradient(90deg,#ff6a70,#e3000b);-webkit-background-clip:text;color:transparent}.sos-pwa-copy>p:not(.sos-pwa-kicker){max-width:430px;margin:18px 0 15px;color:#c8d0da;font:500 14px/1.55 'DM Sans',Arial}
-        .sos-pwa-chips{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px;color:#aeb9c6;font:900 9px/1 Arial;letter-spacing:.11em}.sos-pwa-chips b{color:#e3000b}.sos-pwa-go{width:100%;min-height:55px;border:0;border-radius:15px;background:linear-gradient(100deg,#ff6a70,#e3000b 68%,#b80009);color:#ffffff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:900 13px/1 Arial;letter-spacing:.06em;box-shadow:0 16px 42px #e3000b40}.sos-pwa-go strong{font-size:22px}.sos-pwa-later{width:100%;border:0;background:transparent;color:#96a3b2;padding:13px 0 0;font:700 11px/1 Arial}
-        .sos-pwa-copy ol{list-style:none;margin:20px 0;padding:0;display:grid;gap:9px}.sos-pwa-copy li{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid #fff2;border-radius:13px;background:#fff1}.sos-pwa-copy li>b{color:#ff6a70;font:900 11px/1 Arial}.sos-pwa-copy li strong,.sos-pwa-copy li small{display:block}.sos-pwa-copy li strong{font:800 13px/1.2 Arial}.sos-pwa-copy li small{margin-top:3px;color:#9ca9b7;font:500 11px/1.35 Arial}
-        .sos-pwa-safety{position:absolute;left:23px;bottom:16px;margin:0;color:#8995a4;font:600 10px/1.3 'DM Sans',Arial;letter-spacing:.02em}
-        @keyframes sosPwaIn{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}@media(min-width:720px){.sos-pwa-install{place-items:center}.sos-pwa-install section{padding:43px 37px 54px}.sos-pwa-copy{padding-right:155px}.sos-pwa-phone{right:76px;top:75px}.sos-pwa-safety{left:37px}}@media(max-width:430px){.sos-pwa-install section{padding:28px 18px 52px;border-radius:25px}.sos-pwa-copy{padding-right:45px}.sos-pwa-copy h2{font-size:36px}.sos-pwa-phone{right:-7px;opacity:.58}.sos-pwa-safety{left:18px}}@media(prefers-reduced-motion:reduce){.sos-pwa-install{animation:none}}
-      `}</style>
-    <section>
-      <button className="sos-pwa-x" onClick={close} aria-label="Close">×</button>
-      <div className="sos-pwa-phone" aria-hidden="true"><i/><b>SOS</b><small>ON STANDBY</small></div>
-      {!steps ? <div className="sos-pwa-copy">
-        <p className="sos-pwa-kicker">{provider?'ATLANTA SERVICE PROVIDERS':'ATLANTA ROADSIDE HELP'}</p>
-        <h2>PUT<br/><em>S.O.S.</em><br/>ON YOUR PHONE.</h2>
-        {provider
-          ?<p>Keep provider onboarding, verification and S.O.S. access one tap away. Installing the web app does not approve a Hero or promise jobs, earnings or service assignments.</p>
-          :<p>Tow, gas, jump start, flat tire and lockout, one tap away when you need it. S.O.S. is roadside help, not an emergency service. For an emergency, call 911.</p>}
-        <div className="sos-pwa-chips">{provider
-          ?<><span>APPLY</span><b>•</b><span>VERIFY</span><b>•</b><span>STAY READY</span></>
-          :<><span>TOW</span><b>•</b><span>GAS</span><b>•</b><span>JUMP</span><b>•</b><span>FLAT</span><b>•</b><span>LOCKOUT</span></>}</div>
-        <button className="sos-pwa-go" onClick={install}><span>{promptEvent ? 'INSTALL S.O.S.' : 'ADD S.O.S.'}</span><strong>↗</strong></button>
-        <button className="sos-pwa-later" onClick={close}>Continue in browser</button>
-      </div> : <div className="sos-pwa-copy">
-        <p className="sos-pwa-kicker">{apple ? 'IPHONE / HOME SCREEN' : 'INSTALL / HOME SCREEN'}</p>
-        <h2>THREE TAPS.<br/><em>STAY READY.</em></h2>
-        <ol>
-          <li><b>01</b><div><strong>{apple ? 'Tap Share' : 'Open browser menu'}</strong><small>{apple ? 'Use Safari’s Share button.' : 'Open the browser install menu.'}</small></div></li>
-          <li><b>02</b><div><strong>Add to Home Screen</strong><small>Select Add to Home Screen / Install App.</small></div></li>
-          <li><b>03</b><div><strong>Tap Add</strong><small>S.O.S. lands beside your other apps.</small></div></li>
-        </ol>
-        <button className="sos-pwa-go" onClick={close}>GOT IT</button>
-      </div>}
-      <p className="sos-pwa-safety">S.O.S. is not an emergency service. For an emergency, call 911.</p>
+      .sos-pwa-install{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-end;justify-content:center;background:rgba(2,6,9,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:sosPwaFade .2s ease both}
+      .sos-pwa-sheet{position:relative;width:100%;max-width:460px;max-height:calc(100dvh - 24px);overflow:auto;padding:10px 20px calc(18px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:linear-gradient(180deg,#121c29 0%,#0a1018 60%);border:1px solid rgba(255,255,255,.08);border-bottom:0;box-shadow:0 -24px 70px rgba(0,0,0,.55);color:#f4f6f9;font-family:'DM Sans',system-ui,-apple-system,sans-serif;animation:sosPwaUp .32s cubic-bezier(.2,.8,.2,1) both}
+      .sos-pwa-handle{display:block;width:40px;height:5px;margin:0 auto 14px;border-radius:99px;background:rgba(255,255,255,.22)}
+      .sos-pwa-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.08);color:#c9d1db;font-size:20px;line-height:34px;cursor:pointer}
+      .sos-pwa-app{display:flex;align-items:center;gap:14px;padding-right:40px}
+      .sos-pwa-app img{width:64px;height:64px;border-radius:15px;flex:none;box-shadow:0 8px 24px rgba(227,0,11,.28),0 0 0 1px rgba(255,255,255,.1)}
+      .sos-pwa-app strong{display:block;font:800 19px/1.1 'DM Sans',system-ui,sans-serif;letter-spacing:-.01em}
+      .sos-pwa-app span{display:block;margin-top:2px;color:#aab5c2;font-size:13px}
+      .sos-pwa-app small{display:block;margin-top:6px;color:#7f8c9b;font-size:11.5px;font-weight:600}
+      .sos-pwa-kicker{margin:20px 0 0;color:#ff5a61;font:800 11px/1 'DM Sans',system-ui,sans-serif;letter-spacing:.14em}
+      .sos-pwa-sheet h2{margin:7px 0 14px;font:800 30px/1 'Barlow Condensed','DM Sans',Arial,sans-serif;letter-spacing:.005em;text-transform:uppercase}
+      .sos-pwa-points{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:4px}
+      .sos-pwa-points li{display:flex;gap:13px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}
+      .sos-pwa-points li:first-child{border-top:0}
+      .sos-pwa-ico{flex:none;width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(227,0,11,.13);color:#ff5a61}
+      .sos-pwa-points b{display:block;font-size:15px;font-weight:700;line-height:1.25}
+      .sos-pwa-points p{margin:3px 0 0;color:#9aa6b4;font-size:13.5px;line-height:1.4}
+      .sos-pwa-go{width:100%;min-height:54px;border:0;border-radius:16px;background:#e3000b;color:#fff;font:800 16px/1 'DM Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;box-shadow:0 12px 30px rgba(227,0,11,.32)}
+      .sos-pwa-go:active{transform:scale(.985)}
+      .sos-pwa-later{display:block;width:100%;margin-top:6px;min-height:46px;border:0;background:transparent;color:#aab5c2;font:600 14px/1 'DM Sans',system-ui,sans-serif;cursor:pointer}
+      .sos-pwa-safety{margin:6px 0 0;text-align:center;color:#6f7c8b;font-size:11.5px;line-height:1.45}
+      .sos-pwa-x:focus-visible,.sos-pwa-go:focus-visible,.sos-pwa-later:focus-visible{outline:2px solid #ff5a61;outline-offset:3px}
+      @media(min-width:720px){.sos-pwa-install{align-items:center}.sos-pwa-sheet{border-radius:28px;border-bottom:1px solid rgba(255,255,255,.08);padding:14px 26px 24px}}
+      @keyframes sosPwaFade{from{opacity:0}to{opacity:1}}
+      @keyframes sosPwaUp{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+      @media(prefers-reduced-motion:reduce){.sos-pwa-install,.sos-pwa-sheet{animation:none}}
+    `}</style>
+    <section className="sos-pwa-sheet" onClick={event=>event.stopPropagation()}>
+      <span className="sos-pwa-handle" aria-hidden="true"/>
+      <button type="button" className="sos-pwa-x" onClick={close} aria-label="Close">×</button>
+      <header className="sos-pwa-app">
+        <img src="/sos-app-icon-192.png" alt="" width="64" height="64"/>
+        <div>
+          <strong>S.O.S.</strong>
+          <span>{provider ? 'SUPERHERO portal' : 'Superheros On Standby'}</span>
+          <small>Free · Web app · Metro Atlanta</small>
+        </div>
+      </header>
+      <p className="sos-pwa-kicker">{provider ? 'ATLANTA SERVICE PROVIDERS' : 'ATLANTA ROADSIDE HELP'}</p>
+      <h2>{provider ? 'Keep the Hero portal one tap away' : 'Roadside help, one tap away'}</h2>
+      <ul className="sos-pwa-points">
+        {points.map(([icon,title,body])=><li key={title}><span className="sos-pwa-ico"><PointIcon name={icon}/></span><div><b>{title}</b><p>{body}</p></div></li>)}
+      </ul>
+      <button type="button" className="sos-pwa-go" data-sos-install-go onClick={install}>{promptEvent ? 'Install app' : 'Add to Home Screen'}</button>
+      <button type="button" className="sos-pwa-later" onClick={close}>Not now</button>
+      <p className="sos-pwa-safety">{provider ? 'Installing doesn’t approve an application or promise jobs or earnings.' : 'S.O.S. is roadside assistance, not an emergency service. In an emergency, call 911.'}</p>
     </section>
   </div>;
+}
+
+function PointIcon({ name }) {
+  const c = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
+  if (name === 'tow') return <svg {...c}><path d="M3 16V9h9l3 4h4a2 2 0 0 1 2 2v1"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M12 9V5l-3-1"/></svg>;
+  if (name === 'pin') return <svg {...c}><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.2"/></svg>;
+  if (name === 'doc') return <svg {...c}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>;
+  if (name === 'bolt') return <svg {...c}><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>;
+  return <svg {...c}><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 18h2"/></svg>;
 }

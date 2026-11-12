@@ -38,7 +38,7 @@ const FLOWS = {
     { icon: 'check', title: 'Tap Add', body: 'S.O.S. lands on your Home Screen.', target: 'top-right', place: 'middle' },
   ],
   ios_chrome: [
-    { icon: 'share', title: 'Tap the Share button', body: 'Top right, inside the address bar.', target: 'top-right', place: 'top' },
+    { icon: 'share', title: 'Tap the Share button', body: 'Top left, next to the address bar (square with an arrow).', target: 'top-left', place: 'top' },
     { icon: 'add', title: 'Tap “Add to Home Screen”', body: 'Scroll down the share sheet. If you don’t see it, tap “More”.', target: 'sheet', place: 'top' },
     { icon: 'check', title: 'Tap Add', body: 'Top right corner. S.O.S. lands on your Home Screen.', target: 'top-right', place: 'middle' },
   ],
@@ -120,9 +120,11 @@ export default function SOSInstallCoach({ flow, onClose, onDone }) {
       .target-bottom-center .arrow{left:calc(50% - 32px);bottom:calc(14px + env(safe-area-inset-bottom));animation:bounceDown 1s ease-in-out infinite}
       .target-sheet .arrow{left:calc(50% - 32px);top:calc(50% - 10px);animation:bounceDown 1s ease-in-out infinite}
       .target-top-right .arrow{right:16px;top:calc(8px + env(safe-area-inset-top));transform:rotate(180deg);animation:bounceUp 1s ease-in-out infinite}
+      .target-top-left .arrow{left:16px;top:calc(8px + env(safe-area-inset-top));transform:rotate(180deg);animation:bounceUp 1s ease-in-out infinite}
       .target-top-right-menu .arrow{right:60px;top:calc(120px + env(safe-area-inset-top));transform:rotate(180deg);animation:bounceUp 1s ease-in-out infinite}
       .target-none .arrow{display:none}
       .place-top.target-top-right .card{top:calc(86px + env(safe-area-inset-top))}
+      .place-top.target-top-left .card{top:calc(86px + env(safe-area-inset-top))}
       @keyframes bounceDown{0%,100%{translate:0 0}50%{translate:0 10px}}
       @keyframes bounceUp{0%,100%{translate:0 0}50%{translate:0 -10px}}
       @media (prefers-reduced-motion: reduce){.arrow{animation:none!important}.card{transition:none}}
