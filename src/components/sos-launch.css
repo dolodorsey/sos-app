@@ -124,6 +124,12 @@ html body .sos2-quick-grid > button:not([data-verified-coverage="active"]) [clas
 }
 .sos2-auth-about-hero span { font-size: 11px; color: rgba(235,241,248,.6); }
 .sos2-auth-about-hero strong { font-size: 14px; color: #ff6a70; }
+.sos2-auth-about-word {
+  display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid rgba(235,241,248,.14); background: rgba(255,255,255,.03); color: #fff; text-decoration: none;
+}
+.sos2-auth-about-word span { font-size: 11px; color: rgba(235,241,248,.6); }
+.sos2-auth-about-word strong { font-size: 14px; color: #fff; }
 @media (max-width: 380px) {
   .sos2-auth-about-services { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
