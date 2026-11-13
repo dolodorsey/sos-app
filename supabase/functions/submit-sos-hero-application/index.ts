@@ -73,7 +73,7 @@ Deno.serve(async req=>{
   }
   const email=text(b.email,254).toLowerCase(),phone=text(b.phone,40),first=text(b.firstName,80),last=text(b.lastName,80);
   if(!first||!last||!/^\S+@\S+\.\S+$/.test(email)||phone.length<7)return json(origin,{error:'Name, valid email, and phone are required.'},422);
-  if(!b.licenseAttested||!b.insuranceAttested||!b.backgroundConsent||!b.termsAccepted)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
+  if(b.licenseAttested!==true||b.insuranceAttested!==true||b.backgroundConsent!==true||b.termsAccepted!==true)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
   const{data:existing}=await admin.from('sos_hero_applications').select('id,status,submitted_at,khg_bridge_status,candidate_id').eq('email',email).in('status',ACTIVE_APPLICATION_STATUSES).maybeSingle();
   if(existing){
     const attribution=existing.candidate_id?{linked:true}:await linkRecruitingCandidate(admin,existing.id);
