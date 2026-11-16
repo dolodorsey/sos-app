@@ -24,7 +24,7 @@ for(const options of [{},{oldFail:true},{newFail:true},{strict:true},{usersGate:
 // Actual logout invalidates immediately, before its awaited presence RPC.
 {
  let release;const gate=new Promise(r=>release=r);const loadSession={current:{access_token:'fixture'}},loadGeneration={current:3};
- const noop=()=>{};const logout=vm.runInNewContext(line('logout')+'\nlogout',{loadSession,loadGeneration,heartbeat:{current:null},session:{access_token:'fixture',user:{id:'fixture'}},hero:{on_duty:true},rpc:()=>gate,localStorage:{removeItem:noop},setSession:noop,setUser:noop,setHero:noop,setOffers:noop,setMissions:noop,setPayments:noop,setSelectedMission:noop});
+ const noop=()=>{};const logout=vm.runInNewContext(line('logout')+'\nlogout',{loadSession,loadGeneration,heartbeat:{current:null},session:{access_token:'fixture',user:{id:'fixture'}},hero:{on_duty:true},rpc:()=>gate,localStorage:{removeItem:noop},setError:noop,setSession:noop,setUser:noop,setHero:noop,setOffers:noop,setMissions:noop,setPayments:noop,setSelectedMission:noop});
  const pending=logout();assert.equal(loadSession.current,null);assert.equal(loadGeneration.current,4);release();await pending;results.push({case:'actual logout invalidates before await',passed:true});
 }
 // Actual boot effect cleanup invalidates in-flight loads.
