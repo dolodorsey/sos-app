@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const source=fs.readFileSync(new URL('../src/components/SOSHeroVerificationReadinessHost.jsx',import.meta.url),'utf8');
+const start=source.indexOf(' const requestSequence=');
+const end=source.indexOf(' const ready=',start);
+const code=source.slice(start,end).replace(' const load=',' const load=');
+const ready={state:'hero',dispatch_ready:true};
+const pending={state:'hero',dispatch_ready:false};
+function fixture(){
+ let stored={access_token:'first'},state=ready,cleanup,tick;
+ const requests=[],writes=[];
+ const context=vm.createContext({useRef:value=>({current:value}),session:()=>stored,setState:value=>{state=value;writes.push(value)},SB:'https://fixture.invalid',headers:token=>({Authorization:`Bearer ${token}`}),fetch:(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject})),useEffect:fn=>{cleanup=fn()},setInterval:fn=>{tick=fn;return 1},clearInterval:()=>{}});
+ vm.runInContext(code+'\nglobalThis.refresh=load;',context);
+ const respond=async(index,value,ok=true)=>{requests[index].resolve({ok,json:async()=>value});await new Promise(resolve=>setImmediate(resolve))};
+ return{requests,writes,refresh:()=>context.refresh(),respond,cleanup:()=>cleanup(),tick:()=>tick(),setSession:value=>{stored=value},get state(){return state}};
+}
+test('current POST response replaces readiness with pending',async()=>{const f=fixture();await f.respond(0,pending);assert.equal(f.state,pending);assert.equal(f.requests[0].options.method,'POST');assert.equal(f.requests[0].options.body,'{}');assert.equal(f.requests[0].options.headers.Authorization,'Bearer first')});
+test('missing session clears readiness without another request',async()=>{const f=fixture();f.setSession(null);await f.refresh();assert.equal(f.state,null);assert.equal(f.requests.length,1);await f.respond(0,ready);assert.equal(f.state,null)});
+test('current HTTP failure clears readiness',async()=>{const f=fixture();await f.respond(0,{message:'unavailable'},false);assert.equal(f.state,null)});
+test('current network failure clears readiness',async()=>{const f=fixture();f.requests[0].reject(new Error('offline'));await new Promise(resolve=>setImmediate(resolve));assert.equal(f.state,null)});
+test('non-Hero response replaces old Hero state',async()=>{const f=fixture();const value={state:'not_hero'};await f.respond(0,value);assert.equal(f.state,value)});
+test('older success cannot overwrite newer pending result',async()=>{const f=fixture();const next=f.refresh();await f.respond(1,pending);await next;await f.respond(0,ready);assert.equal(f.state,pending)});
+test('older failure cannot clear newer result',async()=>{const f=fixture();const next=f.refresh();await f.respond(1,pending);await next;f.requests[0].reject(new Error('old failure'));await new Promise(resolve=>setImmediate(resolve));assert.equal(f.state,pending)});
+test('sign-out while request pending rejects old response',async()=>{const f=fixture();f.setSession(null);await f.respond(0,ready);assert.equal(f.state,null)});
+test('session switch while request pending rejects old response',async()=>{const f=fixture();f.setSession({access_token:'second'});await f.respond(0,ready);assert.equal(f.state,null)});
+test('new session request wins over prior session response',async()=>{const f=fixture();f.setSession({access_token:'second'});const next=f.refresh();await f.respond(1,pending);await next;await f.respond(0,ready);assert.equal(f.state,pending);assert.equal(f.requests[1].options.headers.Authorization,'Bearer second')});
+test('unmount invalidates pending response and subsequent calls',async()=>{const f=fixture();f.cleanup();await f.respond(0,pending);await f.refresh();assert.equal(f.writes.length,0);assert.equal(f.requests.length,1)});
+test('poll notices sign-out after settled response',async()=>{const f=fixture();await f.respond(0,ready);f.setSession(null);f.tick();assert.equal(f.state,null)});

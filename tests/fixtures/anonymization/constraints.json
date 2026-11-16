@@ -1,0 +1,327 @@
+[
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_candidate_id_fkey",
+    "definition": "FOREIGN KEY (candidate_id) REFERENCES sos_recruiting_candidates(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_email_check",
+    "definition": "CHECK (((char_length(email) >= 3) AND (char_length(email) <= 254)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_experience_summary_check",
+    "definition": "CHECK (((experience_summary IS NULL) OR (char_length(experience_summary) <= 3000)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_first_name_check",
+    "definition": "CHECK (((char_length(first_name) >= 1) AND (char_length(first_name) <= 80)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_khg_bridge_status_check",
+    "definition": "CHECK ((khg_bridge_status = ANY (ARRAY['pending'::text, 'synced'::text])))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_last_name_check",
+    "definition": "CHECK (((char_length(last_name) >= 1) AND (char_length(last_name) <= 80)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_operator_note_check",
+    "definition": "CHECK (((operator_note IS NULL) OR (char_length(operator_note) <= 3000)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_phone_check",
+    "definition": "CHECK (((char_length(phone) >= 7) AND (char_length(phone) <= 40)))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_source_hero_id_fkey",
+    "definition": "FOREIGN KEY (source_hero_id) REFERENCES sos_heroes(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_source_user_id_fkey",
+    "definition": "FOREIGN KEY (source_user_id) REFERENCES sos_users(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_status_check_v2",
+    "definition": "CHECK ((status = ANY (ARRAY['documents_required'::text, 'waitlisted'::text, 'reviewing'::text, 'needs_information'::text, 'conditionally_approved'::text, 'approved'::text, 'rejected'::text, 'withdrawn'::text])))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_vehicle_year_check",
+    "definition": "CHECK (((vehicle_year IS NULL) OR ((vehicle_year >= 1900) AND (vehicle_year <= ((EXTRACT(year FROM CURRENT_DATE))::integer + 2)))))"
+  },
+  {
+    "table_name": "sos_hero_applications",
+    "name": "sos_hero_applications_years_experience_check",
+    "definition": "CHECK (((years_experience >= 0) AND (years_experience <= 80)))"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_level_check",
+    "definition": "CHECK ((level = ANY (ARRAY['rookie'::text, 'pro'::text, 'elite'::text, 'legend'::text])))"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_payout_method_check",
+    "definition": "CHECK ((payout_method = ANY (ARRAY['instant'::text, 'weekly'::text, 'biweekly'::text])))"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_user_id_fkey",
+    "definition": "FOREIGN KEY (user_id) REFERENCES sos_users(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_user_id_key",
+    "definition": "UNIQUE (user_id)"
+  },
+  {
+    "table_name": "sos_heroes",
+    "name": "sos_heroes_verification_status_check",
+    "definition": "CHECK ((verification_status = ANY (ARRAY['pending'::text, 'documents_submitted'::text, 'under_review'::text, 'verified'::text, 'rejected'::text])))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_address_length",
+    "definition": "CHECK ((((pickup_address IS NULL) OR (char_length(pickup_address) <= 500)) AND ((dropoff_address IS NULL) OR (char_length(dropoff_address) <= 500))))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_category_id_fkey",
+    "definition": "FOREIGN KEY (category_id) REFERENCES sos_categories(id)"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_citizen_id_fkey",
+    "definition": "FOREIGN KEY (citizen_id) REFERENCES sos_users(id)"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_client_estimate_nonnegative",
+    "definition": "CHECK (((client_estimate_amount IS NULL) OR (client_estimate_amount >= (0)::numeric)))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_hero_id_fkey",
+    "definition": "FOREIGN KEY (hero_id) REFERENCES sos_heroes(id)"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_intake_payload_size",
+    "definition": "CHECK ((pg_column_size(intake_payload) <= 16384))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_notes_length",
+    "definition": "CHECK (((citizen_notes IS NULL) OR (char_length(citizen_notes) <= 2000)))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_pricing_status_check",
+    "definition": "CHECK ((pricing_status = ANY (ARRAY['starting_estimate'::text, 'quote_required'::text, 'manual_review'::text, 'confirmed'::text])))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_request_type_check",
+    "definition": "CHECK ((request_type = ANY (ARRAY['now'::text, 'scheduled'::text, 'quote'::text])))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_requested_service_length",
+    "definition": "CHECK (((requested_service_name IS NULL) OR (char_length(requested_service_name) <= 120)))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['requested'::text, 'matching'::text, 'assigned'::text, 'en_route'::text, 'on_site'::text, 'working'::text, 'completed'::text, 'canceled_by_citizen'::text, 'canceled_by_hero'::text, 'canceled_by_system'::text, 'disputed'::text])))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_subcategory_id_fkey",
+    "definition": "FOREIGN KEY (subcategory_id) REFERENCES sos_subcategories(id)"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_tax_amount_check",
+    "definition": "CHECK ((tax_amount >= (0)::numeric))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_tax_rate_percent_check",
+    "definition": "CHECK ((tax_rate_percent >= (0)::numeric))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_tip_amount_check",
+    "definition": "CHECK ((tip_amount >= (0)::numeric))"
+  },
+  {
+    "table_name": "sos_missions",
+    "name": "sos_missions_vehicle_id_fkey",
+    "definition": "FOREIGN KEY (vehicle_id) REFERENCES sos_vehicles(id)"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_attempt_count_check",
+    "definition": "CHECK ((attempt_count >= 0))"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_outreach_status_check",
+    "definition": "CHECK ((outreach_status = ANY (ARRAY['not_queued'::text, 'ready'::text, 'queued'::text, 'in_progress'::text, 'sent'::text, 'responded'::text, 'failed'::text, 'paused'::text, 'suppressed'::text])))"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_pipeline_stage_check",
+    "definition": "CHECK ((pipeline_stage = ANY (ARRAY['prospect'::text, 'priority'::text, 'qualified'::text, 'nurture'::text, 'contacted'::text, 'screening'::text, 'training'::text, 'account_setup'::text, 'test_mission'::text, 'approved'::text, 'rejected'::text, 'withdrawn'::text, 'suppressed'::text])))"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_priority_score_check",
+    "definition": "CHECK (((priority_score >= (0)::numeric) AND (priority_score <= (100)::numeric)))"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_source_hero_id_fkey",
+    "definition": "FOREIGN KEY (source_hero_id) REFERENCES sos_heroes(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_source_hero_id_key",
+    "definition": "UNIQUE (source_hero_id)"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_source_review_count_check",
+    "definition": "CHECK ((source_review_count >= 0))"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_candidates_source_user_id_fkey",
+    "definition": "FOREIGN KEY (source_user_id) REFERENCES sos_users(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "sos_recruiting_candidates",
+    "name": "sos_recruiting_last_outcome_check",
+    "definition": "CHECK (((last_outcome IS NULL) OR (last_outcome = ANY (ARRAY['sent'::text, 'responded'::text, 'failed'::text, 'paused'::text, 'not_reached'::text, 'invalid_contact'::text, 'opted_out'::text]))))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_category_check",
+    "definition": "CHECK ((category = ANY (ARRAY['account'::text, 'vehicle'::text, 'payment'::text, 'membership'::text, 'mission'::text, 'safety'::text, 'technical'::text, 'other'::text])))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_description_check",
+    "definition": "CHECK (((char_length(description) >= 5) AND (char_length(description) <= 3000)))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_mission_id_fkey",
+    "definition": "FOREIGN KEY (mission_id) REFERENCES sos_missions(id) ON DELETE SET NULL"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_priority_check",
+    "definition": "CHECK ((priority = ANY (ARRAY['normal'::text, 'high'::text, 'urgent'::text])))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['open'::text, 'reviewing'::text, 'waiting_customer'::text, 'resolved'::text, 'closed'::text])))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_subject_check",
+    "definition": "CHECK (((char_length(subject) >= 3) AND (char_length(subject) <= 160)))"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_ticket_number_key",
+    "definition": "UNIQUE (ticket_number)"
+  },
+  {
+    "table_name": "sos_support_tickets",
+    "name": "sos_support_tickets_user_id_fkey",
+    "definition": "FOREIGN KEY (user_id) REFERENCES sos_users(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_auth_id_fkey",
+    "definition": "FOREIGN KEY (auth_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_auth_id_key",
+    "definition": "UNIQUE (auth_id)"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_pkey",
+    "definition": "PRIMARY KEY (id)"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_referral_code_key",
+    "definition": "UNIQUE (referral_code)"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_referred_by_fkey",
+    "definition": "FOREIGN KEY (referred_by) REFERENCES sos_users(id)"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_role_check",
+    "definition": "CHECK ((role = ANY (ARRAY['citizen'::text, 'hero'::text, 'admin'::text])))"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_shield_plan_check",
+    "definition": "CHECK ((shield_plan = ANY (ARRAY['shield'::text, 'shield_plus'::text, 'shield_pro'::text, 'shield_family'::text, 'shield_fleet'::text])))"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_status_check",
+    "definition": "CHECK ((status = ANY (ARRAY['active'::text, 'suspended'::text, 'deactivated'::text, 'pending_verification'::text])))"
+  },
+  {
+    "table_name": "sos_users",
+    "name": "sos_users_trust_rating_count_check",
+    "definition": "CHECK ((trust_rating_count >= 0))"
+  }
+]
