@@ -50,8 +50,15 @@ test('all realtime features share one non-persistent Supabase client', () => {
 })
 
 
-test('packaged root and web app share the complete customer entry point',()=>{
-  assert.match(read('../src/app/page.jsx'),/export \{default\} from '\.\/app\/page'/)
+test('web root is the public homepage and the packaged app still opens the full customer entry point',()=>{
+  const layout=read('../src/app/layout.jsx'), home=read('../src/components/SOSHome.jsx')
+  assert.match(read('../src/app/page.jsx'),/SOSHome/)
+  // Native shells are sent to /app/ before paint, with a client-side backstop on the homepage.
+  assert.match(layout,/isNativePlatform\(\)\)\{var p=location\.pathname;if\(p==='\/'\|\|p==='\/index\.html'\)\{location\.replace\('\/app\/'\)/)
+  assert.match(home,/isNativePlatform\(\)\)[\s\S]{0,60}location\.replace\('\/app\/'\)/)
+  // Auth, confirmation and recovery links landing on the root are forwarded to the app.
+  assert.match(home,/access_token/)
+  assert.match(home,/type=recovery/)
   assert.match(appPage,/SOSCustomerCoverageStatusHost/)
   assert.match(appPage,/SOSCustomerReceiptHost/)
   assert.match(appPage,/SOSShareTrackingHost/)

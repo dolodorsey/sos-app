@@ -50,5 +50,6 @@ export function useAppSlot(name) {
 export function isCustomerAppRoute() {
   if (typeof window === 'undefined') return false;
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
-  return path === '/' || path === '/app';
+  // The root is the public homepage on web; native shells are redirected to /app before paint.
+  return path === '/app';
 }
