@@ -58,3 +58,28 @@ export const LAUNCH_SERVICE_LIST_TEXT = 'Towing, Fuel Delivery, Jump Start, Flat
 export function notAvailableMessage(name) {
   return `${name || 'This service'} is not available yet. At launch S.O.S. offers ${LAUNCH_SERVICE_LIST_TEXT} in ${LAUNCH_MARKET.name}.`;
 }
+
+// ---------- Hero (provider) sign-up rules for launch ----------
+// Tow and Lockout applicants must prove they already do the work (business card, business license, or certification).
+// Gas, Jump and Flat Tire are open to anyone who passes standard Hero verification.
+export const TRADE_PROOF_SERVICES = ['tow', 'lockout'];
+export const HERO_LAUNCH_SERVICES = LAUNCH_SERVICES.map(s => ({
+  ...s,
+  proof: TRADE_PROOF_SERVICES.includes(s.id),
+  pitch: {
+    tow: 'Flatbed or wheel-lift towing',
+    fuel: 'Bring gas to stranded drivers',
+    jump: 'Jump pack or cables',
+    flat: 'Spare install or plug & inflate',
+    lockout: 'Vehicle entry tools',
+  }[s.id],
+}));
+export const SIDES_OF_TOWN = [
+  { id: 'east', label: 'East side', hint: 'Decatur · Stone Mountain · Lithonia' },
+  { id: 'south', label: 'South side', hint: 'College Park · East Point · Riverdale' },
+  { id: 'west', label: 'West side', hint: 'West End · Austell · Douglasville' },
+  { id: 'downtown', label: 'Downtown', hint: 'Downtown · Castleberry · Old Fourth Ward' },
+  { id: 'midtown', label: 'Midtown', hint: 'Midtown · Atlantic Station · Westside' },
+  { id: 'buckhead', label: 'Buckhead', hint: 'Buckhead · Brookhaven · Sandy Springs' },
+];
+export const needsTradeProof = ids => ids.some(id => TRADE_PROOF_SERVICES.includes(id));

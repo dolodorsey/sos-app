@@ -12,8 +12,9 @@ test('Hero application supports verified-email cross-device resume', async () =>
 
 test('Hero onboarding remains gated through credentials, review and activation', async () => {
   const page = await readFile(new URL('../src/app/hero/apply/page.jsx', import.meta.url), 'utf8');
-  assert.match(page, /Government ID/);
   assert.match(page, /Driver license/);
+  assert.match(page, /\['selfie','Selfie'/);
+  assert.match(page, /capture=\{capture\|\|undefined\}/);
   assert.match(page, /Insurance/);
   assert.match(page, /Operations review/);
   assert.match(page, /Activation/);
