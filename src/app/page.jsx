@@ -1,5 +1,7 @@
-'use client';
+import SOSHome from '@/components/SOSHome';
 
-// The packaged app starts at /. Keep it on the same complete customer
-// experience as /app so release safeguards and features cannot drift.
-export {default} from './app/page';
+// Web front door. The packaged app is sent to /app/ by the root layout before
+// paint, so native users keep the full customer entry point at /app.
+export default function HomePage() {
+  return <SOSHome />;
+}

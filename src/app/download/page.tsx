@@ -1,98 +1,34 @@
 export const metadata = {
-  title: "SOS - Android Download",
-  description: "Download the SOS Android app directly.",
+  title: 'S.O.S. — Launch status | Superheros On Standby',
+  description: 'The S.O.S. iPhone app is in final App Store review. Get notified at launch.',
+  alternates: { canonical: '/download/' },
 };
 
-export default function DownloadPage() {
+// Kept so older links still resolve. S.O.S. is not yet in the App Store,
+// so this page shows launch status instead of install links.
+export default function LaunchStatusPage() {
   return (
     <div style={{
-      minHeight: "100vh",
-      background: "#080808",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
+      minHeight: '100vh',
+      background: '#05080d',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
       fontFamily: "'DM Sans', sans-serif",
-      color: "#F5F0E8",
-      padding: "40px 20px",
-      textAlign: "center",
+      color: '#F7F8FA',
+      padding: '40px 20px',
+      textAlign: 'center',
     }}>
-
-      <div style={{ marginBottom: "32px" }}>
-        <div style={{
-          width: "80px", height: "80px",
-          background: "#E53E3E",
-          borderRadius: "20px",
-          margin: "0 auto 20px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "36px"
-        }}>📱</div>
-        <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-          SOS
-        </h1>
-        <p style={{ color: "#E53E3E", fontSize: "1rem", margin: 0 }}>
-          Roadside help in Atlanta. One tap away.
-        </p>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "320px" }}>
-
-        <a
-          href="https://dzlmtvodpyhetvektfuo.supabase.co/storage/v1/object/public/apks/sos-release.apk"
-          download="sos-release.apk"
-          style={{
-            background: "#E53E3E",
-            color: "#080808",
-            padding: "18px 32px",
-            borderRadius: "12px",
-            fontWeight: 800,
-            fontSize: "1.05rem",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-          }}
-        >
-          ⬇ Download for Android
-        </a>
-
-        <a
-          href="https://testflight.apple.com"
-          style={{
-            background: "transparent",
-            color: "#F5F0E8",
-            padding: "16px 32px",
-            borderRadius: "12px",
-            fontWeight: 600,
-            fontSize: "1rem",
-            textDecoration: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "10px",
-            border: "1px solid rgba(245,240,232,0.2)",
-          }}
-        >
-           Download for iPhone (TestFlight)
-        </a>
-
-      </div>
-
-      <div style={{ marginTop: "40px", maxWidth: "300px" }}>
-        <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", lineHeight: 1.6 }}>
-          <strong style={{ color: "rgba(245,240,232,0.7)" }}>Android:</strong> After download, open the APK file.
-          Enable <em>Install from Unknown Sources</em> in Settings if prompted.
-        </p>
-        <p style={{ color: "rgba(245,240,232,0.4)", fontSize: "0.8rem", lineHeight: 1.6, marginTop: "8px" }}>
-          <strong style={{ color: "rgba(245,240,232,0.7)" }}>iPhone:</strong> TestFlight link opens the App Store.
-          No Apple approval required — available immediately.
-        </p>
-      </div>
-
-      <p style={{ marginTop: "48px", color: "rgba(245,240,232,0.25)", fontSize: "0.75rem" }}>
-        The Kollective Hospitality Group · superherosonstandby.com
+      <img src="/brand/sos-logo.webp" alt="S.O.S. — Superheros On Standby" width={180} style={{ height: 'auto', marginBottom: 24 }} />
+      <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 12px' }}>In final App Store review</h1>
+      <p style={{ color: 'rgba(247,248,250,.75)', fontSize: '1.05rem', maxWidth: 420, lineHeight: 1.6, margin: '0 0 28px' }}>
+        S.O.S. brings roadside SUPERHEROS to Atlanta drivers. Leave your email and we’ll tell you the day it launches.
       </p>
+      <a href="/#notify" style={{ background: '#E3000B', color: '#fff', padding: '16px 28px', borderRadius: 12, fontWeight: 800, textDecoration: 'none' }}>
+        Get notified at launch
+      </a>
+      <a href="/hero/apply/" style={{ marginTop: 16, color: '#fff', fontWeight: 700 }}>Become a SUPERHERO</a>
     </div>
   );
 }

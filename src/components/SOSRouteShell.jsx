@@ -64,6 +64,11 @@ export default function SOSRouteShell({ children }) {
     router.replace(fallback);
   };
 
+  if (pathname === '/') {
+    // Web homepage: full-width public page, no app frame or route header.
+    return <div className="sos-authority-shell sos-home-shell">{children}</div>;
+  }
+
   if (authority) {
     return <div className="sos-authority-shell">{children}</div>;
   }
