@@ -141,7 +141,7 @@ export default function SOSHome() {
             </p>
             <p className="sh-status">
               <span className="sh-dot" aria-hidden="true" />
-              In final App Store review. Get notified at launch.
+              Coming soon to the App Store. Get notified at launch.
             </p>
             <div className="sh-ctas">
               <a href="#notify" className="sh-btn sh-btn-red">Get notified at launch</a>
@@ -188,7 +188,7 @@ export default function SOSHome() {
             <p className="sh-kicker">Launch list</p>
             <h2>Get notified at launch</h2>
             <p className="sh-body">
-              The S.O.S. iPhone app is in final App Store review. Leave your email and we’ll tell you the day it goes live.
+              The S.O.S. iPhone app is coming soon to the App Store. Leave your email and we’ll tell you the day it goes live.
             </p>
           </div>
           <NotifyForm />

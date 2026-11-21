@@ -1,6 +1,6 @@
 export const metadata = {
   title: 'S.O.S. — Launch status | Superheros On Standby',
-  description: 'The S.O.S. iPhone app is in final App Store review. Get notified at launch.',
+  description: 'The S.O.S. iPhone app is coming soon to the App Store. Get notified at launch.',
   alternates: { canonical: '/download/' },
 };
 
@@ -21,7 +21,7 @@ export default function LaunchStatusPage() {
       textAlign: 'center',
     }}>
       <img src="/brand/sos-logo.webp" alt="S.O.S. — Superheros On Standby" width={180} style={{ height: 'auto', marginBottom: 24 }} />
-      <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 12px' }}>In final App Store review</h1>
+      <h1 style={{ fontSize: '2.2rem', fontWeight: 800, margin: '0 0 12px' }}>Coming soon to the App Store</h1>
       <p style={{ color: 'rgba(247,248,250,.75)', fontSize: '1.05rem', maxWidth: 420, lineHeight: 1.6, margin: '0 0 28px' }}>
         S.O.S. brings roadside SUPERHEROS to Atlanta drivers. Leave your email and we’ll tell you the day it launches.
       </p>
