@@ -32,7 +32,7 @@ jobs:
       TESTFLIGHT_CHANGELOG: Automated SOS build from ${{ github.sha }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Prepare Apple release signing from Supabase
         shell: bash
@@ -134,7 +134,7 @@ jobs:
 
           rm -f "$TOKEN_FILE" "$CRED_FILE" "$PRIVATE_KEY_P12" "$CERT_PATH" "$CERT_PASSWORD_PATH" "$PROFILE_PATH" "$META_FILE"
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           cache: npm
