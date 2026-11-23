@@ -26,9 +26,13 @@ test('invite migration keeps the gates: drafts only, service-role link minting, 
 
 test('sosatl.com short links forward to the sign-up page', () => {
   const cfg = JSON.parse(read('vercel.json'))
-  const r = cfg.redirects.find(x => x.source.startsWith('/:code'))
-  assert.equal(r.destination, 'https://thesuperherosonstandby.com/hero/apply/?i=:code')
-  assert.match(r.has[0].value, /sosatl/)
+  const codes = cfg.redirects.filter(x => x.source.startsWith('/:code'))
+  assert.deepEqual(codes.map(r => r.has[0].value).sort(), ['sosatl.com', 'www.sosatl.com'])
+  for (const r of cfg.redirects) {
+    assert.doesNotMatch(r.source, /\)\/?\?$/, 'Vercel rejects an optional trailing slash after a param pattern')
+    assert.match(r.destination, /^https:\/\/thesuperherosonstandby\.com\/hero\/apply\//)
+  }
+  assert.equal(codes[0].destination, 'https://thesuperherosonstandby.com/hero/apply/?i=:code')
 })
 
 test('selfie is an allowed document type at the table level', () => {
