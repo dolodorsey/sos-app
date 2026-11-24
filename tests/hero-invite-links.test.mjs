@@ -27,7 +27,10 @@ test('invite migration keeps the gates: drafts only, service-role link minting, 
 test('sosatl.com short links forward to the sign-up page', () => {
   const cfg = JSON.parse(read('vercel.json'))
   const codes = cfg.redirects.filter(x => x.source.startsWith('/:code'))
-  assert.deepEqual(codes.map(r => r.has[0].value).sort(), ['sosatl.com', 'www.sosatl.com'])
+  // The site adds a trailing slash before redirects run, so each host needs both forms.
+  assert.deepEqual(codes.map(r => r.has[0].value + ' ' + r.source).sort(), [
+    'sosatl.com /:code([A-Za-z0-9]{8})', 'sosatl.com /:code([A-Za-z0-9]{8})/',
+    'www.sosatl.com /:code([A-Za-z0-9]{8})', 'www.sosatl.com /:code([A-Za-z0-9]{8})/'])
   for (const r of cfg.redirects) {
     assert.doesNotMatch(r.source, /\)\/?\?$/, 'Vercel rejects an optional trailing slash after a param pattern')
     assert.match(r.destination, /^https:\/\/thesuperherosonstandby\.com\/hero\/apply\//)
