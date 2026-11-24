@@ -5,11 +5,15 @@
   display: grid;
   place-items: center;
   background: radial-gradient(circle at 50% 40%, #1a0508 0%, #05080d 70%);
-  animation: introIn 0.35s ease-out both;
+  opacity: 1;
+  transition: opacity 0.6s ease-in, transform 0.6s ease-in;
 }
 
 .leaving {
-  animation: introOut 0.6s ease-in forwards;
+  /* fade out; the element is removed by a timer either way, so a paused
+     animation can never leave an invisible layer over the form */
+  opacity: 0;
+  transform: scale(1.04);
   pointer-events: none;
 }
 
@@ -51,14 +55,4 @@
 .skip {
   background: #ff1f2a;
   border-color: #ff1f2a;
-}
-
-@keyframes introIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes introOut {
-  from { opacity: 1; transform: scale(1); }
-  to { opacity: 0; transform: scale(1.04); }
 }
