@@ -10,10 +10,12 @@ test('Hero sign-up shows the brand intro, and the intro always gets out of the w
   const c = fs.readFileSync(root + 'src/components/SOSHeroIntro.jsx', 'utf8');
   assert.match(c, /onEnded=\{close\}/, 'closes when the video ends');
   assert.match(c, /onError=\{close\}/, 'closes if the video fails');
-  assert.match(c, /setTimeout\(close, MAX_MS\)/, 'hard cap so the form is never blocked');
-  assert.match(c, /catch\(\(\) => close\(\)\)/, 'closes if autoplay is refused');
-  assert.match(c, /sessionStorage/, 'once per visit');
-  assert.match(c, /prefers-reduced-motion/);
+  assert.match(c, /setTimeout\(close, PLAY_CAP_MS\)/, 'hard cap once playing');
+  assert.match(c, /setTimeout\(close, TAP_WAIT_MS\)/, 'an untouched Play screen closes itself');
+  assert.match(c, /p\.catch\(\(\) => setMode/, 'autoplay refused shows the Play button instead of disappearing');
+  assert.doesNotMatch(c, /p\.catch\(\(\) => close\(\)\)/, 'blocked autoplay must not hide the intro');
+  assert.match(c, /REPLAY_AFTER_MS/, 'plays on every arrival, not once per tab');
+  assert.match(c, /prefers-reduced-motion[\s\S]*'tap'/, 'Reduce Motion gets the Play button, not nothing');
   assert.match(c, />\s*Skip\s*</);
   assert.ok(fs.statSync(root + 'public/brand/intro/sos-hero-intro.mp4').size < 3_000_000, 'intro video stays phone-friendly');
 });
