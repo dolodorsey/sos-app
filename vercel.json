@@ -4,6 +4,8 @@
     { "source": "/", "has": [{ "type": "host", "value": "sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/", "permanent": false },
     { "source": "/", "has": [{ "type": "host", "value": "www.sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/", "permanent": false },
     { "source": "/:code([A-Za-z0-9]{8})", "has": [{ "type": "host", "value": "sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/?i=:code", "permanent": false },
-    { "source": "/:code([A-Za-z0-9]{8})", "has": [{ "type": "host", "value": "www.sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/?i=:code", "permanent": false }
+    { "source": "/:code([A-Za-z0-9]{8})/", "has": [{ "type": "host", "value": "sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/?i=:code", "permanent": false },
+    { "source": "/:code([A-Za-z0-9]{8})", "has": [{ "type": "host", "value": "www.sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/?i=:code", "permanent": false },
+    { "source": "/:code([A-Za-z0-9]{8})/", "has": [{ "type": "host", "value": "www.sosatl.com" }], "destination": "https://thesuperherosonstandby.com/hero/apply/?i=:code", "permanent": false }
   ]
 }
