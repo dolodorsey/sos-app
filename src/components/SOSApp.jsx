@@ -240,7 +240,7 @@ function SOSAppInner(){
     setDispatch(p=>({...p,phase:saved?'requested':'error',message}));
   };
   const finishMission=()=>{tap();setDispatch(null);setOpenCat(null);if(session&&sosUser)getMissions(sosUser.id,session.access_token).then(m=>setMissions(m||[]));};
-  const authorizeMission=async(mission)=>{setLoading(true);setErr('');try{const d=await api('/functions/v1/create-mission-checkout',session.access_token,{method:'POST',body:JSON.stringify({mission_id:mission.id})});if(!d?.checkout_url)throw new Error('Secure checkout is unavailable');await openPaymentUrl(d.checkout_url);}catch(e){setErr(e.message)}finally{setLoading(false)}};
+  const authorizeMission=async(mission)=>{setLoading(true);setErr('');try{const d=await api('/functions/v1/create-mission-checkout',session.access_token,{method:'POST',body:JSON.stringify({mission_id:mission.id})});if(d?.covered){window.alert(d.message||'Covered by your S.O.S. reward. Nothing to pay.');window.location.reload();return}if(!d?.checkout_url)throw new Error('Secure checkout is unavailable');await openPaymentUrl(d.checkout_url);}catch(e){setErr(e.message)}finally{setLoading(false)}};
   const rateMission=async(mission)=>{const value=Number(window.prompt('Rate your Hero from 1 to 5'));if(!Number.isInteger(value)||value<1||value>5)return;try{await rpc('sos_rate_completed_mission',{p_mission_id:mission.id,p_rating:value,p_review_text:null,p_tags:[],p_is_public:true},session.access_token);window.alert('Rating submitted. Thank you.');}catch(e){setErr(e.message)}};
 
   const W={fontFamily:ff,color:C.text,background:C.bg,minHeight:'100vh',position:'relative'};

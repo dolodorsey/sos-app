@@ -2,6 +2,7 @@
 
 import {useEffect,useState} from 'react';
 import styles from './SOSAuthConfirmationGuard.module.css';
+import{pendingReferral}from'./SOSRewardsHost';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
@@ -25,7 +26,7 @@ export default function SOSAuthConfirmationGuard(){
    setBusy(true);setError('');setNotice('');
    try{
     const redirect=`https://thesuperherosonstandby.com${path.startsWith('/hero/claim')?'/hero/claim':'/app'}`;
-    const r=await fetch(`${SB}/auth/v1/signup?redirect_to=${encodeURIComponent(redirect)}`,{method:'POST',headers:{apikey:SK,'Content-Type':'application/json'},body:JSON.stringify({email:nextEmail,password,data:{full_name:fullName||undefined,app:'sos',role:'citizen'}})});
+    const r=await fetch(`${SB}/auth/v1/signup?redirect_to=${encodeURIComponent(redirect)}`,{method:'POST',headers:{apikey:SK,'Content-Type':'application/json'},body:JSON.stringify({email:nextEmail,password,data:{full_name:fullName||undefined,app:'sos',role:'citizen',ref:pendingReferral()}})});
     const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d?.msg||d?.error_description||d?.message||d?.error||'Account creation failed');setEmail(nextEmail);
     if(d.access_token){localStorage.setItem('sos_session',JSON.stringify(d));window.location.reload();return}
     setNotice('Your S.O.S. account was created. Confirm the email we sent you before signing in. The live Auth configuration requires email confirmation.');setOpen(true);

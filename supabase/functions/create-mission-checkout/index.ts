@@ -31,20 +31,38 @@ Deno.serve(async(req)=>{
   const serviceAmount=Math.round(Number(mission.final_price)*100)/100
   const taxAmount=Math.max(0,Math.round(Number(mission.tax_amount||0)*100)/100)
   const tipAmount=Math.max(0,Math.round(Number(mission.tip_amount||0)*100)/100)
-  const chargeCents=Math.round((serviceAmount+taxAmount+tipAmount)*100)
-  if(!Number.isFinite(serviceAmount)||serviceAmount<0.5||!Number.isSafeInteger(chargeCents)||chargeCents<50)return json(req,{error:'Mission total is invalid'},409)
+  if(!Number.isFinite(serviceAmount)||serviceAmount<0.5)return json(req,{error:'Mission total is invalid'},409)
+  // Rewards: promo codes and referral credits. One credit per job; S.O.S. funds the discount and the Hero is paid in full.
+  let promoDiscount=0,promoCreditId:string|null=null,promoLabel=''
+  {const{data:credit,error:creditError}=await admin.rpc('sos_reserve_mission_credit',{p_mission_id:mission_id})
+   if(creditError)console.warn('S.O.S. reward lookup failed; charging full price',creditError.message)
+   else if(credit?.credit_id&&Number(credit.discount)>0){promoDiscount=Math.min(serviceAmount,Math.round(Number(credit.discount)*100)/100);promoCreditId=String(credit.credit_id);promoLabel=String(credit.label||'S.O.S. reward')}}
+  const releaseCredit=async()=>{if(promoCreditId){try{await admin.rpc('sos_release_mission_credit',{p_mission_id:mission_id})}catch{}}}
+  const chargeCents=Math.round((serviceAmount-promoDiscount+taxAmount+tipAmount)*100)
+  if(!Number.isSafeInteger(chargeCents)||chargeCents<0)return json(req,{error:'Mission total is invalid'},409)
+  if(chargeCents<50&&!promoCreditId)return json(req,{error:'Mission total is invalid'},409)
 
   let stripeKey=Deno.env.get('STRIPE_SECRET_KEY')||''
   if(!stripeKey){const{data,error}=await admin.rpc('sos_get_runtime_secret',{secret_name:'STRIPE_SECRET_KEY'});if(!error&&data)stripeKey=String(data)}
-  if(!stripeKey)return json(req,{error:'Secure payments are not configured'},503)
+  if(!stripeKey){await releaseCredit();return json(req,{error:'Secure payments are not configured'},503)}
   const stripe=new Stripe(stripeKey,{httpClient:Stripe.createFetchHttpClient()})
 
   const{data:existing}=await admin.from('sos_payments').select('*').eq('mission_id',mission_id).maybeSingle()
   if(existing&&['authorized','captured','transfer_pending','released'].includes(existing.payment_status))return json(req,{error:'Mission payment is already authorized. Refresh mission status.'},409)
+
+  // The reward covers everything: nothing to charge, no card needed.
+  if(chargeCents<50&&promoCreditId){
+    const{error:coveredError}=await admin.rpc('sos_prepare_mission_payment',{p_mission_id:mission_id,p_payment_intent_id:null,p_checkout_session_id:null,p_amount:serviceAmount,p_platform_fee:null,p_hero_payout:null,p_currency:'usd'})
+    if(coveredError){await releaseCredit();console.error('S.O.S. reward-covered payment preparation failed',coveredError);return json(req,{error:'Your reward could not be applied. Try again.'},409)}
+    const at=new Date().toISOString()
+    const{error:markError}=await admin.from('sos_payments').update({payment_status:'authorized',escrow_status:'authorized_hold',payment_method:'promo_credit',promo_discount:promoDiscount,promo_credit_id:promoCreditId,authorized_at:at,metadata:{promo_covered:true,promo_label:promoLabel,customer_charge:0},updated_at:at}).eq('mission_id',mission_id)
+    if(markError){await releaseCredit();return json(req,{error:'Your reward could not be applied. Try again.'},409)}
+    return json(req,{covered:true,promo_discount:promoDiscount,message:`${promoLabel} applied. Nothing to pay for this service.`})
+  }
   if(existing?.stripe_checkout_session_id){
     try{
       const prior=await stripe.checkout.sessions.retrieve(existing.stripe_checkout_session_id)
-      const priorCents=Math.round((Number(existing.amount||0)+Number(existing.tax||0)+Number(existing.tip||0))*100)
+      const priorCents=Math.round((Number(existing.amount||0)-Number(existing.promo_discount||0)+Number(existing.tax||0)+Number(existing.tip||0))*100)
       if(prior.status==='open'&&prior.url&&priorCents===chargeCents)return json(req,{checkout_url:prior.url,checkout_session_id:prior.id})
       if(prior.status==='open'&&priorCents!==chargeCents)await stripe.checkout.sessions.expire(prior.id)
       if(prior.status==='complete')return json(req,{error:'Payment authorization is processing. Refresh mission status before trying again.'},409)
@@ -62,13 +80,14 @@ Deno.serve(async(req)=>{
   const success=safeReturnUrl(success_url,`${base}/app/?payment=authorized`),cancel=safeReturnUrl(cancel_url,`${base}/app/?payment=canceled`)
   const session=await stripe.checkout.sessions.create({
     mode:'payment',success_url:success,cancel_url:cancel,
-    line_items:[{price_data:{currency:'usd',unit_amount:chargeCents,product_data:{name:'S.O.S. roadside mission',metadata:{mission_id,service_amount:String(serviceAmount),tax_amount:String(taxAmount),tip_amount:String(tipAmount)}}},quantity:1}],
+    line_items:[{price_data:{currency:'usd',unit_amount:chargeCents,product_data:{name:promoDiscount>0?`S.O.S. roadside mission (${promoLabel})`:'S.O.S. roadside mission',metadata:{mission_id,service_amount:String(serviceAmount),promo_discount:String(promoDiscount),tax_amount:String(taxAmount),tip_amount:String(tipAmount)}}},quantity:1}],
     customer_email:citizen.email||user.email||undefined,
-    payment_intent_data:{capture_method:'manual',transfer_group:`sos_mission_${mission_id}`,metadata:{brand:'SOS',flow:'mission',mission_id,hero_id:mission.hero_id,service_amount:String(serviceAmount),tax_amount:String(taxAmount),tip_amount:String(tipAmount)}},
+    payment_intent_data:{capture_method:'manual',transfer_group:`sos_mission_${mission_id}`,metadata:{brand:'SOS',flow:'mission',mission_id,hero_id:mission.hero_id,service_amount:String(serviceAmount),promo_discount:String(promoDiscount),tax_amount:String(taxAmount),tip_amount:String(tipAmount)}},
     metadata:{brand:'SOS',flow:'mission',mission_id}
   },{idempotencyKey:`sos-checkout-${mission_id}-${chargeCents}-v3`})
   const paymentIntentId=typeof session.payment_intent==='string'?session.payment_intent:null
   const{error:prepError}=await admin.rpc('sos_prepare_mission_payment',{p_mission_id:mission_id,p_payment_intent_id:paymentIntentId,p_checkout_session_id:session.id,p_amount:serviceAmount,p_platform_fee:null,p_hero_payout:null,p_currency:'usd'})
-  if(prepError){try{if(session.status==='open')await stripe.checkout.sessions.expire(session.id)}catch{};console.error('S.O.S. payment ledger preparation failed',prepError);return json(req,{error:'Payment authorization could not be prepared. No active Checkout was left open.'},409)}
-  return json(req,{checkout_url:session.url,checkout_session_id:session.id})
+  if(prepError){await releaseCredit();try{if(session.status==='open')await stripe.checkout.sessions.expire(session.id)}catch{};console.error('S.O.S. payment ledger preparation failed',prepError);return json(req,{error:'Payment authorization could not be prepared. No active Checkout was left open.'},409)}
+  await admin.from('sos_payments').update({promo_discount:promoDiscount,promo_credit_id:promoCreditId,updated_at:new Date().toISOString()}).eq('mission_id',mission_id)
+  return json(req,{checkout_url:session.url,checkout_session_id:session.id,promo_discount:promoDiscount})
 })

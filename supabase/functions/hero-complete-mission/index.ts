@@ -37,10 +37,13 @@ Deno.serve(async(req)=>{
   if(mission.status!=='working')return json(req,{error:'Mission must be in service before completion'},409)
   if(mission.pricing_status!=='confirmed'||!mission.final_price)return json(req,{error:'Final price must be confirmed'},409)
   const{data:payment}=await admin.from('sos_payments').select('*').eq('mission_id',missionId).single()
-  if(!payment||payment.payment_status!=='authorized'||!payment.stripe_payment_intent_id)return json(req,{error:'Customer payment authorization is required before completion'},409)
+  // Reward-covered jobs have no card charge; discounted jobs charge less. Either way the Hero payout comes from the S.O.S. balance.
+  const rewardCovered=payment?.payment_method==='promo_credit'
+  const fromPlatform=rewardCovered||Number(payment?.promo_discount||0)>0
+  if(!payment||payment.payment_status!=='authorized'||(!payment.stripe_payment_intent_id&&!rewardCovered))return json(req,{error:'Customer payment authorization is required before completion'},409)
 
-  const captureCents=Math.round((Number(payment.amount||0)+Number(payment.tax||0)+Number(payment.tip||0))*100)
-  if(!Number.isSafeInteger(captureCents)||captureCents<50)return json(req,{error:'Authorized payment total is invalid'},409)
+  const captureCents=Math.round((Number(payment.amount||0)-Number(payment.promo_discount||0)+Number(payment.tax||0)+Number(payment.tip||0))*100)
+  if(!rewardCovered&&(!Number.isSafeInteger(captureCents)||captureCents<50))return json(req,{error:'Authorized payment total is invalid'},409)
   const stripe=new Stripe(stripeKey,{httpClient:Stripe.createFetchHttpClient()})
   const now=new Date().toISOString()
   const{data:existingProof}=await admin.from('sos_proof_of_service').select('id').eq('mission_id',missionId).eq('hero_id',hero.id).limit(1).maybeSingle()
@@ -49,8 +52,8 @@ Deno.serve(async(req)=>{
     if(proofError)return json(req,{error:'Proof of service could not be recorded'},409)
   }
 
-  let captured:Stripe.PaymentIntent
-  try{
+  let captured:Stripe.PaymentIntent|null=null
+  if(!rewardCovered)try{
     const intent=await stripe.paymentIntents.retrieve(payment.stripe_payment_intent_id)
     if(intent.amount<captureCents)return json(req,{error:'Payment authorization is lower than the confirmed service total. Mission remains in service.'},409)
     captured=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:captureCents},{idempotencyKey:`sos-capture-${missionId}`})
@@ -58,18 +61,18 @@ Deno.serve(async(req)=>{
     console.error('SOS capture failed',{missionId,error:String(error)})
     return json(req,{error:'Payment capture failed. Mission remains in service and requires support.'},409)
   }
-  const chargeId=typeof captured.latest_charge==='string'?captured.latest_charge:captured.latest_charge?.id||payment.stripe_charge_id||null
+  const chargeId=captured?(typeof captured.latest_charge==='string'?captured.latest_charge:captured.latest_charge?.id||payment.stripe_charge_id||null):null
   const{error:paymentUpdateError}=await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',captured_at:now,stripe_charge_id:chargeId,updated_at:now}).eq('id',payment.id)
   if(paymentUpdateError){console.error('SOS captured payment ledger update failed',{missionId,error:paymentUpdateError.message});return json(req,{error:'Payment was captured but the mission ledger requires automatic reconciliation.'},500)}
 
   const{data:completed,error:missionError}=await admin.from('sos_missions').update({status:'completed',completed_at:now,updated_at:now}).eq('id',missionId).eq('hero_id',hero.id).eq('status','working').select('id,status,completed_at,final_price,tax_amount').single()
   if(missionError||!completed){console.error('SOS mission finalization failed after capture',{missionId,error:missionError?.message});return json(req,{error:'Payment was captured but mission completion requires automatic reconciliation.'},500)}
-  await admin.from('sos_mission_events').insert({mission_id:missionId,event_type:'status_change',old_status:'working',new_status:'completed',payload:{proof:'passed',payment:'captured',capture_cents:captureCents,source:'hero_app'},lat,lng,actor:'hero'})
+  await admin.from('sos_mission_events').insert({mission_id:missionId,event_type:'status_change',old_status:'working',new_status:'completed',payload:{proof:'passed',payment:rewardCovered?'reward_covered':'captured',capture_cents:rewardCovered?0:captureCents,promo_discount:Number(payment.promo_discount||0),source:'hero_app'},lat,lng,actor:'hero'})
 
   let release:{released:boolean,transfer_id?:string,warning?:string}={released:false}
   try{
-    if(!chargeId)throw new Error('Captured charge ID unavailable')
-    const transfer=await stripe.transfers.create({amount:Math.round(Number(payment.hero_payout)*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,source_transaction:chargeId,transfer_group:`sos_mission_${missionId}`,metadata:{mission_id:missionId,hero_id:hero.id}},{idempotencyKey:`sos-release-${missionId}`})
+    if(!chargeId&&!fromPlatform)throw new Error('Captured charge ID unavailable')
+    const transfer=await stripe.transfers.create({amount:Math.round(Number(payment.hero_payout)*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,...(fromPlatform?{}:{source_transaction:chargeId}),transfer_group:`sos_mission_${missionId}`,metadata:{mission_id:missionId,hero_id:hero.id}},{idempotencyKey:`sos-release-${missionId}`})
     await admin.from('sos_payments').update({payment_status:'released',escrow_status:'released_to_hero',stripe_transfer_id:transfer.id,released_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',payment.id)
     release={released:true,transfer_id:transfer.id}
   }catch(error){
