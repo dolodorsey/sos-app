@@ -31,7 +31,7 @@ function Login({onLogin,error,setError}){
 
 function Readiness({hero,payout,onboard}){
   const checks=[['Hero verification',hero?.verification_status==='verified'],['Background',Boolean(hero?.background_cleared)],['Identity',Boolean(hero?.id_verified)],['License',Boolean(hero?.license_verified)],['Insurance',Boolean(hero?.insurance_verified)],['Test mission',Boolean(hero?.test_mission_passed)],['Payout account',Boolean(payout?.payout_ready)]];
-  return <section className="shc-readiness"><div className="shc-section-head"><div><span>LAUNCH READINESS</span><h2>Ready for patrol?</h2></div><b>{checks.filter(x=>x[1]).length}/{checks.length}</b></div><div className="shc-check-grid">{checks.map(([label,ok])=><div key={label} className={ok?'done':''}><i>{ok?'✓':'!'}</i><span>{label}</span></div>)}</div>{!payout?.payout_ready&&<Button onClick={onboard} className="full">Finish payout setup →</Button>}</section>
+  return <section className="shc-readiness"><div className="shc-section-head"><div><span>LAUNCH READINESS</span><h2>Ready for patrol?</h2></div><b>{checks.filter(x=>x[1]).length}/{checks.length}</b></div><div className="shc-check-grid">{checks.map(([label,ok])=><div key={label} className={ok?'done':''}><i>{ok?'✓':'!'}</i><span>{label}</span></div>)}</div>{!payout?.payout_ready&&(payout?.payout_method==='mailed_check'?<p className="shc-payout-note">Mailed check chosen. Waiting on your W-9 tax form: email it to help@superherosonstandby.com.</p>:<Button onClick={onboard} className="full">Finish payout setup →</Button>)}</section>
 }
 
 function OfferCard({offer,clock,busy,onAnswer}){
