@@ -25,6 +25,10 @@ Deno.serve(async req=>{
   if(!stripeKey)return json(req,{error:'Payout setup is temporarily unavailable while secure Stripe credentials are restored.'},503);
   const{data:sosUser}=await admin.from('sos_users').select('id,role,email,first_name,last_name,status').eq('auth_id',authData.user.id).single();if(!sosUser||sosUser.role!=='hero'||sosUser.status!=='active')return json(req,{error:'Active Hero account required'},403);
   const{data:hero}=await admin.from('sos_heroes').select('id,stripe_connect_id,verification_status').eq('user_id',sosUser.id).single();if(!hero)return json(req,{error:'Hero profile not found'},404);
+  const{data:payoutChoice}=await admin.from('sos_hero_payout_profiles').select('payout_preference,tax_form_status').eq('hero_id',hero.id).maybeSingle();
+  const peek=await req.clone().json().catch(()=>({})) as Record<string,unknown>;
+  // Mailed-check Heroes are not on Stripe: a status read must not reset their payout check.
+  if(payoutChoice?.payout_preference==='mailed_check'&&String(peek.action||'status')==='status')return json(req,{connected:false,payout_method:'mailed_check',payout_ready:payoutChoice.tax_form_status==='received',tax_form_status:payoutChoice.tax_form_status,requirements_due:[]});
   const syncPayoutCheck=async(status:'pending'|'submitted'|'passed',notes:string)=>{const{error:checkError}=await admin.from('sos_hero_verification_checks').upsert({hero_id:hero.id,check_type:'payout_account',required:true,status,notes,reviewed_by:'stripe',reviewed_at:status==='passed'?now():null,updated_at:now()},{onConflict:'hero_id,check_type'});if(checkError)throw checkError;const{error:recomputeError}=await admin.rpc('sos_recompute_hero_verification_admin',{p_hero_id:hero.id});if(recomputeError)console.error('hero payout verification recompute',recomputeError)};
   const input=await req.json().catch(()=>({})) as Record<string,unknown>;const action=String(input.action||'status');const base=Deno.env.get('SOS_PUBLIC_URL')||'https://thesuperherosonstandby.com';
   let accountId=hero.stripe_connect_id as string|null;let account:any;
