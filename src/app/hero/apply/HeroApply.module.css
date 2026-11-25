@@ -29,3 +29,60 @@
 .secure:before{content:'';width:7px;height:7px;border-radius:50%;background:#37d68d;box-shadow:0 0 0 4px rgba(55,214,141,.1)}
 @media(max-width:820px){.resumePanel{grid-template-columns:1fr}.preflight{grid-template-columns:1fr}.timeline{grid-template-columns:repeat(5,minmax(94px,1fr))!important;overflow-x:auto;padding-bottom:5px}.timeline>div:not(:last-child):after{display:none}}
 @media(max-width:560px){.resumePanel{padding:18px;border-radius:19px}.heroActions{align-items:stretch}.resumeButton{width:100%}.heroActions>span{width:100%;text-align:center}.preflight>div{padding:13px}.timeline{margin-inline:-4px}.resumeTabs button{font-size:9px}}
+/* ---- Side of town ---- */
+.zoneHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.zoneAll{border:1px solid rgba(255,59,66,.35);background:transparent;color:#ff6a70;border-radius:99px;padding:6px 11px;font:800 9px 'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.zoneGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.zone{display:grid;gap:3px;text-align:left;border:1px solid rgba(145,171,202,.14);border-radius:14px;background:#070d15;color:#fff;padding:11px 12px;cursor:pointer;text-transform:none;letter-spacing:0;transition:border-color .15s,background .15s}
+.zone strong{font-size:13px;font-weight:800}
+.zone small{font-size:10px;color:rgba(235,241,248,.45);font-weight:500;line-height:1.3}
+.zoneOn{border-color:#ff3b42;background:rgba(227,0,11,.10)}
+.zoneOn strong{color:#ff6a70}
+.zoneNote{font-size:10px;color:rgba(235,241,248,.42);text-transform:none;letter-spacing:0;font-weight:500}
+/* ---- Launch services ---- */
+.launchGrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.launchCard{position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;padding:16px 8px 13px;border-radius:18px;border:1px solid rgba(145,171,202,.14);background:linear-gradient(165deg,rgba(255,59,66,.06),#070d15 60%);color:#fff;cursor:pointer;text-align:center;transition:transform .15s,border-color .15s,background .15s}
+.launchCard:hover{transform:translateY(-2px);border-color:rgba(255,59,66,.4)}
+.launchOn{border-color:#ff3b42;background:linear-gradient(165deg,rgba(255,59,66,.20),#0b0f16 70%);box-shadow:0 0 0 3px rgba(227,0,11,.10)}
+.launchCheck{position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;border:1px solid rgba(145,171,202,.3);display:grid;place-items:center;font-size:11px;font-weight:900}
+.launchOn .launchCheck{background:#ff3b42;border-color:#ff3b42;color:#fff}
+.launchIcon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#ff5a60;background:rgba(227,0,11,.13);border:1px solid rgba(255,59,66,.26)}
+.launchCard strong{font:800 18px/1 'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.02em}
+.launchCard small{font-size:10px;line-height:1.3;color:rgba(235,241,248,.5);min-height:26px}
+.proofTag,.openTag{font-style:normal;font-size:8.5px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border-radius:99px}
+.proofTag{color:#ffc46b;background:rgba(255,170,40,.10);border:1px solid rgba(255,170,40,.32)}
+.openTag{color:#8fe0b1;background:rgba(33,199,122,.10);border:1px solid rgba(33,199,122,.28)}
+.proofNote{margin-top:12px;display:grid;gap:4px;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,170,40,.3);background:rgba(255,170,40,.06)}
+.proofNote b{font-size:11px;color:#ffc46b;letter-spacing:.04em}
+.proofNote span{font-size:11.5px;line-height:1.5;color:rgba(235,241,248,.72)}
+.extras{margin-top:16px;border:1px solid rgba(145,171,202,.12);border-radius:16px;padding:12px 14px;background:rgba(255,255,255,.015)}
+.extras summary{cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#dce3ec;list-style:none}
+.extras summary::-webkit-details-marker{display:none}
+.extras summary:before{content:'+';width:18px;height:18px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(145,171,202,.3);font-size:12px}
+.extras[open] summary:before{content:'–'}
+.extras summary small{font-size:10px;font-weight:600;color:rgba(235,241,248,.42)}
+.extras summary b{margin-left:auto;font-size:10px;color:#ff6a70}
+.extras p{font-size:11px;line-height:1.5;color:rgba(235,241,248,.5);margin:10px 0}
+/* ---- Trade proof upload ---- */
+.tradeBlock{margin-top:12px;display:grid;gap:10px;padding:14px;border-radius:18px;border:1px solid rgba(255,170,40,.3);background:rgba(255,170,40,.04)}
+.tradeBlock span{display:block;font-size:8.5px;font-weight:900;letter-spacing:.12em;color:#ffc46b}
+.tradeBlock>div:first-child strong{display:block;font-size:14px;margin-top:4px}
+.tradeBlock>div:first-child small{display:block;font-size:10.5px;color:rgba(235,241,248,.55);margin-top:2px}
+.tradeGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.reviewBox:has(>div:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:760px){.launchGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.launchGrid>.launchCard:last-child:nth-child(odd){grid-column:1/-1}.zoneGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.tradeGrid{grid-template-columns:1fr}}
+/* ---- Business & schedule ---- */
+.field select{width:100%;height:52px;border:1px solid rgba(145,171,202,.14);border-radius:14px;background:#070d15;color:#fff;padding:0 12px;font:inherit;font-size:13px;text-transform:none;letter-spacing:0;outline:0}
+.field select:focus{border-color:rgba(255,59,66,.55)}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.segment button{height:48px;border-radius:14px;border:1px solid rgba(145,171,202,.14);background:#070d15;color:#dce3ec;font:700 13px 'DM Sans',sans-serif;text-transform:none;letter-spacing:0;cursor:pointer}
+.segment .segOn{border-color:#ff3b42;background:rgba(227,0,11,.12);color:#ff6a70}
+.quickPicks{display:flex;gap:6px;flex-wrap:wrap}
+.dayRow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{height:46px;border-radius:12px;border:1px solid rgba(145,171,202,.14);background:#070d15;color:#fff;font:800 12px 'DM Sans',sans-serif;text-transform:none;letter-spacing:0;cursor:pointer}
+.day.zoneOn{color:#ff6a70}
+.timeGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:760px){.timeGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.zoneHead{flex-wrap:wrap}}
+
+.linkButton{background:none;border:0;padding:0;font:inherit;font-weight:700;color:inherit;text-decoration:underline;cursor:pointer}

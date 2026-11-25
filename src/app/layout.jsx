@@ -23,6 +23,7 @@ import KHGTrackingHost from '../components/KHGTrackingHost';
 import SOSInstallAppPromptClient from '../components/SOSInstallAppPromptClient';
 import '../components/sos-responsive-contract.css';
 import '../components/sos-app-native-contract.css';
+import '../components/sos-launch.css';
 import '../components/sos-app-frame.css';
 
 export const metadata = {

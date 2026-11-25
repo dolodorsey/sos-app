@@ -99,6 +99,6 @@ jobs:
         run: |
           set -euo pipefail
           home="$(curl -L --fail --silent --show-error --retry 3 --retry-all-errors --connect-timeout 8 --max-time 25 "${BASE_URL}/")"
-          grep -Eqi 'S\.O\.S\.|SUPERHEROES ON STANDBY|SUPERHEROES' <<<"$home" || { echo 'S.O.S. production brand shell is missing'; exit 1; }
+          grep -Eqi 'S\.O\.S\.|SUPERHEROS ON STANDBY|SUPERHEROS' <<<"$home" || { echo 'S.O.S. production brand shell is missing'; exit 1; }
           for asset in /manifest.json /marketplace-sw.js /health.json; do curl -L --fail --silent --show-error --retry 3 --retry-all-errors --connect-timeout 8 --max-time 25 "${BASE_URL}${asset}" >/dev/null; echo "OK ${asset}"; done
           echo 'S.O.S. production smoke passed.'

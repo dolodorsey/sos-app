@@ -11,6 +11,11 @@ const list=(v:unknown,max=30)=>Array.isArray(v)?v.map(x=>text(x,100)).filter(Boo
 const sha256=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
 const trackingToken=()=>{const bytes=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const MAX_BODY_BYTES=32768;
+const ZONES=new Set(['east','south','west','downtown','midtown','buckhead']);
+const LAUNCH=new Set(['tow','fuel','jump','flat','lockout']);
+const DAYS=new Set(['mon','tue','wed','thu','fri','sat','sun']),TIMES=new Set(['morning','afternoon','evening','overnight']);
+const profile=(v:any)=>{if(!v||typeof v!=='object'||Array.isArray(v))return {};const t=(x:unknown,m=120)=>text(x,m)||null;return {has_business:v.has_business===true,business_name:t(v.business_name),business_type:t(v.business_type,60),business_years:Number.isFinite(Number(v.business_years))&&v.business_years!==null?Math.max(0,Math.min(80,Number(v.business_years))):null,business_insured:t(v.business_insured,20),business_link:t(v.business_link,200),days:pick(v.days,DAYS),times:pick(v.times,TIMES),hours_per_week:t(v.hours_per_week,20),start_when:t(v.start_when,40),max_miles:t(v.max_miles,40),languages:t(v.languages,120),heard_from:t(v.heard_from,60)}};
+const pick=(v:unknown,allowed:Set<string>)=>[...new Set(list(v,10).map(x=>x.toLowerCase()).filter(x=>allowed.has(x)))];
 
 const syncKHG=async(admin:any,applicationId:string)=>{
   const attemptedAt=new Date().toISOString();
@@ -59,7 +64,7 @@ Deno.serve(async req=>{
     const nextAction = claimReady
       ? 'Create or sign in with the same email and continue Hero activation.'
       : data.status==='documents_required'
-        ? 'Secure your application with the same email, then upload Government ID, driver license, and current insurance.'
+        ? 'Secure your application with the same email, then upload your driver license and take a selfie. Tow and Lockout also upload a business card or license.'
         : data.status==='waitlisted'
           ? 'Your required credentials are received. S.O.S. Operations review is next.'
           : data.status==='reviewing'
@@ -73,7 +78,7 @@ Deno.serve(async req=>{
   }
   const email=text(b.email,254).toLowerCase(),phone=text(b.phone,40),first=text(b.firstName,80),last=text(b.lastName,80);
   if(!first||!last||!/^\S+@\S+\.\S+$/.test(email)||phone.length<7)return json(origin,{error:'Name, valid email, and phone are required.'},422);
-  if(!b.licenseAttested||!b.insuranceAttested||!b.backgroundConsent||!b.termsAccepted)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
+  if(b.licenseAttested!==true||b.insuranceAttested!==true||b.backgroundConsent!==true||b.termsAccepted!==true)return json(origin,{error:'Required eligibility attestations and consent must be accepted.'},422);
   const{data:existing}=await admin.from('sos_hero_applications').select('id,status,submitted_at,khg_bridge_status,candidate_id').eq('email',email).in('status',ACTIVE_APPLICATION_STATUSES).maybeSingle();
   if(existing){
     const attribution=existing.candidate_id?{linked:true}:await linkRecruitingCandidate(admin,existing.id);
@@ -83,7 +88,12 @@ Deno.serve(async req=>{
   const source=(req.headers.get('x-forwarded-for')||req.headers.get('x-real-ip')||req.headers.get('cf-connecting-ip')||'unknown').split(',')[0].trim(),ipHash=await sha256(source);
   const{data:limit,error:limitError}=await admin.rpc('marketplace_consume_intake_rate_limit',{p_app:'sos_hero',p_ip_hash:ipHash,p_limit:8,p_window_minutes:60});if(limitError)throw limitError;if(limit?.allowed!==true)return json(origin,{error:'Too many new applications from this network. Try again later.',retry_after_minutes:60},429);
   const token=trackingToken(),hash=await sha256(token);
-  const{data,error}=await admin.from('sos_hero_applications').insert({first_name:first,last_name:last,email,phone,city:text(b.city,100)||null,state:text(b.state,50)||null,services_requested:list(b.services),tools_available:list(b.tools),vehicle_type:text(b.vehicleType,100)||null,vehicle_make:text(b.vehicleMake,100)||null,vehicle_model:text(b.vehicleModel,100)||null,vehicle_year:b.vehicleYear?Number(b.vehicleYear):null,years_experience:Math.max(0,Math.min(80,Number(b.yearsExperience)||0)),experience_summary:text(b.experienceSummary,3000)||null,license_attested:true,insurance_attested:true,background_consent:true,terms_accepted:true,status:'documents_required',status_token_hash:hash,khg_bridge_status:'pending'}).select('id,status,submitted_at').single();
+  const zones=pick(b.serviceZones,ZONES),launch=pick(b.launchServices,LAUNCH),extras=list(b.additionalServices,60);
+  const row:any={first_name:first,last_name:last,email,phone,city:text(b.city,100)||null,state:text(b.state,50)||null,services_requested:list(b.services),tools_available:list(b.tools),vehicle_type:text(b.vehicleType,100)||null,vehicle_make:text(b.vehicleMake,100)||null,vehicle_model:text(b.vehicleModel,100)||null,vehicle_year:b.vehicleYear?Number(b.vehicleYear):null,years_experience:Math.max(0,Math.min(80,Number(b.yearsExperience)||0)),experience_summary:text(b.experienceSummary,3000)||null,license_attested:true,insurance_attested:true,background_consent:true,terms_accepted:true,status:'documents_required',status_token_hash:hash,khg_bridge_status:'pending'};
+  const launchCols={service_zones:zones,launch_services:launch,additional_services:extras,trade_proof_required:launch.includes('tow')||launch.includes('lockout'),intake_profile:profile(b.intakeProfile)};
+  let{data,error}=await admin.from('sos_hero_applications').insert({...row,...launchCols}).select('id,status,submitted_at').single();
+  // Columns arrive with migration 20261120090000; until then the intake summary still carries side of town + services.
+  if(error&&(error.code==='PGRST204'||error.code==='42703'))({data,error}=await admin.from('sos_hero_applications').insert(row).select('id,status,submitted_at').single());
   if(error)throw error;
   const attribution=await linkRecruitingCandidate(admin,data.id);
   await syncKHG(admin,data.id);

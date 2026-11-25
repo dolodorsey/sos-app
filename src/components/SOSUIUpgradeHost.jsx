@@ -47,11 +47,18 @@ function legalCopy(kind){
   const common={
     privacy:{eyebrow:'LEGAL · IN APP',title:'Privacy Policy',intro:'Your privacy matters. S.O.S. uses account, vehicle, location, mission and payment information only to operate the roadside network and app features.',sections:[['Information we handle','Account and contact information, vehicle details, device/location data and mission information required to deliver service.'],['How we use it','To dispatch qualified Heroes, process requests, protect the marketplace, communicate with you and improve the app.'],['Security & choices','Access controls, verification gates and secure payment flows protect marketplace data. Manage supported preferences from your profile.'],['Children','S.O.S. accounts are intended for people legally able to request or provide roadside services and are not directed to children under 13.']]},
     terms:{eyebrow:'LEGAL · IN APP',title:'Terms of Service',intro:'S.O.S. connects customers with qualified independent roadside providers. Service availability, final assignment and ETA depend on live marketplace conditions.',sections:[['Service requests','A request is not assigned until a qualified Hero accepts it.'],['Pricing','Starting prices and estimates are shown before request. Final approved adjustments must be disclosed.'],['Safety','S.O.S. is not an emergency response service. For life-threatening emergencies, call 911.'],['Account conduct','Accurate information, lawful use and respectful conduct are required.']]},
-    safety:{eyebrow:'SAFETY',title:'Not 911',intro:'S.O.S. is roadside assistance. It does not replace police, fire, EMS or 911.',sections:[['Call 911 when','There is injury, fire, immediate danger, a collision blocking traffic, suspected crime or another life-threatening emergency.'],['Use S.O.S. for','Flat tires, jump starts, lockouts, towing, fuel delivery, batteries and other eligible roadside services.'],['Stay safe','Move away from traffic when possible, use hazard lights and follow local safety guidance while help is being matched.']]},
+    safety:{eyebrow:'SAFETY',title:'Not 911',intro:'S.O.S. is roadside assistance. It does not replace police, fire, EMS or 911.',sections:[['Call 911 when','There is injury, fire, immediate danger, a collision blocking traffic, suspected crime or another life-threatening emergency.'],['Use S.O.S. for','Towing, fuel delivery, jump starts, flat tires and lockouts in metro Atlanta. More services are coming soon.'],['Stay safe','Move away from traffic when possible, use hazard lights and follow local safety guidance while help is being matched.']]},
     support:{eyebrow:'SUPPORT · IN APP',title:'Support',intro:'Need help with an account, mission, payment or completed service? Keep the conversation inside S.O.S. so the correct mission context stays attached.',sections:[['Active mission','Open Missions and select the live request for status and support options.'],['Account & billing','Use Profile for vehicles, payments, membership and account tools.'],['General support','Use the support action from the app or email thedoctordorsey@gmail.com when email follow-up is required.']]},
   };
   return common[kind]||common.support;
 }
+
+const FULL_DOCUMENT={
+  privacy:{href:'/privacy/',label:'Read the full Privacy Policy'},
+  terms:{href:'/terms/',label:'Read the full Terms of Service'},
+  safety:{href:'/legal/',label:'Read the full Not 911 notice'},
+  support:{href:'/support/',label:'Open Support'},
+};
 
 export default function SOSUIUpgradeHost(){
   const[legal,setLegal]=useState(null);
@@ -101,17 +108,29 @@ export default function SOSUIUpgradeHost(){
     return()=>{stop();document.documentElement.classList.remove('sos-home-animation-first')};
   },[]);
 
+  useEffect(()=>{
+    if(!legal)return;
+    const opener=document.activeElement;
+    const root=document.documentElement;
+    root.classList.add('sos-legal-open');
+    const onKey=event=>{if(event.key==='Escape')setLegal(null)};
+    window.addEventListener('keydown',onKey);
+    requestAnimationFrame(()=>document.querySelector('.sos3-legal header button')?.focus());
+    return()=>{root.classList.remove('sos-legal-open');window.removeEventListener('keydown',onKey);if(opener&&typeof opener.focus==='function')opener.focus()};
+  },[legal]);
+
   const copy=legal?legalCopy(legal):null;
+  const full=legal?FULL_DOCUMENT[legal]||FULL_DOCUMENT.support:null;
   return <>
-    {(profileSlot||authPanel)?createPortal(<nav className="sos-inline-legal" aria-label="S.O.S. legal and support"><button onClick={()=>setLegal('privacy')}>Privacy</button><button onClick={()=>setLegal('terms')}>Terms</button><button onClick={()=>setLegal('safety')}>Not 911</button><button onClick={()=>setLegal('support')}>Support</button></nav>,profileSlot||authPanel):customerRoute?null:<div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
-      <button onClick={()=>setLegal('privacy')}>Privacy</button><i/>
-      <button onClick={()=>setLegal('terms')}>Terms</button><i/>
-      <button onClick={()=>setLegal('safety')}>Not 911</button><i/>
-      <button onClick={()=>setLegal('support')}>Support</button>
+    {(profileSlot||authPanel)?createPortal(<nav className="sos-inline-legal" aria-label="S.O.S. legal and support"><button type="button" onClick={()=>setLegal('privacy')}>Privacy</button><button type="button" onClick={()=>setLegal('terms')}>Terms</button><button type="button" onClick={()=>setLegal('safety')}>Not 911</button><button type="button" onClick={()=>setLegal('support')}>Support</button></nav>,profileSlot||authPanel):customerRoute?null:<div className="sos3-utility" role="navigation" aria-label="S.O.S. legal and support">
+      <button type="button" onClick={()=>setLegal('privacy')}>Privacy</button><i/>
+      <button type="button" onClick={()=>setLegal('terms')}>Terms</button><i/>
+      <button type="button" onClick={()=>setLegal('safety')}>Not 911</button><i/>
+      <button type="button" onClick={()=>setLegal('support')}>Support</button>
     </div>}
     {copy&&<section className="sos3-legal" role="dialog" aria-modal="true" aria-label={copy.title}>
-      <header><button onClick={()=>setLegal(null)} aria-label="Back to S.O.S.">←</button><img src="/brand/sos-logo.webp" alt="S.O.S."/><span/></header>
-      <div className="sos3-legal-scroll"><p className="sos3-legal-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p className="sos3-legal-intro">{copy.intro}</p><div className="sos3-legal-card">{copy.sections.map(([title,text])=><article key={title}><span className="sos3-legal-icon">{icons[title.includes('Safety')?'lock':title.includes('Account')?'home':title.includes('Information')?'bag':'home']}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div></div>
+      <header><button type="button" onClick={()=>setLegal(null)} aria-label="Close and return to S.O.S.">←</button><img src="/brand/sos-logo.webp" alt="S.O.S."/><span/></header>
+      <div className="sos3-legal-scroll"><p className="sos3-legal-eyebrow">{copy.eyebrow}</p><h1>{copy.title}</h1><p className="sos3-legal-intro">{copy.intro}</p><div className="sos3-legal-card">{copy.sections.map(([title,text])=><article key={title}><span className="sos3-legal-icon" aria-hidden="true" dangerouslySetInnerHTML={{__html:icons[title.includes('Safety')?'lock':title.includes('Account')?'home':title.includes('Information')?'bag':'home']}}/><div><h2>{title}</h2><p>{text}</p></div></article>)}</div><div className="sos3-legal-full"><a href={full.href}>{full.label}</a><button type="button" onClick={()=>setLegal(null)}>Close</button></div></div>
     </section>}
   </>;
 }

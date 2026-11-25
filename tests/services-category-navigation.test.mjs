@@ -7,7 +7,8 @@ const responsive = readFileSync(new URL('../src/components/sos-responsive-contra
 
 test('S.O.S. Services opens with categories instead of the complete service list', () => {
   assert.match(customer, /const\[category,setCategory\]=useState\(''\)/)
-  assert.match(customer, /Choose a category\./)
+  assert.doesNotMatch(customer, /Choose a category\./, 'no filler header on the Services root')
+  assert.doesNotMatch(customer, /Five rescues/, 'no promo banner on Home')
   assert.match(customer, /sos2-services-categories/)
   assert.match(customer, /category\|\|query\?<.*sos2-service-list/s)
 })
