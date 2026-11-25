@@ -131,13 +131,13 @@ test('SOS customer mission state is realtime-first with polling only as fallback
 })
 
 test('SOS browser push registration is mounted for customer and Hero portals', () => {
-  const customer=read('src/app/app/page.jsx'),hero=read('src/app/hero/page.jsx'),host=read('src/components/SOSPushRegistrationHost.jsx'),worker=read('public/marketplace-sw.js')
+  const customer=read('src/app/app/page.jsx'),hero=read('src/app/hero/page.jsx'),host=read('src/components/SOSPushRegistrationHost.jsx'),worker=read('public/sw.js')
   assert.match(customer,/SOSPushRegistrationHost/)
   assert.match(hero,/SOSPushRegistrationHost/)
   assert.match(host,/marketplace-push-config/)
   assert.match(host,/marketplace_register_push_subscription/)
   assert.match(host,/p_app:'sos'/)
-  assert.match(host,/serviceWorker\.register\('\/marketplace-sw\.js'/)
+  assert.match(host,/serviceWorker\.register\('\/sw\.js'/)
   assert.match(worker,/addEventListener\('push'/)
   assert.match(worker,/showNotification/)
   assert.match(worker,/notificationclick/)
