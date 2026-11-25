@@ -9,8 +9,8 @@ export const metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: '/wiki/' },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `${SITE}/wiki/`, type: 'website', siteName: 'S.O.S. — Superheros On Standby', images: [{ url: '/sos-app-icon-512.png', width: 512, height: 512, alt: 'S.O.S. logo' }] },
-  twitter: { card: 'summary', title: TITLE, description: DESCRIPTION },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${SITE}/wiki/`, type: 'website', siteName: 'S.O.S. — Superheros On Standby', images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'S.O.S. — Superheros On Standby' }] },
+  twitter: { card: 'summary_large_image', images: ['/og-image.jpg'], title: TITLE, description: DESCRIPTION },
 };
 
 const TERM_SET = {
