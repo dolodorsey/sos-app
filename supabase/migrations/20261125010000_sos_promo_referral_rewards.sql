@@ -1,5 +1,5 @@
 -- S.O.S. promo codes + referral rewards.
---   Promo code SOSFREE: one free service, redeem and use by Dec 31 2026 (Atlanta time).
+--   Promo code ATL SUPERHERO (stored ATLSUPERHERO; spaces are ignored when typed): one free service, redeem and use by Dec 31 2026 (Atlanta time).
 --   Referral: 10 different people open your link  -> 50% off one service (once).
 --             every 5 friends who sign up with your link -> 1 complimentary service.
 -- Customers hold rewards as credits. One credit applies per job, automatically at
@@ -59,7 +59,7 @@ alter table public.sos_referral_link_opens enable row level security;
 revoke all on public.sos_promo_codes, public.sos_customer_credits, public.sos_referral_link_opens from anon, authenticated;
 
 insert into public.sos_promo_codes(code, reward_kind, description, starts_at, ends_at, credit_expires_at)
-values ('SOSFREE', 'free_service', '1 free service',
+values ('ATLSUPERHERO', 'free_service', '1 free service',
         now(), timestamptz '2026-12-31 23:59:59 America/New_York', timestamptz '2026-12-31 23:59:59 America/New_York')
 on conflict (code) do nothing;
 

@@ -4,8 +4,8 @@ import fs from 'node:fs'
 const read = p => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8')
 const mig = read('supabase/migrations/20261125010000_sos_promo_referral_rewards.sql')
 
-test('SOSFREE: one free service, valid through Dec 31 2026 Atlanta time, once per customer', () => {
-  assert.match(mig, /'SOSFREE', 'free_service', '1 free service'/)
+test('ATLSUPERHERO: one free service, valid through Dec 31 2026 Atlanta time, once per customer', () => {
+  assert.match(mig, /'ATLSUPERHERO', 'free_service', '1 free service'/)
   assert.match(mig, /timestamptz '2026-12-31 23:59:59 America\/New_York'/)
   assert.match(mig, /sos_credit_one_per_promo on public\.sos_customer_credits\(citizen_id, promo_code\)/)
 })
@@ -46,4 +46,11 @@ test('app: rewards screen, ref and promo links, referrer saved at sign-up', () =
   assert.match(read('src/app/app/page.jsx'), /<SOSRewardsHost\/>/)
   for (const p of ['src/components/SOSCustomerMobilityApp.jsx', 'src/components/SOSAuthConfirmationGuard.jsx'])
     assert.match(read(p), /ref:pendingReferral\(\)/)
+})
+
+test('ATL SUPERHERO works typed with a space, lowercase, or as one word', () => {
+  // sos_redeem_promo_code strips everything but letters and digits, then upper-cases.
+  assert.match(mig, /upper\(regexp_replace\(coalesce\(p_code,''\), '\[\^A-Za-z0-9\]', '', 'g'\)\)/)
+  for (const typed of ['ATL SUPERHERO', 'atl superhero', 'ATLSUPERHERO', 'Atl-Superhero'])
+    assert.equal(typed.replace(/[^A-Za-z0-9]/g, '').toUpperCase(), 'ATLSUPERHERO')
 })

@@ -5,7 +5,7 @@ import{createPortal}from'react-dom';
 import{useAppSlot}from'../lib/useAppSlot';
 
 // Rewards: promo codes and referrals.
-// - A promo code (e.g. SOSFREE) adds a reward to the customer's account.
+// - A promo code (e.g. ATL SUPERHERO, typed with or without the space) adds a reward to the customer's account.
 // - Share link: 10 different people open it -> 50% off a service.
 // - Every 5 friends who sign up with the link -> 1 complimentary service.
 // One reward applies automatically at checkout per job; S.O.S. covers the
@@ -39,7 +39,7 @@ export default function SOSRewardsHost(){
   const redeem=async(value)=>{const s=getSession();const c=(value||code).trim();if(!c)return;if(!s){setMsg({bad:true,text:'Sign in to use a promo code.'});return}setBusy(true);setMsg(null);try{const d=await rpc('sos_redeem_promo_code',{p_code:c},s.access_token);setMsg({bad:!d?.ok,text:d?.message||'Code checked.'});if(d?.ok||d?.reason==='already_redeemed'){setCode('');try{localStorage.removeItem(PROMO_KEY)}catch{}}await load()}catch(e){setMsg({bad:true,text:e.message})}finally{setBusy(false)}};
 
   useEffect(()=>{captureRewardLinks();load();const onOpen=()=>setOpen(true);window.addEventListener('sos:open-rewards',onOpen);
-    // A promo link (?promo=SOSFREE) applies itself once the customer is signed in.
+    // A promo link (?promo=ATLSUPERHERO) applies itself once the customer is signed in.
     const t=setInterval(()=>{let p=null;try{p=localStorage.getItem(PROMO_KEY)}catch{}if(p&&getSession()){clearInterval(t);setOpen(true);redeem(p)}},1500);
     return()=>{window.removeEventListener('sos:open-rewards',onOpen);clearInterval(t)}},[]);
   useEffect(()=>{if(open)load()},[open]);
@@ -57,7 +57,7 @@ export default function SOSRewardsHost(){
     {open&&<div className="sosx-backdrop" onMouseDown={()=>setOpen(false)}><section className="sosx-sheet sosx-rewards" data-sos-rewards onMouseDown={e=>e.stopPropagation()}><div className="sosx-handle"/>
       <header><div><span>REWARDS</span><h2>Free service is<br/>one code away.</h2><p>Rewards apply automatically at checkout, one per service. Your Hero is always paid in full.</p></div><button onClick={()=>setOpen(false)} aria-label="Close rewards">×</button></header>
       {!getSession()&&<div className="sosx-notice">Sign in or create an account to add promo codes and earn rewards.</div>}
-      <form className="sosx-promo" onSubmit={e=>{e.preventDefault();redeem()}}><label htmlFor="sos-promo-code">Promo code</label><div><input id="sos-promo-code" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="Enter code" autoCapitalize="characters" autoComplete="off" maxLength={24}/><button disabled={busy||!code.trim()}>{busy?'Checking…':'Apply'}</button></div></form>
+      <form className="sosx-promo" onSubmit={e=>{e.preventDefault();redeem()}}><label htmlFor="sos-promo-code">Promo code</label><div><input id="sos-promo-code" value={code} onChange={e=>setCode(e.target.value.toUpperCase())} placeholder="e.g. ATL SUPERHERO" autoCapitalize="characters" autoComplete="off" maxLength={24}/><button disabled={busy||!code.trim()}>{busy?'Checking…':'Apply'}</button></div></form>
       {msg&&<div className={msg.bad?'sosx-error':'sosx-notice'} role="status">{msg.text}</div>}
       {data&&<>
         <div className="sosx-reward-grid">
