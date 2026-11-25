@@ -35,4 +35,4 @@ See `SOS_RELEASE_BLOCKERS.md`.
 | New FIRST_RESCUE promo | ATL SUPERHERO (1 free service through Dec 31) is already live, plus share and signup rewards. Not adding a second free-first-rescue promo unless Dolo asks. |
 | Ranking: 55% drive time, 20% reliability, 15% rating, 10% fair share; waves at 3, 7 and 15 miles | Live dispatch ranks by distance with waves at 8, 15, 25, 35 and 50 miles. Moving to the plan's weights and waves is a tuning change, best made after the first field tests show real Hero density. |
 | AGENTS.md: HighLevel is the primary outbound system | Dolo retired HighLevel (Nov 23). AGENTS.md needs updating. |
-| Instagram handle | AGENTS.md says @SUPERHERO.ONSTANDBY; the project brief says @superheros.onstandby. Dolo to confirm which is live. |
+| Instagram handle | Resolved Nov 25: @superheros.onstandby (Dolo confirmed). Repo updated. |
