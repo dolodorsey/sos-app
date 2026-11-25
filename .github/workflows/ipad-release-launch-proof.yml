@@ -36,15 +36,16 @@ jobs:
           xcodebuild -version | tee launch-proof/xcode-version.txt
           xcrun simctl list runtimes | tee launch-proof/simulator-runtimes.txt
 
-      - name: Select and boot iPadOS 26 simulator
+      - name: Select and boot newest iPadOS simulator (27+)
         id: simulator
         shell: bash
         run: |
           set -euo pipefail
           DEVICE_JSON="$(xcrun simctl list devices available -j)"
-          UDID="$(python3 -c 'import json,sys; d=json.load(sys.stdin); xs=[x for group,ds in d["devices"].items() if "iOS-26" in group for x in ds if x["isAvailable"] and "iPad" in x["name"]]; print(xs[0]["udid"] if xs else "")' <<< "$DEVICE_JSON")"
+          # Newest installed iOS runtime that has an iPad (iOS 27+ on the Xcode 27 image).
+          UDID="$(python3 -c 'import json,re,sys; d=json.load(sys.stdin); v=lambda g: tuple(int(n) for n in re.findall(r"iOS-(\d+)(?:-(\d+))?",g)[0] if n) if re.search(r"iOS-\d+",g) else (); xs=sorted(((v(g),x) for g,ds in d["devices"].items() if v(g) and v(g)[0]>=27 for x in ds if x["isAvailable"] and "iPad" in x["name"]),key=lambda t:t[0],reverse=True); print(xs[0][1]["udid"] if xs else "")' <<< "$DEVICE_JSON")"
           if [ -z "$UDID" ]; then
-            echo "::error::No available iPad simulator on iOS 26 runtime"
+            echo "::error::No available iPad simulator on an iOS 27+ runtime"
             exit 1
           fi
           DEVICE_NAME="$(xcrun simctl list devices available | grep "$UDID" | sed 's/.*(//' | sed 's/).*//')"
