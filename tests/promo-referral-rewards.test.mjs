@@ -54,3 +54,11 @@ test('ATL SUPERHERO works typed with a space, lowercase, or as one word', () => 
   for (const typed of ['ATL SUPERHERO', 'atl superhero', 'ATLSUPERHERO', 'Atl-Superhero'])
     assert.equal(typed.replace(/[^A-Za-z0-9]/g, '').toUpperCase(), 'ATLSUPERHERO')
 })
+
+test('automatic payout retry and refunds respect the reward discount', () => {
+  const retry = read('supabase/functions/marketplace-payout-retry/index.ts')
+  assert.match(retry, /current==='authorized'&&rewardCovered/, 'covered jobs skip the card capture')
+  assert.match(retry, /Number\(p\.amount\|\|0\)-Number\(p\.promo_discount\|\|0\)/, 'captures only what the customer owes')
+  assert.match(retry, /\(chargeId\|\|fromPlatform\)/, 'covered jobs still queue the Hero payout')
+  assert.match(read('supabase/functions/manage-mission-payment/index.ts'), /totalPaid=Number\(payment\.amount\|\|0\)-Number\(payment\.promo_discount\|\|0\)/, 'refunds never exceed what the customer paid')
+})

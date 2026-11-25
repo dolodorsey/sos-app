@@ -34,7 +34,8 @@ test('S.O.S. completion and operations capture/refund include tax', () => {
     assert.match(source, /stripe_transfer_status/);
   }
   const ops = read('supabase/functions/manage-mission-payment/index.ts');
-  assert.match(ops, /totalPaid=Number\(payment\.amount\|\|0\)\+Number\(payment\.tax\|\|0\)\+Number\(payment\.tip\|\|0\)/);
+  // What the customer paid: service minus any S.O.S. reward, plus tax and tip.
+  assert.match(ops, /totalPaid=Number\(payment\.amount\|\|0\)-Number\(payment\.promo_discount\|\|0\)\+Number\(payment\.tax\|\|0\)\+Number\(payment\.tip\|\|0\)/);
 });
 
 test('S.O.S. restarted Checkout clears terminal payment state safely', () => {
