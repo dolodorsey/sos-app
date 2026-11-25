@@ -46,9 +46,11 @@ export const metadata = {
     type: 'website',
     url: 'https://thesuperherosonstandby.com',
     siteName: 'S.O.S. — Superheros On Standby',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'S.O.S. — Superheros On Standby' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
+    images: ['/og-image.jpg'],
     title: 'S.O.S. — Superheros On Standby',
     description: 'SUPERHEROS: real people who show up when help is needed.',
   },
