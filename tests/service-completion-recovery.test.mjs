@@ -8,7 +8,8 @@ test('S.O.S. service completion recovery requires proof and captures the full au
   const worker = read('supabase/functions/marketplace-payout-retry/index.ts');
   assert.match(worker, /sos_proof_of_service/);
   assert.match(worker, /validation_status','passed'/);
-  assert.match(worker, /Number\(p\.amount\|\|0\)\+Number\(p\.tax\|\|0\)\+Number\(p\.tip\|\|0\)/);
+  // Full authorized total = service minus any S.O.S. reward, plus tax and tip.
+  assert.match(worker, /Number\(p\.amount\|\|0\)-Number\(p\.promo_discount\|\|0\)\+Number\(p\.tax\|\|0\)\+Number\(p\.tip\|\|0\)/);
   assert.match(worker, /sos-capture-\$\{p\.mission_id\}/);
   assert.match(worker, /source:'marketplace_payout_retry'/);
 });

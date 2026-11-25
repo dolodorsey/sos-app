@@ -14,7 +14,9 @@ test('S.O.S. final price confirmation recalculates tax', () => {
 
 test('S.O.S. Checkout authorizes service plus tax and derives payout split in Postgres', () => {
   const checkout = read('supabase/functions/create-mission-checkout/index.ts');
-  assert.match(checkout, /chargeCents=Math\.round\(\(serviceAmount\+taxAmount\+tipAmount\)\*100\)/);
+  // Customer pays service minus any reward, plus tax and tip; the Hero's payout is still derived from the full price.
+  assert.match(checkout, /chargeCents=Math\.round\(\(serviceAmount-promoDiscount\+taxAmount\+tipAmount\)\*100\)/);
+  assert.match(checkout, /p_amount:serviceAmount/);
   assert.match(checkout, /stripe_connect_api_version/);
   assert.match(checkout, /stripe_transfer_status/);
   assert.match(checkout, /p_platform_fee:null/);
@@ -32,7 +34,8 @@ test('S.O.S. completion and operations capture/refund include tax', () => {
     assert.match(source, /stripe_transfer_status/);
   }
   const ops = read('supabase/functions/manage-mission-payment/index.ts');
-  assert.match(ops, /totalPaid=Number\(payment\.amount\|\|0\)\+Number\(payment\.tax\|\|0\)\+Number\(payment\.tip\|\|0\)/);
+  // What the customer paid: service minus any S.O.S. reward, plus tax and tip.
+  assert.match(ops, /totalPaid=Number\(payment\.amount\|\|0\)-Number\(payment\.promo_discount\|\|0\)\+Number\(payment\.tax\|\|0\)\+Number\(payment\.tip\|\|0\)/);
 });
 
 test('S.O.S. restarted Checkout clears terminal payment state safely', () => {

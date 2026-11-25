@@ -94,6 +94,7 @@ export default function SOSMissionTracker({token,missionId,initialMission,onClos
     setPaying(true);setError('');
     try{
       const result=await authorizeCustomerMission(token,missionId);
+      if(result?.covered){setPaying(false);setError('');window.alert(result.message||'Covered by your S.O.S. reward. Nothing to pay.');const next=await getCustomerMission(token,missionId);if(next)setMission(next);return}
       if(!result?.checkout_url)throw new Error('Secure checkout is unavailable');
       window.location.assign(result.checkout_url);
     }catch(e){setError(e.message||'Payment authorization is unavailable');setPaying(false)}
