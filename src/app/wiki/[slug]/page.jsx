@@ -15,8 +15,8 @@ export async function generateMetadata({ params }) {
     title: a.metaTitle,
     description: a.description,
     alternates: { canonical: `/wiki/${a.slug}/` },
-    openGraph: { title: a.metaTitle, description: a.description, url, type: 'article', siteName: 'S.O.S. — Superheros On Standby', publishedTime: PUBLISHED, modifiedTime: UPDATED, images: [{ url: '/sos-app-icon-512.png', width: 512, height: 512, alt: 'S.O.S. logo' }] },
-    twitter: { card: 'summary', title: a.metaTitle, description: a.description },
+    openGraph: { title: a.metaTitle, description: a.description, url, type: 'article', siteName: 'S.O.S. — Superheros On Standby', publishedTime: PUBLISHED, modifiedTime: UPDATED, images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'S.O.S. — Superheros On Standby' }] },
+    twitter: { card: 'summary_large_image', images: ['/og-image.jpg'], title: a.metaTitle, description: a.description },
   };
 }
 
@@ -39,7 +39,7 @@ export default async function Page({ params }) {
     datePublished: PUBLISHED,
     dateModified: UPDATED,
     inLanguage: 'en-US',
-    image: `${SITE}/sos-app-icon-512.png`,
+    image: `${SITE}/og-image.jpg`,
     mainEntityOfPage: url,
     author: { '@id': `${SITE}/#organization` },
     publisher: { '@id': `${SITE}/#organization` },
