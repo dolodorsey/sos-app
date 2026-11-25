@@ -1,17 +1,17 @@
 {
   "name": "S.O.S. — Superheros On Standby",
   "short_name": "S.O.S.",
-  "description": "Provider and Hero network for S.O.S. roadside mobility operations. S.O.S. is not 911 or an emergency service.",
-  "id": "/hero/apply",
-  "start_url": "/hero/apply?source=pwa",
+  "description": "Roadside help in metro Atlanta: tow, jump, flat tire, fuel and lockout. S.O.S. is not 911 or an emergency service.",
+  "id": "/app/",
+  "start_url": "/app/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#020609",
   "theme_color": "#e3000b",
   "categories": [
-    "business",
     "automotive",
+    "travel",
     "utilities"
   ],
   "prefer_related_applications": false,
@@ -37,14 +37,14 @@
   ],
   "shortcuts": [
     {
-      "name": "Become a Hero",
-      "short_name": "Apply",
-      "url": "/hero/apply?source=pwa-shortcut"
+      "name": "Request roadside help",
+      "short_name": "Get help",
+      "url": "/app/?source=pwa-shortcut"
     },
     {
-      "name": "Provider Application",
-      "short_name": "Provider",
-      "url": "/hero/apply?source=pwa-provider-shortcut"
+      "name": "Track my request",
+      "short_name": "Track",
+      "url": "/track/?source=pwa-shortcut"
     }
   ]
 }
