@@ -18,7 +18,7 @@
 }
 
 .video {
-  width: min(100vw, calc(100dvh * 720 / 776));
+  width: min(100vw, calc(100dvh * var(--intro-aspect, 0.9278)));
   height: auto;
   max-height: 100dvh;
   object-fit: contain;

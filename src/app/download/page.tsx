@@ -19,16 +19,10 @@ export default function DownloadPage() {
     }}>
 
       <div style={{ marginBottom: "32px" }}>
-        <div style={{
-          width: "80px", height: "80px",
-          background: "#E53E3E",
-          borderRadius: "20px",
-          margin: "0 auto 20px",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "36px"
-        }}>📱</div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/sos-logo.webp" alt="S.O.S. Superheros On Standby" width={220} height={200} style={{ display: "block", width: "220px", height: "auto", margin: "0 auto 16px" }} />
         <h1 style={{ fontSize: "2.2rem", fontWeight: 800, margin: "0 0 8px", letterSpacing: "-0.02em" }}>
-          SOS
+          Get the S.O.S. app
         </h1>
         <p style={{ color: "#E53E3E", fontSize: "1rem", margin: 0 }}>
           Roadside help in Atlanta. One tap away.

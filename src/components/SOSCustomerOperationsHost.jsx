@@ -15,7 +15,7 @@ export default function SOSCustomerOperationsHost(){
  useEffect(()=>{
   if(typeof Notification!=='undefined')setPermission(Notification.permission);
   const s=stored();if(!s)return;let disposed=false,missionChannel=null,notificationChannel=null,locationTimer=null;const client=authorizeSosRealtime(s.access_token);
-  const notify=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),4800);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. mission update',{body:row.body||'Your mission has an update.',tag:row.id?`sos-c-${row.id}`:`sos-c-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>{window.focus();window.location.assign('/app')}}};
+  const notify=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),4800);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. mission update',{body:row.body||'Your mission has an update.',tag:row.id?`sos-c-${row.id}`:`sos-c-${Date.now()}`,icon:'/sos-app-icon-192.png'});n.onclick=()=>{window.focus();window.location.assign('/app')}}};
   const rpc=async(name,body)=>{const r=await fetch(`${SB}/rest/v1/rpc/${name}`,{method:'POST',headers:headers(s.access_token),body:JSON.stringify(body||{})});const d=await r.json().catch(()=>null);if(!r.ok)throw new Error(d?.message||d?.error||'Request failed');return d};
   const loadLocation=async id=>{if(!id){if(!disposed)setHero(null);return}try{const rows=await rpc('sos_get_assigned_hero_live_location',{p_mission_id:id});const row=Array.isArray(rows)?rows[0]:rows;if(!disposed)setHero(row||null)}catch{if(!disposed)setHero(null)}};
   const connect=async()=>{
