@@ -25,19 +25,21 @@ Deno.serve(async(req)=>{
   if(!payment||!mission)return json({error:'Payment not found'},404)
 
   if(action==='capture'){
+    if(mission.status==='completed'&&payment.payment_status==='authorized'&&payment.payment_method==='promo_credit'){await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',captured_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',payment.id);return json({ok:true,reward_covered:true})}
     if(mission.status!=='completed'||payment.payment_status!=='authorized'||!payment.stripe_payment_intent_id)return json({error:'Completed mission with an authorized payment required'},409)
-    const captureCents=Math.round((Number(payment.amount||0)+Number(payment.tax||0)+Number(payment.tip||0))*100)
+    const captureCents=Math.round((Number(payment.amount||0)-Number(payment.promo_discount||0)+Number(payment.tax||0)+Number(payment.tip||0))*100)
     if(!Number.isSafeInteger(captureCents)||captureCents<50)return json({error:'Authorized payment total is invalid'},409)
     const intent=await stripe.paymentIntents.retrieve(payment.stripe_payment_intent_id)
     if(intent.amount<captureCents)return json({error:'Payment authorization is lower than the mission total'},409)
     const pi=await stripe.paymentIntents.capture(payment.stripe_payment_intent_id,{amount_to_capture:captureCents},{idempotencyKey:`sos-capture-${mission_id}`})
     await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',captured_at:new Date().toISOString(),stripe_charge_id:typeof pi.latest_charge==='string'?pi.latest_charge:null,updated_at:new Date().toISOString()}).eq('id',payment.id)
   }else if(action==='release'){
-    if(mission.status!=='completed'||!['captured','transfer_pending'].includes(payment.payment_status)||!payment.stripe_charge_id||!mission.hero_id)return json({error:'Captured completed mission required'},409)
+    const fromPlatform=payment.payment_method==='promo_credit'||Number(payment.promo_discount||0)>0
+    if(mission.status!=='completed'||!['captured','transfer_pending'].includes(payment.payment_status)||(!payment.stripe_charge_id&&!fromPlatform)||!mission.hero_id)return json({error:'Captured completed mission required'},409)
     const{data:hero}=await admin.from('sos_heroes').select('stripe_connect_id,stripe_connect_api_version,stripe_transfer_status').eq('id',mission.hero_id).single()
     if(!hero?.stripe_connect_id||hero.stripe_connect_api_version!=='v2'||hero.stripe_transfer_status!=='active')return json({error:'Hero payout account is not transfer-ready'},409)
     try{
-      const transfer=await stripe.transfers.create({amount:Math.round(Number(payment.hero_payout)*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,source_transaction:payment.stripe_charge_id,transfer_group:`sos_mission_${mission_id}`,metadata:{mission_id}},{idempotencyKey:`sos-release-${mission_id}`})
+      const transfer=await stripe.transfers.create({amount:Math.round(Number(payment.hero_payout)*100),currency:payment.currency||'usd',destination:hero.stripe_connect_id,...(fromPlatform?{}:{source_transaction:payment.stripe_charge_id}),transfer_group:`sos_mission_${mission_id}`,metadata:{mission_id}},{idempotencyKey:`sos-release-${mission_id}`})
       await admin.from('sos_payments').update({payment_status:'released',escrow_status:'released_to_hero',stripe_transfer_id:transfer.id,released_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq('id',payment.id)
     }catch(error){
       await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',updated_at:new Date().toISOString()}).eq('id',payment.id)
