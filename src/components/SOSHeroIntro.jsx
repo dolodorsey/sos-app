@@ -23,7 +23,16 @@ const TAP_WAIT_MS = 20000; // an untouched Play screen closes after this
 const PLAY_CAP_MS = 14000; // once playing, never longer than this
 const FADE_MS = 600;
 
-export default function SOSHeroIntro() {
+// Each page passes its own video. Defaults are the Hero sign-up intro.
+export default function SOSHeroIntro({
+  src = VIDEO,
+  poster = POSTER,
+  seenKey = SEEN_KEY,
+  aspect = 720 / 776, // video width / height, for sizing on any screen
+  hasSound = true, // false for silent videos: no sound button
+  label = 'S.O.S. Superheros On Standby intro',
+  webOnly = false, // true: don't show inside the installed iPhone/Android app
+} = {}) {
   const [phase, setPhase] = useState('off'); // off | on | leaving
   const [mode, setMode] = useState('auto'); // auto | tap | playing
   const [muted, setMuted] = useState(true);
@@ -32,8 +41,9 @@ export default function SOSHeroIntro() {
 
   useEffect(() => {
     if (new URLSearchParams(location.search).has('nointro')) return;
+    if (webOnly && window.Capacitor?.isNativePlatform?.()) return;
     let last = 0;
-    try { last = Number(sessionStorage.getItem(SEEN_KEY)) || 0; } catch (e) {}
+    try { last = Number(sessionStorage.getItem(seenKey)) || 0; } catch (e) {}
     if (Date.now() - last < REPLAY_AFTER_MS) return;
     const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
     setMode(reduced ? 'tap' : 'auto');
@@ -43,7 +53,7 @@ export default function SOSHeroIntro() {
   const close = () => {
     if (closing.current) return;
     closing.current = true;
-    try { sessionStorage.setItem(SEEN_KEY, String(Date.now())); } catch (e) {}
+    try { sessionStorage.setItem(seenKey, String(Date.now())); } catch (e) {}
     setPhase('leaving');
     setTimeout(() => setPhase('off'), FADE_MS);
   };
@@ -91,8 +101,7 @@ export default function SOSHeroIntro() {
   const tapToPlay = () => {
     const v = video.current;
     if (!v) return;
-    v.muted = false; // a tap is a user gesture, so sound is allowed
-    setMuted(false);
+    if (hasSound) { v.muted = false; setMuted(false); } // a tap is a user gesture, so sound is allowed
     try { v.currentTime = 0; } catch (e) {}
     v.play().catch(() => { v.muted = true; setMuted(true); v.play().catch(() => close()); });
   };
@@ -106,12 +115,12 @@ export default function SOSHeroIntro() {
   };
 
   return createPortal(
-    <div className={`${styles.overlay} ${phase === 'leaving' ? styles.leaving : ''}`} role="dialog" aria-modal="true" aria-label="S.O.S. Superheros On Standby intro" data-hero-intro data-intro-mode={mode}>
+    <div className={`${styles.overlay} ${phase === 'leaving' ? styles.leaving : ''}`} role="dialog" aria-modal="true" aria-label={label} data-hero-intro data-intro-mode={mode} style={{"--intro-aspect": aspect}}>
       <video
         ref={video}
         className={styles.video}
-        src={VIDEO}
-        poster={POSTER}
+        src={src}
+        poster={poster}
         muted
         playsInline
         preload="auto"
@@ -126,7 +135,7 @@ export default function SOSHeroIntro() {
         </button>
       )}
       <div className={styles.controls}>
-        {mode === 'tap' ? <span /> : (
+        {mode === 'tap' || !hasSound ? <span /> : (
           <button type="button" className={styles.sound} onClick={toggleSound} aria-pressed={!muted}>
             {muted ? 'Tap for sound' : 'Sound on'}
           </button>
