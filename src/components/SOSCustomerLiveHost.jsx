@@ -18,7 +18,7 @@ export default function SOSCustomerLiveHost(){
  useEffect(()=>{
    let disposed=false,missionCh=null,posCh=null,notificationCh=null;
    if(typeof Notification!=='undefined')setPermission(Notification.permission);
-   const show=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row?.id?null:cur),4200);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row?.title||'S.O.S. update',{body:row?.body||'Your roadside mission has an update.',tag:row?.id?`sos-${row.id}`:`sos-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>window.focus()}};
+   const show=row=>{setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row?.id?null:cur),4200);if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row?.title||'S.O.S. update',{body:row?.body||'Your roadside mission has an update.',tag:row?.id?`sos-${row.id}`:`sos-${Date.now()}`,icon:'/sos-app-icon-192.png'});n.onclick=()=>window.focus()}};
    const connect=async()=>{
      const s=storedSession();if(!s||disposed)return;setSession(s);
      const users=await req(`/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{token:s.access_token});const u=users?.[0];if(!u||u.role==='hero'||disposed)return;
