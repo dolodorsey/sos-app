@@ -83,6 +83,8 @@ jobs:
           set -uo pipefail
           # Fail fast instead of hanging until the job times out.
           wd(){ perl -e 'alarm shift; exec @ARGV' 240 "$@"; }
+          # Logs are capped in time and size so the upload step can't stall on a file that keeps growing.
+          CAP=5000000
           APP="$RUNNER_TEMP/SOSDerivedData/Build/Products/Release-iphonesimulator/App.app"
           if [ ! -d "$APP" ]; then
             echo "::error::Release simulator app bundle missing: $APP"
@@ -92,7 +94,7 @@ jobs:
           echo "bundle_id=$BUNDLE_ID" | tee launch-proof/app-identity.txt
           wd xcrun simctl install "${{ steps.simulator.outputs.udid }}" "$APP"
           xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" >/dev/null 2>&1 || true
-          xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log stream --style compact --level info --predicate "process == \"$BUNDLE_ID\"" > launch-proof/launch-log-stream.txt 2>&1 &
+          perl -e 'alarm 60; exec @ARGV' xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log stream --style compact --level info --predicate "process == \"$BUNDLE_ID\"" 2>&1 | head -c "$CAP" > launch-proof/launch-log-stream.txt &
           LOG_PID=$!
           python3 -c 'import time; time.sleep(2)'
           START_NS=$(python3 -c 'import time; print(time.time_ns())')
@@ -106,8 +108,10 @@ jobs:
           ELAPSED_MS=$(( (END_NS - START_NS) / 1000000 ))
           echo "first_screen_capture_elapsed_ms=$ELAPSED_MS" | tee -a launch-proof/launch-result.txt
           wd xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot launch-proof/first-rendered-screen.png
-          xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" > launch-proof/launch-log-show.txt 2>&1 || true
+          wd xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" 2>&1 | head -c "$CAP" > launch-proof/launch-log-show.txt || true
           kill "$LOG_PID" >/dev/null 2>&1 || true
+          pkill -f "simctl spawn .* log stream" >/dev/null 2>&1 || true
+          wait "$LOG_PID" 2>/dev/null || true
           mkdir -p launch-proof/crash-reports
           find "$HOME/Library/Logs/DiagnosticReports" -type f -mmin -15 \( -iname '*App*' -o -iname '*SOS*' \) -exec cp {} launch-proof/crash-reports/ \; 2>/dev/null || true
           xcrun simctl list devices | grep "${{ steps.simulator.outputs.udid }}" > launch-proof/device-final-state.txt
@@ -118,6 +122,7 @@ jobs:
           fi
 
       - name: Upload launch proof, logs and crash reports
+        timeout-minutes: 5
         if: always()
         uses: actions/upload-artifact@v7
         with:
