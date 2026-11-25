@@ -20,7 +20,7 @@ concurrency:
 jobs:
   ipad-release-cold-launch:
     name: Release build + iPad cold launch
-    runs-on: macos-26
+    runs-on: xcode-27 # same toolchain as the TestFlight build
     timeout-minutes: 45
     steps:
       - name: Checkout exact tested source
