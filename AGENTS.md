@@ -7,12 +7,12 @@ This is the mandatory source-of-truth entry point for coding, marketing, CRM, so
 - Canonical company name: **S.O.S. — Superheros On Standby**
 - Canonical branded spelling: **SUPERHEROS** — intentionally spelled without the second "e" in "heroes".
 - **Never auto-correct SUPERHEROS to SUPERHEROES** when referring to the S.O.S. brand, network, provider identity, branded category, metadata, structured data, press language or public-facing naming.
-- Canonical Instagram: **@SUPERHERO.ONSTANDBY**
+- Canonical Instagram: **@superheros.onstandby**
 - Canonical current entity: **S.O.S.**
 - Approved aliases for entity resolution: **S.O.S.**, **SOS**, **Superheros On Standby**, **SUPERHEROS**.
 - Prior identities attached to the underlying Instagram account are retired from current operations.
 - Historical provider/audit evidence may preserve old provider values, but no retired identity may be used for current publishing, scheduling, routing, tagging, reporting, engagement, DMs, comments or approvals.
-- Before social publish, the provider-returned live username must match `superhero.onstandby`.
+- Before social publish, the provider-returned live username must match `superheros.onstandby`.
 
 ## Brand authority — canonical definition
 
@@ -24,15 +24,15 @@ Singular: **SUPERHERO**. Plural: **SUPERHEROS** (never with an E before the S). 
 
 Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com` — definition at `/superheros/`, S.O.S. Knowledge Hub at `/wiki/`.
 
-For media authority, trademark-reference, Wikipedia-readiness and GHL media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
+For media authority, trademark-reference, Wikipedia-readiness and media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
 
-## HighLevel — primary outbound
+## Outbound — current rules
 
-- GHL is the default outbound system for S.O.S. marketing email, newsletters, nurture, provider recruitment, customer lifecycle, operational follow-up and SMS.
-- S.O.S. uses its own GHL location/subaccount: `jz8geHs33Iqyruo2q2oO`.
-- S.O.S. sender identity, contacts, workflows, pipelines, tags, custom fields, suppression state and reporting stay isolated from all other companies.
-- Gmail is not an automatic marketing fallback. Gmail may be used only for founder-approved VC/investor/founder-personal or another explicitly approved special case.
-- Supabase-backed GHL runtime credentials/location truth is authoritative. A ChatGPT-facing connector IAM error is not evidence that GHL is unavailable.
+- HighLevel (GHL) is retired. The founder confirmed on Nov 23, 2026: nothing routes through it.
+- Provider recruitment email goes out from S.O.S.'s own mailbox (hero@sosatl.com). The main S.O.S. inbox is help@superherosonstandby.com.
+- Team members text the sign-up link (www.SOSatl.com) from their own phones, only after the person agrees on the call.
+- Central phone for listings, temporary: (470) 809-2222 (Supabase `sos_system_config.central_phone`).
+- Each company sends from its own mailbox. S.O.S. contacts, audiences and reporting stay separate from every other Kollective entity.
 
 ## Provider recruitment truth
 
