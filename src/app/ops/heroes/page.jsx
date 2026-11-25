@@ -4,6 +4,7 @@ import {useEffect,useMemo,useState} from 'react';
 import SOSHeroVerificationOpsHost from '@/components/SOSHeroVerificationOpsHost';
 import SOSOpsAlertsHost from '@/components/SOSOpsAlertsHost';
 import styles from './HeroOps.module.css';
+import PasswordInput from '../../../components/PasswordInput';
 
 const SB='https://cxdqkjvtpilvouwtbgdy.supabase.co';
 const SK='sb_publishable_x_QDbPwZuhbqB1bd58MLvg_ADSiFODN';
@@ -43,7 +44,7 @@ export default function HeroOpsPage(){
   attributed:activeApplications.filter(a=>a.source_attributed).length
  }),[activeApplications]);
  const reviewStats=useMemo(()=>Object.fromEntries(['waitlisted','reviewing','needs_information','conditionally_approved','rejected'].map(s=>[s,apps.filter(a=>a.status===s).length])),[apps]);
- if(!session)return <main className={styles.page}><form className={styles.auth} onSubmit={login}><span className={styles.status}>S.O.S. OPERATIONS</span><h1>Hero activation operations</h1><p>Work every real applicant from intake through credentials, review, claim, verification, payout readiness, and launch—without losing stage ownership or SLA visibility.</p><label className={styles.field}>Operator email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label className={styles.field}>Password<input type="password" required value={password} onChange={e=>setPassword(e.target.value)}/></label>{error&&<div className={styles.error}>{error}</div>}<button className={styles.primary} disabled={busy==='login'}>{busy==='login'?'Authenticating…':'Open Hero operations'}</button></form></main>;
+ if(!session)return <main className={styles.page}><form className={styles.auth} onSubmit={login}><span className={styles.status}>S.O.S. OPERATIONS</span><h1>Hero activation operations</h1><p>Work every real applicant from intake through credentials, review, claim, verification, payout readiness, and launch—without losing stage ownership or SLA visibility.</p><label className={styles.field}>Operator email<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label className={styles.field}>Password<PasswordInput required value={password} onChange={e=>setPassword(e.target.value)}/></label>{error&&<div className={styles.error}>{error}</div>}<button className={styles.primary} disabled={busy==='login'}>{busy==='login'?'Authenticating…':'Open Hero operations'}</button></form></main>;
  return <main className={styles.page}><div className={styles.shell}><header className={styles.top}><div><span>S.O.S. HERO OPERATIONS</span><h1>Application activation.</h1><p>One operator command layer now covers pre-review applicants, credential progress, stage SLAs, attribution, review, and downstream verification readiness.</p></div><div className={styles.topActions}><button className={styles.secondary} disabled={busy==='refresh'} onClick={refresh}>{busy==='refresh'?'Refreshing…':'Refresh queue'}</button><a className={styles.back} href="/ops">Operations Command →</a></div></header>{error&&<div className={styles.error}>{error}</div>}{notice&&<div className={styles.notice}>{notice}</div>}<div className={styles.stats}>{[
   ['ACTIVE APPLICATIONS',commandStats.active],
   ['DOCUMENTS REQUIRED',commandStats.documents],

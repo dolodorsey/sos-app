@@ -1,0 +1,214 @@
+/* S.O.S. Atlanta core launch — unavailable services + launch banner.
+   Loaded last in app/layout.jsx so it wins over earlier layers. */
+
+.sos2-service-list > button.sos2-unavailable,
+.sos-subcat-card.sos-unavailable,
+.sos-launch-card.is-soon {
+  opacity: .5;
+  filter: grayscale(.85);
+  cursor: default;
+}
+.sos2-service-list > button.sos2-unavailable em,
+.sos-subcat-card.sos-unavailable em {
+  color: rgba(255, 255, 255, .62) !important;
+  font-size: 9px !important;
+  letter-spacing: .14em;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+
+.sos2-unavailable-note {
+  margin: 16px 0 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+.sos2-unavailable-note strong {
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.sos2-unavailable-note small {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(235, 241, 248, .7);
+}
+
+.sos2-membership.sos2-launch-banner {
+  min-height: 0 !important;
+  background-image: linear-gradient(135deg, #3a0b0e, #0b0f17 72%) !important;
+  border-color: rgba(255, 75, 82, .35) !important;
+}
+.sos2-membership.sos2-launch-banner h2 { font-size: 32px !important; }
+.sos2-membership.sos2-launch-banner p { font-size: 12px; color: rgba(255, 255, 255, .75) !important; }
+
+
+
+
+
+/* Quick rescue tiles read as ready to book: no greyed-out filter, no red alert dot.
+   (Requests are still guarded until verified Hero coverage is live.) */
+html body .sos2-quick-grid > button[data-verified-coverage] { opacity: 1 !important; filter: none !important; }
+html body .sos-route-frame.sos-app-frame .sos2-quick-grid > button:not([data-verified-coverage="active"]) [class*="badge"],
+html body .sos2-quick-grid > button:not([data-verified-coverage="active"]) [class*="badge"] { display: none !important; }
+
+/* Website — service availability badges */
+.sos-launch-badge {
+  display: inline-block;
+  margin-top: 6px;
+  font: 800 10px/1 Inter, sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+.sos-launch-badge.live { background: rgba(16, 185, 129, .16); color: #34d399; border: 1px solid rgba(16, 185, 129, .4); }
+.sos-launch-badge.soon { background: rgba(255, 255, 255, .06); color: rgba(255, 255, 255, .6); border: 1px solid rgba(255, 255, 255, .18); }
+
+/* Sign in / sign up — brand animation replaces the still landing image.
+   The still image stays underneath as the loading + reduced-motion fallback. */
+.sos2-auth-art.sos2-auth-art-motion { isolation: isolate; }
+.sos2-auth-motion {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  background: transparent; pointer-events: none;
+}
+.sos2-auth-art.sos2-auth-art-motion:after { z-index: 1; background: linear-gradient(180deg, rgba(5,8,13,.05) 30%, rgba(5,8,13,.55) 62%, #05080d) !important; }
+.sos2-auth-art.sos2-auth-art-motion .sos2-brand,
+.sos2-auth-art.sos2-auth-art-motion .sos2-auth-copy { z-index: 4; }
+@media (prefers-reduced-motion: reduce) { .sos2-auth-motion { display: none; } }
+
+/* Sign in / sign up — about the app */
+.sos2-auth-about {
+  margin: 4px 18px 34px; padding: 24px 20px;
+  border: 1px solid rgba(145,171,202,.14); border-radius: 22px;
+  background: linear-gradient(160deg, rgba(17,28,43,.92), rgba(6,10,16,.96));
+  color: #f7f8fa;
+}
+.sos2-auth-about-eyebrow { display: block; font: 900 10px/1 'DM Sans', sans-serif; letter-spacing: .18em; color: #ff6a70; }
+.sos2-auth-about h2 { margin: 10px 0 10px; font: 800 30px/.95 'Barlow Condensed', sans-serif; text-transform: uppercase; letter-spacing: -.01em; }
+.sos2-auth-about h2 em { font-style: normal; color: #ff3b42; }
+.sos2-auth-about > p { margin: 0 0 18px; font-size: 13px; line-height: 1.55; color: rgba(235,241,248,.7); }
+.sos2-auth-about-steps { display: grid; gap: 8px; margin-bottom: 20px; }
+.sos2-auth-about-steps > div {
+  display: grid; grid-template-columns: 30px 1fr; column-gap: 12px; align-items: center;
+  padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid rgba(145,171,202,.1);
+}
+.sos2-auth-about-steps b { grid-row: span 2; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: rgba(227,0,11,.14); color: #ff3b42; font-size: 12px; }
+.sos2-auth-about-steps strong { font-size: 13px; }
+.sos2-auth-about-steps small { font-size: 11px; line-height: 1.4; color: rgba(235,241,248,.55); }
+.sos2-auth-live-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sos2-auth-live-head .sos2-auth-about-eyebrow { display: inline-flex; align-items: center; gap: 7px; }
+.sos2-auth-live-head .sos2-auth-about-eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: #33d795; box-shadow: 0 0 0 3px rgba(51,215,149,.16), 0 0 10px rgba(51,215,149,.7); animation: sosLivePulse 2.4s ease-in-out infinite; }
+.sos2-auth-live-head small { font-size: 10.5px; color: rgba(235,241,248,.5); }
+@keyframes sosLivePulse { 50% { box-shadow: 0 0 0 6px rgba(51,215,149,0), 0 0 10px rgba(51,215,149,.7); } }
+.sos2-auth-about-services { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; margin: 12px 0 22px; }
+.sos2-auth-about-services > div {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 4px 11px; border-radius: 16px; text-align: center;
+  background: linear-gradient(165deg, rgba(255,59,66,.10), rgba(8,12,18,.9) 62%);
+  border: 1px solid rgba(255,59,66,.20);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+  transition: transform .18s ease, border-color .18s ease;
+}
+.sos2-auth-about-services > div:hover { transform: translateY(-2px); border-color: rgba(255,59,66,.45); }
+.sos2-auth-about-services > div:before { content: ''; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, transparent, #ff3b42, transparent); opacity: .7; }
+.sos2-auth-svc-icon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: #ff5a60; background: rgba(227,0,11,.14); border: 1px solid rgba(255,59,66,.28); }
+.sos2-auth-about-services strong { display: block; font: 800 clamp(13px, 3.6vw, 15px)/1 'Barlow Condensed', sans-serif; letter-spacing: 0; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.sos2-auth-about-services small { display: block; font: 800 13px/1 'Barlow Condensed', sans-serif; color: #ff5a60; }
+.sos2-auth-about-services small em { font: 600 9.5px/1 'DM Sans', sans-serif; font-style: normal; color: rgba(235,241,248,.5); margin-right: 2px; text-transform: lowercase; }
+.sos2-auth-about-trust { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.sos2-auth-about-trust li { font-size: 12px; line-height: 1.45; color: rgba(235,241,248,.62); padding-left: 18px; position: relative; }
+.sos2-auth-about-trust li:before { content: '✓'; position: absolute; left: 0; color: #34d399; font-weight: 900; }
+.sos2-auth-about-trust b { display: block; color: #fff; font-size: 13px; }
+.sos2-auth-about-hero {
+  display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid rgba(255,59,66,.3); background: rgba(227,0,11,.07); color: #fff; text-decoration: none;
+}
+.sos2-auth-about-hero span { font-size: 11px; color: rgba(235,241,248,.6); }
+.sos2-auth-about-hero strong { font-size: 14px; color: #ff6a70; }
+.sos2-auth-about-word {
+  display: flex; flex-direction: column; gap: 4px; margin-top: 10px; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid rgba(235,241,248,.14); background: rgba(255,255,255,.03); color: #fff; text-decoration: none;
+}
+.sos2-auth-about-word span { font-size: 11px; color: rgba(235,241,248,.6); }
+.sos2-auth-about-word strong { font-size: 14px; color: #fff; }
+@media (max-width: 380px) {
+  .sos2-auth-about-services { grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+/* Services tab — main (live) services above the category grid */
+.sos2-main-services { margin: 4px 0 24px; }
+.sos2-all-categories { margin: 0 0 12px; }
+
+/* Quick rescue "coming soon" teaser tile (6th tile → clean 3 + 3 grid). */
+html body .sos2-quick-grid > button.sos2-quick-soon { opacity: .78 !important; border-style: dashed !important; border-color: rgba(255, 255, 255, .22) !important; }
+html body .sos2-quick-grid > button.sos2-quick-soon small { color: rgba(255, 255, 255, .62) !important; }
+html body .sos2-quick-grid > button.sos2-quick-soon em { color: rgba(255, 255, 255, .55) !important; letter-spacing: .14em; font-size: 14px !important; }
+
+/* ---------- Compact customer app (Nov 12): small, scannable tiles; more on one screen ---------- */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-slot-status { gap: 6px !important; padding: 10px 16px 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-status-card { padding: 9px 11px !important; border-radius: 12px !important; gap: 8px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-status-card strong { font-size: 12.5px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-status-card small { font-size: 11.5px !important; line-height: 1.35 !important; display: -webkit-box !important; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-status-card button { min-height: 34px !important; padding: 6px 12px !important; font-size: 12px !important; border-radius: 10px !important; }
+
+/* hero animation: a short banner, not half the screen */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-map-hero { margin: 12px 16px 14px !important; padding: 0 !important; border-radius: 18px !important; position: relative !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos3-home-motion { height: 118px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-location-pill { position: relative !important; inset: auto !important; transform: none !important; box-sizing: border-box !important; max-width: 100% !important; margin: 0 !important; width: 100% !important; min-height: 44px !important; padding: 0 14px !important; border-radius: 0 !important; border: 0 !important; border-top: 1px solid rgba(255,255,255,.08) !important; font-size: 13px !important; background: #0a0f15 !important; }
+
+/* section titles */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-section-title { margin: 0 0 10px !important; padding: 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-section-title span { font-size: 10px !important; letter-spacing: .16em !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-section-title h2 { font-size: 24px !important; line-height: 1 !important; margin: 4px 0 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-note { margin: 4px 0 0 !important; font: 500 12px/1.3 'DM Sans', sans-serif !important; color: rgba(235,241,248,.6) !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick,
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-categories { padding: 0 16px !important; margin: 0 0 20px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-screen .sos2-quick { padding: 0 !important; }
+
+/* service tiles: 3 across, icon + name + price */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button { grid-column: auto !important; min-height: 0 !important; height: auto !important; padding: 10px 6px 9px !important; border-radius: 14px !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; gap: 4px !important; text-align: center !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button .sos2-service-icon { width: 38px !important; height: 38px !important; border-radius: 11px !important; margin: 0 0 2px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button .sos2-service-icon svg { width: 22px !important; height: 22px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button strong { font-size: 13px !important; line-height: 1.15 !important; margin: 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button small { display: none !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button em { font-size: 13px !important; line-height: 1 !important; margin: 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-quick-grid > button.sos2-quick-soon em { font-size: 10px !important; letter-spacing: .14em !important; color: rgba(235,241,248,.55) !important; }
+
+/* category tiles: 4 across, icon + short label */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 8px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid > button { min-height: 0 !important; height: auto !important; padding: 9px 4px 8px !important; border-radius: 13px !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 4px !important; text-align: center !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid .sos2-category-symbol { width: 34px !important; height: 34px !important; border-radius: 10px !important; grid-row: auto !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid .sos2-category-symbol svg { width: 19px !important; height: 19px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid strong { font-size: 11px !important; line-height: 1.2 !important; align-self: center !important; overflow-wrap: anywhere; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-category-grid small { font-size: 10px !important; margin: 0 !important; align-self: center !important; }
+
+/* services tab spacing */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-screen { padding: 16px 16px 28px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-main-services { margin: 0 0 20px !important; }
+
+/* profile: compact header row instead of a giant card */
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-card { display: grid !important; grid-template-columns: 48px minmax(0,1fr) !important; grid-template-areas: "a s" "a h" "a p" !important; column-gap: 12px !important; align-items: center !important; min-height: 0 !important; padding: 14px !important; border-radius: 16px !important; margin: 0 0 12px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-avatar { grid-area: a !important; width: 48px !important; height: 48px !important; border-radius: 14px !important; font-size: 22px !important; margin: 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-card > span { grid-area: s !important; font-size: 9.5px !important; margin: 0 !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-card h1 { grid-area: h !important; font: 700 16px/1.25 'DM Sans', sans-serif !important; text-transform: none !important; letter-spacing: 0 !important; margin: 2px 0 0 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-card p { grid-area: p !important; font-size: 11.5px !important; margin: 0 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-menu { gap: 8px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-menu > *,
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-profile-row { min-height: 0 !important; padding: 10px 12px !important; border-radius: 13px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-menu strong,
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-profile-row strong { font-size: 14px !important; }
+html body .sos-route-frame.sos-app-frame .sos2-app .sos2-profile-menu small,
+html body .sos-route-frame.sos-app-frame .sos2-app .sos-profile-row small { font-size: 11.5px !important; }
+@media (prefers-reduced-motion: reduce) { .sos2-auth-live-head .sos2-auth-about-eyebrow i { animation: none; } }

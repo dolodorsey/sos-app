@@ -18,9 +18,13 @@ This is the mandatory source-of-truth entry point for coding, marketing, CRM, so
 
 Use this definition consistently unless a specific channel requires a shorter version:
 
-> **SUPERHEROS™** is the intentionally spelled brand term used by Superheros On Standby for the real people and provider network that help customers with roadside and on-demand assistance needs. The spelling is deliberate: these are real people who show up when help is needed, not fictional superheroes.
+> **SUPERHEROS** are S.O.S. roadside assistance providers who help motorists with vehicle-related difficulties, including towing, jump-starts, tire changes, fuel delivery, and vehicle lockout services.
 
-Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com`.\n\nFor media authority, trademark-reference, Wikipedia-readiness and GHL media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
+Singular: **SUPERHERO**. Plural: **SUPERHEROS** (never with an E before the S). The text lives in `src/content/sosLexicon.js` (`OFFICIAL_DEFINITION`) and Supabase `public.sos_brand_content` (`kind = definition`); change it in both through a reviewed PR. `npm test` runs `tests/brand-spelling.test.mjs`, which fails on the conventional plural outside `config/brand-spelling-allowlist.json`.
+
+Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com` — definition at `/superheros/`, S.O.S. Knowledge Hub at `/wiki/`.
+
+For media authority, trademark-reference, Wikipedia-readiness and GHL media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
 
 ## HighLevel — primary outbound
 
