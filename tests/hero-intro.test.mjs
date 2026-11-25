@@ -19,3 +19,14 @@ test('Hero sign-up shows the brand intro, and the intro always gets out of the w
   assert.match(c, />\s*Skip\s*</);
   assert.ok(fs.statSync(root + 'public/brand/intro/sos-hero-intro.mp4').size < 3_000_000, 'intro video stays phone-friendly');
 });
+
+test('homepage plays the services-at-launch intro on the website only', () => {
+  const home = fs.readFileSync(new URL('../src/app/page.jsx', import.meta.url), 'utf8')
+  const intro = fs.readFileSync(new URL('../src/components/SOSHeroIntro.jsx', import.meta.url), 'utf8')
+  assert.match(home, /sos-services-intro\.mp4/)
+  assert.match(home, /seenKey="sos_services_intro_seen_at"/, 'own replay timer, separate from the Hero sign-up intro')
+  assert.match(home, /webOnly/)
+  assert.match(home, /<CustomerApp \/>/, 'still the full customer app underneath')
+  assert.match(intro, /webOnly && window\.Capacitor\?\.isNativePlatform\?\.\(\)/)
+  assert.ok(fs.statSync(new URL('../public/brand/intro/sos-services-intro.mp4', import.meta.url)).size < 4_000_000)
+})
