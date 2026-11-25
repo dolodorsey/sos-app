@@ -1,0 +1,88 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483600; /* above the site header and floating buttons */
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 40%, #1a0508 0%, #05080d 70%);
+  opacity: 1;
+  transition: opacity 0.6s ease-in, transform 0.6s ease-in;
+}
+
+.leaving {
+  /* fade out; the element is removed by a timer either way, so a paused
+     animation can never leave an invisible layer over the form */
+  opacity: 0;
+  transform: scale(1.04);
+  pointer-events: none;
+}
+
+.video {
+  width: min(100vw, calc(100dvh * 720 / 776));
+  height: auto;
+  max-height: 100dvh;
+  object-fit: contain;
+  display: block;
+}
+
+.controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px;
+}
+
+.sound,
+.skip {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(5, 8, 13, 0.62);
+  color: #fff;
+  font: 800 13px/1 inherit;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.skip {
+  background: #ff1f2a;
+  border-color: #ff1f2a;
+}
+
+.play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 0 28px 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #ff1f2a;
+  color: #fff;
+  font: 900 20px/1 inherit;
+  font-family: inherit;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 0 0 10px rgba(255, 31, 42, 0.22), 0 18px 50px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.playIcon {
+  width: 0;
+  height: 0;
+  border-left: 18px solid #fff;
+  border-top: 11px solid transparent;
+  border-bottom: 11px solid transparent;
+}

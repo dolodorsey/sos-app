@@ -2,7 +2,7 @@
 
 ## Product boundary
 
-- Public product: **S.O.S. — Superheroes On Standby**.
+- Public product: **S.O.S. — Superheros On Standby**.
 - Repository: `dolodorsey/sos-app`.
 - Primary domain: `https://thesuperherosonstandby.com`.
 - Production Supabase project: `cxdqkjvtpilvouwtbgdy`.

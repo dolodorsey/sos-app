@@ -1,50 +1,61 @@
-# SOS — App Store Listing (Copy-Paste Ready)
+# S.O.S. — App Store Listing (copy-paste ready)
 
-## App Name
-SOS
+Status: **draft for approval.** This file does not change the live App Store listing. Updating App Store Connect requires an editable app version and owner approval.
 
-## Subtitle
-Emergency Services & Support
+Terminology: plural is always **SUPERHEROS** (`npm test` enforces this file too).
+
+## App Name (30 max)
+S.O.S. Superheros On Standby
+
+## Subtitle (30 max)
+Roadside help from SUPERHEROS
 
 ## Category
-Primary: Lifestyle
-Secondary: Utilities
+Primary: Navigation
+Secondary: Lifestyle
+
+## Promotional Text (170 max)
+Dead battery, flat tire, empty tank, locked out or need a tow? Request a SUPERHERO in metro Atlanta and follow real status until the job is done.
 
 ## Description
-SOS™ is your direct line to essential services and emergency support — powered by The Kollective Hospitality Group.
+S.O.S. — Superheros On Standby connects drivers with roadside assistance providers we call SUPERHEROS.
 
-Whether you need immediate assistance, want to connect with a professional, or require urgent consultation, SOS puts help at your fingertips. One tap to get in touch. One platform to access the support network you need.
+Choose what you need, share your exact location, and your request goes to qualified SUPERHEROS nearby. Your request is assigned only when a SUPERHERO accepts it, and status updates come from the live mission, not guesses.
 
-FEATURES:
-• Instant inquiry submission — get connected fast
-• Professional consultation requests
-• Sponsorship and partnership inquiries
-• Volunteer coordination
-• NDA and legal document access
-• RSVP management for exclusive events
+SERVICES IN METRO ATLANTA
+• Towing
+• Jump-starts
+• Flat tire changes
+• Fuel delivery
+• Vehicle lockouts
 
-POWERED BY KHG:
-SOS is part of The Kollective Hospitality Group's ecosystem of apps designed to make life easier, safer, and more connected.
+HOW IT WORKS
+1. Pick a service and share your location.
+2. Nearby qualified SUPERHEROS receive your request.
+3. One accepts, and you follow the mission in the app.
+4. Confirm the final price and pay in the app.
 
-Download free. Help is one tap away.
+WHAT IS A SUPERHERO?
+SUPERHEROS are S.O.S. roadside assistance providers who help motorists with vehicle-related difficulties, including towing, jump-starts, tire changes, fuel delivery, and vehicle lockout services. The spelling is deliberate. Learn more at thesuperherosonstandby.com/superheros
 
-## Keywords
-emergency,services,support,help,consultation,connect,assistance,professional,urgent,KHG
+PROVIDERS
+Tow operators, mobile roadside technicians and lockout specialists can apply to become SUPERHEROS. Verification is required before accepting customer missions.
 
-## Privacy URL
-https://sos-app-website.vercel.app/privacy
+S.O.S. is roadside assistance, not an emergency service. If anyone is hurt or in danger, call 911.
 
-## Support URL
-https://sos-app-website.vercel.app/support
+## Keywords (100 max)
+roadside,tow,towing,jump start,flat tire,lockout,fuel,gas delivery,atlanta,superheros,car help
+
+## URLs
+- Marketing: https://thesuperherosonstandby.com/superheros/
+- Support: https://thesuperherosonstandby.com/support/
+- Privacy: https://thesuperherosonstandby.com/privacy/
 
 ## Age Rating
-17+
+4+ (no objectionable content; confirm in the App Store Connect questionnaire)
 
 ## SKU
 sos-ios-v1
 
 ## Copyright
 © 2026 The Kollective Hospitality Group
-
-## Contact Email
-info@thekollectivehospitalitygroup.com

@@ -216,3 +216,32 @@ Do not file or claim exclusive nationwide rights based solely on internal resear
 - Trademark research is not trademark registration.
 
 Every status change must be supported by the corresponding provider or public evidence.
+
+## Knowledge Hub and definition (2026-11-11)
+
+Public routes on `https://thesuperherosonstandby.com`:
+
+- `/superheros/` — official definition (Schema.org `DefinedTerm`, text identical to the visible definition).
+- `/wiki/` — S.O.S. Knowledge Hub index (searchable; `DefinedTermSet` "S.O.S. Lexicon").
+- `/wiki/<slug>/` — 12 entries: superheros, roadside-assistance, towing, jump-start, tire-change, fuel-delivery, lockout-service, how-sos-works, provider-network, provider-categories, safety-standards, roadside-terminology.
+
+Every hub page states it is S.O.S.-published brand material, not Wikipedia, Wikimedia or an independent dictionary. `/wiki/superheros/` is a distinct encyclopedia-style entry (history, service model, FAQ, citations) with its own canonical, per the 2026-11-11 handoff; issue #119 originally proposed a 301 to `/superheros/` instead.
+
+Official definition:
+
+> SUPERHEROS are S.O.S. roadside assistance providers who help motorists with vehicle-related difficulties, including towing, jump-starts, tire changes, fuel delivery, and vehicle lockout services.
+
+### Content source of truth
+
+- Code: `src/content/sosLexicon.js` drives every hub page.
+- Database: `public.sos_brand_content` (+ `_revisions`, `_destinations`), migration `20261111090000_sos_brand_content_source_of_truth.sql`. Seed with `node scripts/build-brand-content-seed.mjs`.
+- Muse/ops read `public.sos_brand_content_status_v` with the service role. Client roles are denied, like the other authority tables.
+- Index receipts stay in `sos_search_index_submissions`; per-URL submitted vs indexed status lives on `sos_brand_content_destinations`.
+
+### Spelling regression check
+
+`node scripts/check-brand-spelling.mjs` (also run by `npm test`) fails on the conventional plural anywhere in the repo except entries in `config/brand-spelling-allowlist.json`, each with a reason. The database trigger `sos_brand_content_guard` rejects it in brand content unless `body.spelling_exception_reason` documents a verbatim third-party quotation.
+
+### Not affiliated
+
+Georgia DOT's HERO (Highway Emergency Response Operators) program is unrelated to S.O.S. Pages say so explicitly; keep it that way in all copy.

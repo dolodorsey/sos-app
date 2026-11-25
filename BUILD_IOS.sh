@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════
-# SOS — Superheroes On Standby — iOS BUILD SCRIPT
+# SOS — Superheros On Standby — iOS BUILD SCRIPT
 # Run on Mac: bash BUILD_IOS.sh
 # ═══════════════════════════════════════════════════════
 set -e
@@ -12,7 +12,7 @@ NC='\033[0m'
 
 echo ""
 echo "═══════════════════════════════════════════"
-echo "  🦸 SOS — Superheroes On Standby — iOS Build"
+echo "  🦸 SOS — Superheros On Standby — iOS Build"
 echo "  Bundle: com.sos.app"
 echo "═══════════════════════════════════════════"
 echo ""

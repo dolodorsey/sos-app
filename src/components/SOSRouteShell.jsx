@@ -17,7 +17,10 @@ const AUTHORITY_ROUTES = new Set([
   '/press',
   '/media-kit',
   '/history',
+  '/wiki',
 ]);
+// Knowledge Hub articles live under /wiki/<slug>.
+const isAuthorityRoute = (pathname) => AUTHORITY_ROUTES.has(pathname) || pathname.startsWith('/wiki/');
 
 const fallbackFor = (pathname) => {
   if (pathname.startsWith('/hero/')) return '/hero';
@@ -26,6 +29,7 @@ const fallbackFor = (pathname) => {
   if (pathname === '/login') return '/';
   if (pathname === '/privacy' || pathname === '/terms' || pathname === '/legal') return '/';
   if (pathname === '/support' || pathname === '/track') return '/app';
+  if (pathname.startsWith('/wiki/')) return '/wiki';
   if (AUTHORITY_ROUTES.has(pathname)) return '/superheros';
   return '/';
 };
@@ -35,7 +39,7 @@ export default function SOSRouteShell({ children }) {
   const router = useRouter();
   const currentPath = useRef(pathname);
   const previousAppPath = useRef(null);
-  const authority = AUTHORITY_ROUTES.has(pathname);
+  const authority = isAuthorityRoute(pathname);
   const hasRouteHeader = !ROOT_ROUTES.has(pathname) && !authority;
   const appFrame = APP_FRAME_ROUTES.has(pathname);
 
