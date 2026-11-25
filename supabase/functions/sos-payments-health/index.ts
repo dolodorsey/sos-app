@@ -64,6 +64,23 @@ Deno.serve(async (req) => {
     }
   }
 
+  // Wallets at checkout: Stripe Checkout shows Apple Pay and Google Pay when they are on
+  // in the account's default payment method settings. Reports on/off only.
+  let applePay: string = "unknown", googlePay: string = "unknown";
+  if (stripeSecretKey && stripeApi === "reachable") {
+    try {
+      const r = await fetch("https://api.stripe.com/v1/payment_method_configurations?limit=20", {
+        headers: { Authorization: `Bearer ${stripeSecretKey}` },
+        signal: AbortSignal.timeout(5000),
+      });
+      const d = await r.json().catch(() => ({}));
+      const configs = Array.isArray(d?.data) ? d.data : [];
+      const pick = configs.find((c: any) => c?.is_default && !c?.parent) || configs.find((c: any) => c?.is_default) || configs[0];
+      const state = (m: any) => !m ? "not_listed" : (m.available && m.display_preference?.value === "on") ? "on" : (m.display_preference?.value || "off");
+      if (pick) { applePay = state(pick.apple_pay); googlePay = state(pick.google_pay); }
+    } catch { /* leave unknown */ }
+  }
+
   const ready = Boolean(stripeSecretKey && sosWebhookSecret && stripeApi === "reachable");
 
   return new Response(JSON.stringify({
@@ -76,6 +93,8 @@ Deno.serve(async (req) => {
       stripe_api: stripeApi,
       stripe_http_status: stripeHttpStatus,
       stripe_latency_ms: stripeLatencyMs,
+      apple_pay_at_checkout: applePay,
+      google_pay_at_checkout: googlePay,
     },
     latency_ms: Date.now() - startedAt,
     timestamp: new Date().toISOString(),
