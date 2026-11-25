@@ -26,13 +26,23 @@ permissions:
 
 jobs:
   verify-build-upload:
-    runs-on: macos-latest
+    # Apple (ITMS-90725): from April 2027 uploads must be built with the iOS 27 SDK (Xcode 27).
+    runs-on: xcode-27
     timeout-minutes: 45
     env:
       TESTFLIGHT_CHANGELOG: Automated SOS build from ${{ github.sha }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+
+      - name: Require the iOS 27 SDK or later
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          SDK=$(xcrun --sdk iphoneos --show-sdk-version)
+          echo "iOS SDK: $SDK"
+          [[ "${SDK%%.*}" -ge 27 ]] || { echo "::error::Built with iOS SDK $SDK; App Store Connect requires iOS 27 SDK (Xcode 27) or later."; exit 1; }
 
       - name: Prepare Apple release signing from Supabase
         shell: bash
@@ -134,7 +144,7 @@ jobs:
 
           rm -f "$TOKEN_FILE" "$CRED_FILE" "$PRIVATE_KEY_P12" "$CERT_PATH" "$CERT_PASSWORD_PATH" "$PROFILE_PATH" "$META_FILE"
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
           cache: npm
