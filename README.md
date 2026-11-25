@@ -12,7 +12,7 @@ Canonical website entity: **https://thesuperherosonstandby.com**
 
 ## Current operating truth
 
-- Canonical Instagram: **@SUPERHERO.ONSTANDBY**
+- Canonical Instagram: **@superheros.onstandby**
 - Primary CRM/outbound system: **HighLevel**
 - GHL location: `jz8geHs33Iqyruo2q2oO`
 - Gmail is exception-only; it is not the S.O.S. marketing/newsletter fallback.

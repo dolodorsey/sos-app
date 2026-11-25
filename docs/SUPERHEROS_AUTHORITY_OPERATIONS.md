@@ -6,7 +6,7 @@ This runbook governs the S.O.S. authority, media, trademark-reference and CRM ex
 
 - Company: **S.O.S. — Superheros On Standby**
 - Brand term: **SUPERHEROS**
-- Instagram: **@SUPERHERO.ONSTANDBY**
+- Instagram: **@superheros.onstandby**
 - Canonical web entity: `https://thesuperherosonstandby.com`
 - HighLevel location: `jz8geHs33Iqyruo2q2oO`
 - HighLevel media pipeline: **SOS | MEDIA AUTHORITY**

@@ -8,7 +8,7 @@ const ORG = {
   alternateName: ['S.O.S.', 'SOS', 'S.O.S. — Superheros On Standby'],
   url: SITE,
   logo: `${SITE}/brand/sos-logo.webp`,
-  sameAs: ['https://www.instagram.com/superhero.onstandby/'],
+  sameAs: ['https://www.instagram.com/superheros.onstandby/'],
   areaServed: { '@type': 'City', name: 'Atlanta', containedInPlace: { '@type': 'State', name: 'Georgia' } },
   description: 'Superheros On Standby (S.O.S.) is a roadside assistance platform in metro Atlanta. Its roadside assistance providers are called SUPERHEROS.',
 };
