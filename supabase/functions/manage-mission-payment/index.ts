@@ -52,7 +52,7 @@ Deno.serve(async(req)=>{
     await admin.from('sos_payments').update({payment_status:'canceled',escrow_status:'released_to_customer',updated_at:new Date().toISOString()}).eq('id',payment.id)
   }else{
     if(!payment.stripe_charge_id||!['captured','released','partially_refunded','transfer_pending'].includes(payment.payment_status))return json({error:'Captured payment required'},409)
-    const totalPaid=Number(payment.amount||0)+Number(payment.tax||0)+Number(payment.tip||0),alreadyRefunded=Number(payment.refund_amount||0),remaining=Math.max(0,totalPaid-alreadyRefunded)
+    const totalPaid=Number(payment.amount||0)-Number(payment.promo_discount||0)+Number(payment.tax||0)+Number(payment.tip||0),alreadyRefunded=Number(payment.refund_amount||0),remaining=Math.max(0,totalPaid-alreadyRefunded)
     const requested=amount==null?remaining:Number(amount)
     if(!Number.isFinite(requested)||requested<=0||requested>remaining+0.0001)return json({error:'Refund amount exceeds the remaining captured balance'},422)
     const cents=Math.round(requested*100)

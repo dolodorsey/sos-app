@@ -66,16 +66,19 @@ Deno.serve(async req=>{
     const{data:m}=await admin.from('sos_missions').select('status,hero_id').eq('id',p.mission_id).maybeSingle();if(!m||!['working','completed'].includes(String(m.status)))continue;
     if(m.status==='working'){const{data:proof}=await admin.from('sos_proof_of_service').select('id').eq('mission_id',p.mission_id).eq('hero_id',m.hero_id).eq('validation_status','passed').limit(1).maybeSingle();if(!proof)continue}
     let current=String(p.payment_status),chargeId=p.stripe_charge_id||null;
-    if(current==='authorized'){
+    // Rewards: a fully covered job has no card charge; a discounted job captures only what the customer owes.
+    const rewardCovered=p.payment_method==='promo_credit',fromPlatform=rewardCovered||Number(p.promo_discount||0)>0;
+    if(current==='authorized'&&rewardCovered){const now=new Date().toISOString();await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',captured_at:p.captured_at??now,updated_at:now}).eq('id',p.id).eq('payment_status','authorized');current='captured'}
+    else if(current==='authorized'){
       if(!p.stripe_payment_intent_id)throw new Error('Proof-complete mission is missing PaymentIntent');
-      const captureCents=Math.round((Number(p.amount||0)+Number(p.tax||0)+Number(p.tip||0))*100);if(captureCents<50)throw new Error('Authorized mission total is invalid');
+      const captureCents=Math.round((Number(p.amount||0)-Number(p.promo_discount||0)+Number(p.tax||0)+Number(p.tip||0))*100);if(captureCents<50)throw new Error('Authorized mission total is invalid');
       let pi=await stripe.paymentIntents.retrieve(p.stripe_payment_intent_id);if(pi.status==='requires_capture')pi=await stripe.paymentIntents.capture(pi.id,{amount_to_capture:captureCents},{idempotencyKey:`sos-capture-${p.mission_id}`});if(pi.status!=='succeeded')throw new Error(`Service PaymentIntent is ${pi.status}`);
       chargeId=typeof pi.latest_charge==='string'?pi.latest_charge:pi.latest_charge?.id||chargeId;const now=new Date().toISOString();await admin.from('sos_payments').update({payment_status:'captured',escrow_status:'held_for_release',stripe_charge_id:chargeId,captured_at:p.captured_at??now,updated_at:now}).eq('id',p.id).eq('payment_status','authorized');current='captured';
     }else if(!chargeId&&p.stripe_payment_intent_id){const pi=await stripe.paymentIntents.retrieve(p.stripe_payment_intent_id);chargeId=typeof pi.latest_charge==='string'?pi.latest_charge:pi.latest_charge?.id||null;if(chargeId)await admin.from('sos_payments').update({stripe_charge_id:chargeId,updated_at:new Date().toISOString()}).eq('id',p.id)}
     if(m.status==='working'){
       const now=new Date().toISOString();const{data:done}=await admin.from('sos_missions').update({status:'completed',completed_at:now,updated_at:now}).eq('id',p.mission_id).eq('status','working').select('id').maybeSingle();if(done)await admin.from('sos_mission_events').insert({mission_id:p.mission_id,event_type:'status_change',old_status:'working',new_status:'completed',payload:{proof:'passed',payment:'reconciled',source:'marketplace_payout_retry'},actor:'system'});
     }
-    if(current==='captured'&&Number(p.hero_payout||0)>0&&chargeId){await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,updated_at:new Date().toISOString()}).eq('id',p.id).eq('payment_status','captured');current='transfer_pending'}
+    if(current==='captured'&&Number(p.hero_payout||0)>0&&(chargeId||fromPlatform)){await admin.from('sos_payments').update({payment_status:'transfer_pending',escrow_status:'held_for_release',stripe_charge_id:chargeId,updated_at:new Date().toISOString()}).eq('id',p.id).eq('payment_status','captured');current='transfer_pending'}
     results.push({kind:'sos',phase:'completion',id:p.id,status:'reconciled',message:`Mission completion reconciled (${current})`});
   }catch(e){results.push({kind:'sos',phase:'completion',id:p.id,status:'failed',message:e instanceof Error?e.message:String(e)})}}
 
