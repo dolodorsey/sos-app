@@ -109,7 +109,8 @@ jobs:
           echo "first_screen_capture_elapsed_ms=$ELAPSED_MS" | tee -a launch-proof/launch-result.txt
           # The app must still be running (no crash) well after launch.
           UDID="${{ steps.simulator.outputs.udid }}"
-          ALIVE=$(perl -e 'alarm 60; exec @ARGV' xcrun simctl spawn "$UDID" launchctl list 2>/dev/null | grep -c "UIKitApplication:$BUNDLE_ID" || true)
+          perl -e 'alarm 60; exec @ARGV' xcrun simctl spawn "$UDID" launchctl list > launch-proof/simulator-launchctl.txt 2>&1 || true
+          ALIVE=$(grep -c "UIKitApplication:$BUNDLE_ID" launch-proof/simulator-launchctl.txt || true)
           echo "app_running_after_launch=${ALIVE:-0}" | tee -a launch-proof/launch-result.txt
           # Screenshot: two tries. simctl's screenshot tool can hang on brand-new simulator runtimes.
           for attempt in 1 2; do
