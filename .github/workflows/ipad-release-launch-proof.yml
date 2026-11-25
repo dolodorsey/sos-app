@@ -21,7 +21,7 @@ jobs:
   ipad-release-cold-launch:
     name: Release build + iPad cold launch
     runs-on: xcode-27 # same toolchain as the TestFlight build
-    timeout-minutes: 45
+    timeout-minutes: 40
     steps:
       - name: Checkout exact tested source
         uses: actions/checkout@v4
@@ -36,16 +36,19 @@ jobs:
           xcodebuild -version | tee launch-proof/xcode-version.txt
           xcrun simctl list runtimes | tee launch-proof/simulator-runtimes.txt
 
-      - name: Select and boot newest iPadOS simulator (27+)
+      - name: Select and boot iPadOS simulator matching the Xcode SDK
         id: simulator
         shell: bash
         run: |
           set -euo pipefail
           DEVICE_JSON="$(xcrun simctl list devices available -j)"
-          # Newest installed iOS runtime that has an iPad (iOS 27+ on the Xcode 27 image).
-          UDID="$(python3 -c 'import json,re,sys; d=json.load(sys.stdin); v=lambda g: tuple(int(n) for n in re.findall(r"iOS-(\d+)(?:-(\d+))?",g)[0] if n) if re.search(r"iOS-\d+",g) else (); xs=sorted(((v(g),x) for g,ds in d["devices"].items() if v(g) and v(g)[0]>=27 for x in ds if x["isAvailable"] and "iPad" in x["name"]),key=lambda t:t[0],reverse=True); print(xs[0][1]["udid"] if xs else "")' <<< "$DEVICE_JSON")"
+          # iPad on the iOS runtime that matches Xcode's own simulator SDK (a runtime newer than
+          # Xcode can hang simctl install/launch). Falls back to the newest runtime at or below it.
+          SDK_VER="$(xcrun --sdk iphonesimulator --show-sdk-version)"
+          echo "Simulator SDK: $SDK_VER"
+          UDID="$(SDK_VER="$SDK_VER" python3 -c 'import json,os,re,sys; d=json.load(sys.stdin); sdk=tuple(int(n) for n in os.environ["SDK_VER"].split(".")[:2]); ver=lambda g: (lambda m: (int(m.group(1)),int(m.group(2))) if m else None)(re.search(r"SimRuntime\.iOS-(\d+)-(\d+)$",g)); xs=sorted(((ver(g),x) for g,ds in d["devices"].items() if ver(g) and ver(g)<=sdk for x in ds if x["isAvailable"] and "iPad" in x["name"]),key=lambda t:t[0],reverse=True); print(xs[0][1]["udid"] if xs else "")' <<< "$DEVICE_JSON")"
           if [ -z "$UDID" ]; then
-            echo "::error::No available iPad simulator on an iOS 27+ runtime"
+            echo "::error::No available iPad simulator on a runtime matching iOS simulator SDK $SDK_VER"
             exit 1
           fi
           DEVICE_NAME="$(xcrun simctl list devices available | grep "$UDID" | sed 's/.*(//' | sed 's/).*//')"
@@ -78,6 +81,8 @@ jobs:
         shell: bash
         run: |
           set -uo pipefail
+          # Fail fast instead of hanging until the job times out.
+          wd(){ perl -e 'alarm shift; exec @ARGV' 240 "$@"; }
           APP="$RUNNER_TEMP/SOSDerivedData/Build/Products/Release-iphonesimulator/App.app"
           if [ ! -d "$APP" ]; then
             echo "::error::Release simulator app bundle missing: $APP"
@@ -85,14 +90,14 @@ jobs:
           fi
           BUNDLE_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")
           echo "bundle_id=$BUNDLE_ID" | tee launch-proof/app-identity.txt
-          xcrun simctl install "${{ steps.simulator.outputs.udid }}" "$APP"
+          wd xcrun simctl install "${{ steps.simulator.outputs.udid }}" "$APP"
           xcrun simctl terminate "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" >/dev/null 2>&1 || true
           xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log stream --style compact --level info --predicate "process == \"$BUNDLE_ID\"" > launch-proof/launch-log-stream.txt 2>&1 &
           LOG_PID=$!
           python3 -c 'import time; time.sleep(2)'
           START_NS=$(python3 -c 'import time; print(time.time_ns())')
           set +e
-          xcrun simctl launch --terminate-running-process "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" 2>&1 | tee launch-proof/launch-command.log
+          wd xcrun simctl launch --terminate-running-process "${{ steps.simulator.outputs.udid }}" "$BUNDLE_ID" 2>&1 | tee launch-proof/launch-command.log
           LAUNCH_RC=${PIPESTATUS[0]}
           set -e
           echo "launch_exit_code=$LAUNCH_RC" | tee launch-proof/launch-result.txt
@@ -100,7 +105,7 @@ jobs:
           END_NS=$(python3 -c 'import time; print(time.time_ns())')
           ELAPSED_MS=$(( (END_NS - START_NS) / 1000000 ))
           echo "first_screen_capture_elapsed_ms=$ELAPSED_MS" | tee -a launch-proof/launch-result.txt
-          xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot launch-proof/first-rendered-screen.png
+          wd xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot launch-proof/first-rendered-screen.png
           xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" > launch-proof/launch-log-show.txt 2>&1 || true
           kill "$LOG_PID" >/dev/null 2>&1 || true
           mkdir -p launch-proof/crash-reports
