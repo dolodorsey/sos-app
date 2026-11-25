@@ -16,7 +16,7 @@ export default function SOSHeroAlertsHost(){
    const r=await fetch(`${SB}/rest/v1/sos_users?auth_id=eq.${s.user.id}&select=id,role&limit=1`,{headers:{apikey:SK,Authorization:`Bearer ${s.access_token}`}});const rows=await r.json().catch(()=>[]);const u=rows?.[0];if(!u||u.role!=='hero'||disposed)return;
    channel=client.channel(`sos-hero-alerts:${u.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'sos_notifications',filter:`user_id=eq.${u.id}`},payload=>{
     const row=payload.new||{};setAlert(row);window.setTimeout(()=>setAlert(cur=>cur?.id===row.id?null:cur),5000);
-    if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. Hero Command',{body:row.body||'Your Hero network has an update.',tag:row.id?`hero-${row.id}`:`hero-${Date.now()}`,icon:'/favicon.png'});n.onclick=()=>{window.focus();window.location.assign('/hero')}}
+    if(typeof Notification!=='undefined'&&Notification.permission==='granted'){const n=new Notification(row.title||'S.O.S. Hero Command',{body:row.body||'Your Hero network has an update.',tag:row.id?`hero-${row.id}`:`hero-${Date.now()}`,icon:'/sos-app-icon-192.png'});n.onclick=()=>{window.focus();window.location.assign('/hero')}}
    }).subscribe();
   };
   run().catch(e=>console.warn('Hero realtime alerts unavailable',e));return()=>{disposed=true;if(channel)client.removeChannel(channel)}
