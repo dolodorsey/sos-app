@@ -1,5 +1,6 @@
 import React,{useState,useEffect}from'react';
 import NotNineOneOneGate,{hasAcknowledgedNot911}from'./NotNineOneOneGate';
+import PasswordInput from './PasswordInput';
 import{requestCustomerMission}from'../lib/sosMissionClient';
 import{isLaunchService,launchServiceId,notAvailableMessage,inLaunchMarket,OUT_OF_MARKET_MESSAGE,NOT_AVAILABLE_LABEL,LAUNCH_MARKET}from'../lib/sosLaunch';
 
@@ -278,7 +279,7 @@ function SOSAppInner(){
       </>}
       {authMode==='signup'&&<input value={name} onChange={e=>setName(e.target.value)} placeholder="Full Name" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>}
       <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:12}}/>
-      <input type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password (8+ chars)" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:16}}/>
+      <PasswordInput value={pw} onChange={e=>setPw(e.target.value)} placeholder="Password (8+ chars)" style={{width:'100%',padding:'14px 16px',background:C.card2,border:`1px solid ${C.border}`,borderRadius:12,color:C.text,fontSize:14,outline:'none',boxSizing:'border-box',fontFamily:ff,marginBottom:16}}/>
       {err&&<div style={{padding:'10px 14px',background:'rgba(239,68,68,.12)',border:'1px solid rgba(239,68,68,.3)',borderRadius:12,marginBottom:14,fontSize:13,color:C.red,fontWeight:600}}>{err}</div>}
       <button onClick={doAuth} disabled={!ok||loading} style={{width:'100%',padding:'16px',background:ok&&!loading?`linear-gradient(135deg,${authRole==='hero'?C.green:C.accent},${authRole==='hero'?'#059669':C.accentDk})`:'rgba(255,255,255,.08)',color:ok?'#fff':C.muted,border:'none',borderRadius:14,fontSize:16,fontWeight:700,cursor:ok&&!loading?'pointer':'not-allowed',fontFamily:ff}}>{loading?'\u00B7\u00B7\u00B7':(authMode==='signup'?'Create Account':'Sign In')}</button>
       {authMode==='signin'&&!forgotMode&&<button onClick={()=>{setForgotMode(true);setErr('');setResetSent(false)}} style={{background:'none',border:'none',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:ff,marginTop:12,width:'100%',textAlign:'center'}}>Forgot password?</button>}
