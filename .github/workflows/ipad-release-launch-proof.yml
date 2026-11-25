@@ -107,8 +107,15 @@ jobs:
           END_NS=$(python3 -c 'import time; print(time.time_ns())')
           ELAPSED_MS=$(( (END_NS - START_NS) / 1000000 ))
           echo "first_screen_capture_elapsed_ms=$ELAPSED_MS" | tee -a launch-proof/launch-result.txt
-          wd xcrun simctl io "${{ steps.simulator.outputs.udid }}" screenshot launch-proof/first-rendered-screen.png
-          wd xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" 2>&1 | head -c "$CAP" > launch-proof/launch-log-show.txt || true
+          # The app must still be running (no crash) well after launch.
+          UDID="${{ steps.simulator.outputs.udid }}"
+          ALIVE=$(perl -e 'alarm 60; exec @ARGV' xcrun simctl spawn "$UDID" launchctl list 2>/dev/null | grep -c "UIKitApplication:$BUNDLE_ID" || true)
+          echo "app_running_after_launch=${ALIVE:-0}" | tee -a launch-proof/launch-result.txt
+          # Screenshot: two tries. simctl's screenshot tool can hang on brand-new simulator runtimes.
+          for attempt in 1 2; do
+            perl -e 'alarm 90; exec @ARGV' xcrun simctl io "$UDID" screenshot launch-proof/first-rendered-screen.png && break || echo "screenshot attempt $attempt did not finish"
+          done
+          perl -e 'alarm 90; exec @ARGV' xcrun simctl spawn "${{ steps.simulator.outputs.udid }}" log show --last 3m --style compact --predicate "process == \"$BUNDLE_ID\" OR eventMessage CONTAINS[c] \"crash\"" 2>&1 | head -c "$CAP" > launch-proof/launch-log-show.txt || true
           kill "$LOG_PID" >/dev/null 2>&1 || true
           pkill -f "simctl spawn .* log stream" >/dev/null 2>&1 || true
           wait "$LOG_PID" 2>/dev/null || true
@@ -116,9 +123,12 @@ jobs:
           find "$HOME/Library/Logs/DiagnosticReports" -type f -mmin -15 \( -iname '*App*' -o -iname '*SOS*' \) -exec cp {} launch-proof/crash-reports/ \; 2>/dev/null || true
           xcrun simctl list devices | grep "${{ steps.simulator.outputs.udid }}" > launch-proof/device-final-state.txt
           if [ "$LAUNCH_RC" -ne 0 ]; then exit "$LAUNCH_RC"; fi
-          if [ ! -s launch-proof/first-rendered-screen.png ]; then
-            echo "::error::No first-screen screenshot captured"
+          if [ "${ALIVE:-0}" -lt 1 ]; then
+            echo "::error::S.O.S. was not running after cold launch (crashed or closed)"
             exit 1
+          fi
+          if [ ! -s launch-proof/first-rendered-screen.png ]; then
+            echo "::warning::App launched and stayed running, but the simulator screenshot tool did not respond on this runtime. No screenshot attached."
           fi
 
       - name: Upload launch proof, logs and crash reports
