@@ -19,7 +19,7 @@ export default function SOSPushRegistrationHost(){
      let next=Notification.permission;if(requestPermission&&next==='default')next=await Notification.requestPermission();setPermission(next);if(next!=='granted'){setReady(false);return}
      const session=storedSession();if(!session?.access_token){setReady(false);return}
      const configRes=await fetch(`${SB}/functions/v1/marketplace-push-config`,{headers:{apikey:SK},cache:'no-store'});const config=await configRes.json().catch(()=>({}));if(!configRes.ok||!config?.ready||!config?.publicKey)throw new Error('S.O.S. push configuration is unavailable.')
-     const worker=await navigator.serviceWorker.register('/marketplace-sw.js',{scope:'/'});await navigator.serviceWorker.ready
+     const worker=await navigator.serviceWorker.register('/sw.js',{scope:'/'});await navigator.serviceWorker.ready
      let subscription=await worker.pushManager.getSubscription();if(!subscription)subscription=await worker.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:toBytes(String(config.publicKey))})
      const json=subscription.toJSON();const endpoint=subscription.endpoint,p256dh=String(json.keys?.p256dh||''),auth=String(json.keys?.auth||'');if(!endpoint||!p256dh||!auth)throw new Error('Browser push subscription is incomplete.')
      const response=await fetch(`${SB}/rest/v1/rpc/marketplace_register_push_subscription`,{method:'POST',headers:{apikey:SK,Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json'},body:JSON.stringify({p_app:'sos',p_endpoint:endpoint,p_p256dh:p256dh,p_auth:auth,p_user_agent:navigator.userAgent})});const body=await response.json().catch(()=>null);if(!response.ok)throw new Error(body?.message||body?.error||'Push registration failed.')
