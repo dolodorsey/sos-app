@@ -64,3 +64,9 @@ test('web root is the public homepage and the packaged app still opens the full 
   assert.match(appPage,/SOSShareTrackingHost/)
   assert.match(read('../src/components/SOSPasswordRecoveryHost.jsx'),/path==='\/'/)
 })
+
+test('homepage offers the installable web app beside the App Store line', () => {
+  const home = read('../src/components/SOSHome.jsx')
+  assert.match(home, /Coming soon to the App Store/)
+  assert.match(home, /href="\/download\/"[^>]*>Add to my phone</)
+})

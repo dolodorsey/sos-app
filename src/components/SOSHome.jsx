@@ -141,10 +141,11 @@ export default function SOSHome() {
             </p>
             <p className="sh-status">
               <span className="sh-dot" aria-hidden="true" />
-              Coming soon to the App Store. Get notified at launch.
+              Coming soon to the App Store. Add S.O.S. to your phone today.
             </p>
             <div className="sh-ctas">
-              <a href="#notify" className="sh-btn sh-btn-red">Get notified at launch</a>
+              <a href="/download/" className="sh-btn sh-btn-red">Add to my phone</a>
+              <a href="#notify" className="sh-btn sh-btn-ghost">Get notified at launch</a>
               <a href="/hero/apply/" className="sh-btn sh-btn-ghost">Become a SUPERHERO</a>
             </div>
             <p className="sh-signin">
