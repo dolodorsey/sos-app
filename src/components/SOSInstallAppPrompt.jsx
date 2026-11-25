@@ -5,13 +5,13 @@ import SOSInstallCoach, { detectInstallFlow } from './SOSInstallCoach';
 
 
 function forceInstall(){try{return new URLSearchParams(location.search).get('install')==='1'}catch{return false}}
-function InstallQr(){
+function InstallQr({provider}){
   const [qr,setQr]=useState('');
   useEffect(()=>{if(typeof window==='undefined'||window.innerWidth<760)return;try{const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('install','1');setQr('https://wfkohcwxxsrhcxhepfql.supabase.co/functions/v1/app-install-qr?url='+encodeURIComponent(u.toString()))}catch{}},[]);
   if(!qr)return null;
   return <aside aria-label="Scan to install app" style={{position:'fixed',right:22,bottom:22,zIndex:2147483002,width:188,padding:12,borderRadius:20,background:'rgba(7,8,11,.97)',border:'1px solid rgba(255,255,255,.16)',boxShadow:'0 24px 70px rgba(0,0,0,.48)',color:'#fff',fontFamily:'Arial,sans-serif'}}>
     <img src={qr} alt="QR code to install this app" width="164" height="164" style={{display:'block',width:'100%',height:'auto',borderRadius:12,background:'#fff',padding:6}}/>
-    <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>PROVIDERS — SCAN TO GET S.O.S.</strong>
+    <strong style={{display:'block',marginTop:10,fontSize:10,letterSpacing:'.14em'}}>{provider?'PROVIDERS — SCAN TO GET S.O.S.':'SCAN TO GET THE S.O.S. APP'}</strong>
     <small style={{display:'block',marginTop:5,color:'rgba(255,255,255,.62)',fontSize:9,lineHeight:1.45}}>iPhone: ••• → Share → Add to Home Screen → Add. Android: ⋮ → Install app.</small>
   </aside>
 }
@@ -99,7 +99,7 @@ export default function SOSInstallAppPrompt() {
   const provider=audience==='provider';
   if (coach) return <SOSInstallCoach flow={coach} onClose={()=>{setCoach(null);track('cta_click',{cta:'install_coach_close'})}} onDone={()=>{setCoach(null);set('sos:pwa-dismissed',String(Date.now()));track('cta_click',{cta:'install_coach_done',flow:coach})}}/>;
   if (!show && !provider && signedIn()) return null;
-  if (!show) return <button aria-label={provider?'Get S.O.S. provider app':'Get the S.O.S. app'} onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:`${audience}_persistent_get_app`})}} style={{position:'fixed',right:16,bottom:'calc(16px + env(safe-area-inset-bottom))',zIndex:2147482500,display:'flex',alignItems:'center',gap:9,border:'1px solid rgba(227,0,11,.55)',borderRadius:999,padding:'7px 15px 7px 7px',background:'rgba(10,16,24,.92)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)',color:'#ffffff',font:"800 11.5px/1 'DM Sans',system-ui,sans-serif",letterSpacing:'.04em',boxShadow:'0 12px 32px rgba(0,0,0,.45)',cursor:'pointer'}}><img src="/sos-app-icon-192.png" alt="" width="26" height="26" style={{width:26,height:26,borderRadius:7}}/><span>SERVICE PROVIDERS · GET S.O.S.</span></button>;
+  if (!show) return <button aria-label={provider?'Get S.O.S. provider app':'Get the S.O.S. app'} onClick={()=>{setSteps(false);setShow(true);track('cta_click',{cta:`${audience}_persistent_get_app`})}} style={{position:'fixed',right:16,bottom:'calc(16px + env(safe-area-inset-bottom))',zIndex:2147482500,display:'flex',alignItems:'center',gap:9,border:'1px solid rgba(227,0,11,.55)',borderRadius:999,padding:'7px 15px 7px 7px',background:'rgba(10,16,24,.92)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)',color:'#ffffff',font:"800 11.5px/1 'DM Sans',system-ui,sans-serif",letterSpacing:'.04em',boxShadow:'0 12px 32px rgba(0,0,0,.45)',cursor:'pointer'}}><img src="/sos-app-icon-192.png" alt="" width="26" height="26" style={{width:26,height:26,borderRadius:7}}/><span>{provider?'SERVICE PROVIDERS · GET S.O.S.':'GET THE S.O.S. APP'}</span></button>;
 
   const close = () => {
     set('sos:pwa-dismissed', String(Date.now()));
@@ -133,7 +133,7 @@ export default function SOSInstallAppPrompt() {
   ];
 
   return <div className="sos-pwa-install" role="dialog" aria-modal="true" aria-label="Install S.O.S." onClick={close} onKeyDown={event=>{if(event.key==='Escape')close()}}>
-    <InstallQr/>
+    <InstallQr provider={provider}/>
     <style jsx>{`
       .sos-pwa-install{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:flex-end;justify-content:center;background:rgba(2,6,9,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:sosPwaFade .2s ease both}
       .sos-pwa-sheet{position:relative;width:100%;max-width:460px;max-height:calc(100dvh - 24px);overflow:auto;padding:10px 20px calc(18px + env(safe-area-inset-bottom));border-radius:28px 28px 0 0;background:linear-gradient(180deg,#121c29 0%,#0a1018 60%);border:1px solid rgba(255,255,255,.08);border-bottom:0;box-shadow:0 -24px 70px rgba(0,0,0,.55);color:#f4f6f9;font-family:'DM Sans',system-ui,-apple-system,sans-serif;animation:sosPwaUp .32s cubic-bezier(.2,.8,.2,1) both}
