@@ -51,7 +51,11 @@ test('all realtime features share one non-persistent Supabase client', () => {
 
 
 test('packaged root and web app share the complete customer entry point',()=>{
-  assert.match(read('../src/app/page.jsx'),/export \{default\} from '\.\/app\/page'/)
+  const root=read('../src/app/page.jsx')
+  // Root may add the website intro on top, but must render the very same customer app.
+  assert.match(root,/import CustomerApp from '\.\/app\/page'/)
+  assert.match(root,/<CustomerApp \/>/)
+  assert.doesNotMatch(root,/from '\.\.\/components\/(?!SOSHeroIntro)/,'no other root-only components')
   assert.match(appPage,/SOSCustomerCoverageStatusHost/)
   assert.match(appPage,/SOSCustomerReceiptHost/)
   assert.match(appPage,/SOSShareTrackingHost/)
