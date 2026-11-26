@@ -1,17 +1,18 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 
-const ALLOWED=new Set(['https://thesuperherosonstandby.com','https://www.thesuperherosonstandby.com','https://superherosonstandby.com','https://www.superherosonstandby.com']);
+// capacitor://localhost = the S.O.S. iPhone/iPad app (Capacitor serves its bundled files from that address).
+const ALLOWED=new Set(['https://superherosonstandby.com','https://www.superherosonstandby.com','https://thesuperherosonstandby.com','https://www.thesuperherosonstandby.com','capacitor://localhost']);
 const KHG_BRIDGE_URL='https://dzlmtvodpyhetvektfuo.supabase.co/functions/v1/khg-sos-hero-bridge';
 const ACTIVE_APPLICATION_STATUSES=['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'];
-const cors=(origin:string)=>({'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://thesuperherosonstandby.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'});
+const cors=(origin:string)=>({'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://superherosonstandby.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'});
 const json=(origin:string,body:unknown,status=200)=>Response.json(body,{status,headers:{...cors(origin),'Cache-Control':'no-store'}});
 const text=(v:unknown,max=3000)=>String(v??'').trim().slice(0,max);
 const list=(v:unknown,max=30)=>Array.isArray(v)?v.map(x=>text(x,100)).filter(Boolean).slice(0,max):[];
 const sha256=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(b=>b.toString(16).padStart(2,'0')).join('');
 const trackingToken=()=>{const bytes=crypto.getRandomValues(new Uint8Array(32));return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
 const MAX_BODY_BYTES=32768;
-const ZONES=new Set(['east','south','west','downtown','midtown','buckhead']);
+const ZONES=new Set(['east','south','west','gwinnett','sandy_springs','downtown','midtown','buckhead']);
 const LAUNCH=new Set(['tow','fuel','jump','flat','lockout']);
 const DAYS=new Set(['mon','tue','wed','thu','fri','sat','sun']),TIMES=new Set(['morning','afternoon','evening','overnight']);
 const profile=(v:any)=>{if(!v||typeof v!=='object'||Array.isArray(v))return {};const t=(x:unknown,m=120)=>text(x,m)||null;return {has_business:v.has_business===true,business_name:t(v.business_name),business_type:t(v.business_type,60),business_years:Number.isFinite(Number(v.business_years))&&v.business_years!==null?Math.max(0,Math.min(80,Number(v.business_years))):null,business_insured:t(v.business_insured,20),business_link:t(v.business_link,200),days:pick(v.days,DAYS),times:pick(v.times,TIMES),hours_per_week:t(v.hours_per_week,20),start_when:t(v.start_when,40),max_miles:t(v.max_miles,40),languages:t(v.languages,120),heard_from:t(v.heard_from,60)}};
