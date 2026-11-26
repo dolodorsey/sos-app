@@ -1,0 +1,7 @@
+{
+  "bundle_id": "com.superherosonstandby.app",
+  "version": "1.0",
+  "attach_latest_build": true,
+  "submit_for_review": true,
+  "review_notes": "Resubmission. This build adds camera and photo library permission descriptions for the SUPERHERO (service provider) verification selfie and document uploads, includes in-app account deletion (signed in: Account & privacy > Delete your S.O.S. account), and updates branding. S.O.S. connects drivers in metro Atlanta with nearby independent roadside assistance providers (towing, jump-starts, tire changes, fuel delivery, lockouts). It is not an emergency service. Use the demo account provided to sign in as a customer."
+}

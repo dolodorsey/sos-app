@@ -200,3 +200,12 @@ jobs:
           set -euo pipefail
           python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]' 2>/dev/null || python3 -m pip install --quiet 'pyjwt[crypto]'
           python3 scripts/asc-status.py
+
+      - name: App Store release step (attach build / submit for review)
+        if: always() && env.ASC_KEY_PATH != '' && hashFiles('ios/app-store-release.json') != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]' 2>/dev/null || python3 -m pip install --quiet 'pyjwt[crypto]'
+          python3 scripts/asc-release.py
