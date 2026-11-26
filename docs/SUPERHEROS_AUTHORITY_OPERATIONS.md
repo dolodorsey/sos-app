@@ -7,7 +7,7 @@ This runbook governs the S.O.S. authority, media, trademark-reference and CRM ex
 - Company: **S.O.S. — Superheros On Standby**
 - Brand term: **SUPERHEROS**
 - Instagram: **@superheros.onstandby**
-- Canonical web entity: `https://thesuperherosonstandby.com`
+- Canonical web entity: `https://superherosonstandby.com`
 - HighLevel location: `jz8geHs33Iqyruo2q2oO`
 - HighLevel media pipeline: **SOS | MEDIA AUTHORITY**
 - Pipeline ID: `4tc0h7lSbFYwozn652H1`
@@ -219,7 +219,7 @@ Every status change must be supported by the corresponding provider or public ev
 
 ## Knowledge Hub and definition (2026-11-11)
 
-Public routes on `https://thesuperherosonstandby.com`:
+Public routes on `https://superherosonstandby.com`:
 
 - `/superheros/` — official definition (Schema.org `DefinedTerm`, text identical to the visible definition).
 - `/wiki/` — S.O.S. Knowledge Hub index (searchable; `DefinedTermSet` "S.O.S. Lexicon").

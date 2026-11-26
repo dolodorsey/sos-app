@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      BASE_URL: https://thesuperherosonstandby.com
+      BASE_URL: https://superherosonstandby.com
       BACKEND_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-health
       PAYMENTS_HEALTH_URL: https://cxdqkjvtpilvouwtbgdy.supabase.co/functions/v1/sos-payments-health
     steps:

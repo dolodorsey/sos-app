@@ -22,7 +22,7 @@ Use this definition consistently unless a specific channel requires a shorter ve
 
 Singular: **SUPERHERO**. Plural: **SUPERHEROS** (never with an E before the S). The text lives in `src/content/sosLexicon.js` (`OFFICIAL_DEFINITION`) and Supabase `public.sos_brand_content` (`kind = definition`); change it in both through a reviewed PR. `npm test` runs `tests/brand-spelling.test.mjs`, which fails on the conventional plural outside `config/brand-spelling-allowlist.json`.
 
-Public authority pages and structured data live under the canonical web entity at `https://thesuperherosonstandby.com` — definition at `/superheros/`, S.O.S. Knowledge Hub at `/wiki/`.
+Public authority pages and structured data live under the canonical web entity at `https://superherosonstandby.com` — definition at `/superheros/`, S.O.S. Knowledge Hub at `/wiki/`.
 
 For media authority, trademark-reference, Wikipedia-readiness and media pipeline execution, agents must also read [`docs/SUPERHEROS_AUTHORITY_OPERATIONS.md`](./docs/SUPERHEROS_AUTHORITY_OPERATIONS.md).
 

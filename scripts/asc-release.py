@@ -81,7 +81,7 @@ open_sub = None
 for s in subs.get("data", []):
     a = s["attributes"]
     say(f"Review submission {s['id']}: {a.get('state')} (submitted {a.get('submittedDate')})")
-    if a.get("state") in ("UNRESOLVED_ISSUES", "READY_FOR_REVIEW") and not open_sub:
+    if a.get("state") in ("UNRESOLVED_ISSUES", "READY_FOR_REVIEW", "WAITING_FOR_REVIEW") and not open_sub:
         open_sub = s
 for inc in subs.get("included", []):
     if inc.get("type") == "reviewSubmissionItems":
@@ -119,17 +119,47 @@ else:
                 st, r = call("PATCH", f"/v1/appStoreReviewDetails/{rd['data']['id']}",
                              {"data": {"type": "appStoreReviewDetails", "id": rd["data"]["id"], "attributes": {"notes": note}}})
                 say(f"Review notes updated: {st}")
+        def add_item(sid):
+            it = {}
+            for attempt in range(6):
+                st, it = call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems",
+                              "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sid}},
+                                                "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+                if st in (200, 201):
+                    say("Version added to submission."); return True
+                time.sleep(20)
+            say(f"Add version to submission failed ({st}). Apple's full answer:")
+            say(json.dumps(it)[:1500])
+            for x in it.get("errors", []):
+                for ae in ((x.get("meta") or {}).get("associatedErrors") or {}).values():
+                    for e in ae:
+                        say(f"- blocking: {e.get('code')}: {e.get('detail') or e.get('title')}")
+            return False
+
+        def submit(sid):
+            st, r = call("PATCH", f"/v1/reviewSubmissions/{sid}",
+                         {"data": {"type": "reviewSubmissions", "id": sid, "attributes": {"submitted": True}}})
+            say(f"Submit for review: {'DONE' if st == 200 else f'{st} ' + errs(r)}")
+            return st == 200
+
         done = False
         if open_sub:
-            st, r = call("PATCH", f"/v1/reviewSubmissions/{open_sub['id']}",
-                         {"data": {"type": "reviewSubmissions", "id": open_sub["id"], "attributes": {"submitted": True}}})
-            say(f"Resubmit existing submission: {st} {'' if st == 200 else errs(r)}")
-            done = st == 200
+            sid = open_sub["id"]
+            st, items = call("GET", f"/v1/reviewSubmissions/{sid}/items")
+            has_items = bool(items.get("data"))
+            say(f"Reusing open submission {sid} (has items: {has_items})")
+            if has_items or add_item(sid):
+                done = submit(sid)
             if not done:
-                st, r = call("PATCH", f"/v1/reviewSubmissions/{open_sub['id']}",
-                             {"data": {"type": "reviewSubmissions", "id": open_sub["id"], "attributes": {"canceled": True}}})
-                say(f"Cancel stuck submission so a new one can open: {st} {'' if st == 200 else errs(r)}")
-                time.sleep(10)
+                st, r = call("PATCH", f"/v1/reviewSubmissions/{sid}",
+                             {"data": {"type": "reviewSubmissions", "id": sid, "attributes": {"canceled": True}}})
+                say(f"Cancel submission {sid}: {st} {'' if st == 200 else errs(r)}")
+                for _ in range(12):
+                    time.sleep(10)
+                    st, v = call("GET", f"/v1/appStoreVersions/{vid}", **{"fields[appStoreVersions]": "appStoreState,appVersionState"})
+                    a = v.get("data", {}).get("attributes", {})
+                    if (a.get("appVersionState") or a.get("appStoreState")) in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "READY_FOR_REVIEW"):
+                        break
         if not done:
             st, ns = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
                           "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
@@ -137,13 +167,9 @@ else:
                 say(f"Open new submission failed: {st} {errs(ns)}")
             else:
                 sid = ns["data"]["id"]
-                st, it = call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems",
-                              "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sid}},
-                                                "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
-                say(f"Add version to submission: {st} {'' if st in (200, 201) else errs(it)}")
-                st, r = call("PATCH", f"/v1/reviewSubmissions/{sid}",
-                             {"data": {"type": "reviewSubmissions", "id": sid, "attributes": {"submitted": True}}})
-                say(f"Submit for review: {st} {'' if st == 200 else errs(r)}")
+                say(f"Opened new submission {sid}")
+                if add_item(sid):
+                    submit(sid)
 
     st, v2 = call("GET", f"/v1/appStoreVersions/{vid}", **{"fields[appStoreVersions]": "appStoreState,appVersionState"})
     a = v2.get("data", {}).get("attributes", {})

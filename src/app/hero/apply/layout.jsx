@@ -6,7 +6,7 @@ export const metadata = {
   openGraph: {
     title: 'Become a Hero | S.O.S. — Superheros On Standby',
     description: 'Apply for review as a S.O.S. roadside service Hero. Approval and activation require verification.',
-    url: 'https://thesuperherosonstandby.com/hero/apply/',
+    url: 'https://superherosonstandby.com/hero/apply/',
     type: 'website',
     siteName: 'S.O.S. — Superheros On Standby',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'S.O.S. — Superheros On Standby' }],

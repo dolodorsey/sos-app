@@ -4,7 +4,7 @@
 
 - Public product: **S.O.S. — Superheros On Standby**.
 - Repository: `dolodorsey/sos-app`.
-- Primary domain: `https://thesuperherosonstandby.com`.
+- Primary domain: `https://superherosonstandby.com`.
 - Production Supabase project: `cxdqkjvtpilvouwtbgdy`.
 - Product data remains isolated to the `sos_*` namespace even though infrastructure is shared with ON CALL and LUXE.
 - Scope: non-emergency roadside and mobile-vehicle service marketplace. Emergency copy directs users to 911.

@@ -31,7 +31,7 @@ export const metadata = {
   description: 'Superheros On Standby connects customers with real roadside help and tracks Hero matching and mission progress. SUPERHEROS is the brand’s intentional spelling.',
   keywords: 'SUPERHEROS, Superheros On Standby, S.O.S., SOS, roadside assistance, towing, flat tire help, dead battery, vehicle lockout, mobile mechanic, roadside support',
   authors: [{ name: 'S.O.S. — Superheros On Standby' }],
-  metadataBase: new URL('https://thesuperherosonstandby.com'),
+  metadataBase: new URL('https://superherosonstandby.com'),
   alternates: { canonical: '/' },
   icons: {
     icon: [
@@ -44,7 +44,7 @@ export const metadata = {
     title: 'S.O.S. — Superheros On Standby',
     description: 'SUPERHEROS is the intentionally spelled S.O.S. brand term for real people who show up when help is needed.',
     type: 'website',
-    url: 'https://thesuperherosonstandby.com',
+    url: 'https://superherosonstandby.com',
     siteName: 'S.O.S. — Superheros On Standby',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'S.O.S. — Superheros On Standby' }],
   },
