@@ -129,7 +129,15 @@ else:
                 st, r = call("PATCH", f"/v1/reviewSubmissions/{open_sub['id']}",
                              {"data": {"type": "reviewSubmissions", "id": open_sub["id"], "attributes": {"canceled": True}}})
                 say(f"Cancel stuck submission so a new one can open: {st} {'' if st == 200 else errs(r)}")
-                time.sleep(10)
+                # Apple moves the version out of REJECTED asynchronously; wait for it.
+                for _ in range(12):
+                    time.sleep(10)
+                    st, v = call("GET", f"/v1/appStoreVersions/{vid}", **{"fields[appStoreVersions]": "appStoreState,appVersionState"})
+                    a = v.get("data", {}).get("attributes", {})
+                    vstate = a.get("appVersionState") or a.get("appStoreState")
+                    if vstate in ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "READY_FOR_REVIEW"):
+                        break
+                say(f"Version state after cancel: {vstate}")
         if not done:
             st, ns = call("POST", "/v1/reviewSubmissions", {"data": {"type": "reviewSubmissions", "attributes": {"platform": "IOS"},
                           "relationships": {"app": {"data": {"type": "apps", "id": aid}}}}})
@@ -137,9 +145,14 @@ else:
                 say(f"Open new submission failed: {st} {errs(ns)}")
             else:
                 sid = ns["data"]["id"]
-                st, it = call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems",
-                              "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sid}},
-                                                "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+                it = {}
+                for attempt in range(6):
+                    st, it = call("POST", "/v1/reviewSubmissionItems", {"data": {"type": "reviewSubmissionItems",
+                                  "relationships": {"reviewSubmission": {"data": {"type": "reviewSubmissions", "id": sid}},
+                                                    "appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
+                    if st in (200, 201):
+                        break
+                    time.sleep(20)
                 say(f"Add version to submission: {st} {'' if st in (200, 201) else errs(it)}")
                 st, r = call("PATCH", f"/v1/reviewSubmissions/{sid}",
                              {"data": {"type": "reviewSubmissions", "id": sid, "attributes": {"submitted": True}}})
