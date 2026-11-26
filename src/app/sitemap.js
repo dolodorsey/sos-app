@@ -22,7 +22,7 @@ export const WIKI_SLUGS = [
 const KNOWLEDGE_HUB_UPDATED = '2026-11-11';
 
 export default function sitemap(){
-  const base='https://thesuperherosonstandby.com';
+  const base='https://superherosonstandby.com';
   const entries=[
     ['/', 'weekly', 1],
     ['/superheros/', 'monthly', .95],

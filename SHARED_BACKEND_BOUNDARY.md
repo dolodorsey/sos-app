@@ -6,7 +6,7 @@ S.O.S. currently shares Supabase project `cxdqkjvtpilvouwtbgdy` with ON CALL as 
 
 - Public product: **S.O.S. — Superheros On Standby**
 - Repository: `dolodorsey/sos-app`
-- Primary domain: `thesuperherosonstandby.com`
+- Primary domain: `superherosonstandby.com`
 - Product database namespace: **`sos_*` only**
 - ON CALL product namespace: `oc_*` — not S.O.S. data
 - Shared Auth/Stripe/runtime infrastructure does not imply shared public branding or product ownership.

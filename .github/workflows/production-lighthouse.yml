@@ -25,10 +25,10 @@ jobs:
         uses: treosh/lighthouse-ci-action@12.6.2
         with:
           urls: |
-            https://thesuperherosonstandby.com/
-            https://thesuperherosonstandby.com/login
-            https://thesuperherosonstandby.com/provider
-            https://thesuperherosonstandby.com/become-a-provider
+            https://superherosonstandby.com/
+            https://superherosonstandby.com/login
+            https://superherosonstandby.com/provider
+            https://superherosonstandby.com/become-a-provider
           configPath: "./lighthouserc.json"
           uploadArtifacts: true
           temporaryPublicStorage: false
