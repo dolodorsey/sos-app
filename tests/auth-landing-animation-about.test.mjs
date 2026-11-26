@@ -7,11 +7,11 @@ const css = readFileSync(new URL('../src/components/sos-launch.css', import.meta
 const auth = app.slice(app.indexOf('if(!session)return'), app.indexOf('</div>;', app.indexOf('if(!session)return')));
 
 test('sign in / sign up landing shows the S.O.S. animation instead of the still image', () => {
-  // Approved footage only. sos-ani2.mp4 shows the conventional plural on the logo and must not come back.
-  assert.match(app, /AUTH_MOTION='\/brand\/intro\/sos-hero-intro\.mp4'/);
-  assert.match(auth, /<video className="sos2-auth-motion" src=\{AUTH_MOTION\} poster=\{AUTH_POSTER\} autoPlay muted loop playsInline/);
+  // Dolo's header animation (sos-ani2) stays exactly as he made it — founder decision Nov 26, 2026. Do not swap it.
+  assert.match(app, /AUTH_MOTION='https:\/\/woqlhjodiedyqfvzweoe\.supabase\.co\/storage\/v1\/object\/public\/animations\/sos-ani2\.mp4'/);
+  assert.match(auth, /<video className="sos2-auth-motion" src=\{AUTH_MOTION\} autoPlay muted loop playsInline/);
   const upgrade = readFileSync(new URL('../src/components/SOSUIUpgradeHost.jsx', import.meta.url), 'utf8');
-  assert.doesNotMatch(app + upgrade, /animations\/sos-ani2\.mp4/);
+  assert.match(upgrade, /const MOTION=`\$\{ASSET\}\/animations\/sos-ani2\.mp4`/);
   assert.doesNotMatch(auth, /sos2-road-lines|sos2-signal/);
   assert.match(css, /prefers-reduced-motion: reduce\) \{ \.sos2-auth-motion \{ display: none; \} \}/);
 });

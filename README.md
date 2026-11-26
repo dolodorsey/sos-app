@@ -8,7 +8,7 @@ S.O.S. — The Kollective Hospitality Group
 
 Canonical public name: **S.O.S. — Superheros On Standby**  
 Canonical branded term: **SUPERHEROS**  
-Canonical website entity: **https://thesuperherosonstandby.com**
+Canonical website entity: **https://superherosonstandby.com**
 
 ## Current operating truth
 
