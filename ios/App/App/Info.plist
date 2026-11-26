@@ -30,6 +30,10 @@
 	<string>S.O.S. uses your location to dispatch, track, and coordinate a roadside mission while the app is in use.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>S.O.S. uses your location to dispatch, track, and coordinate a roadside mission, including while the app is in the background during an active mission.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>S.O.S. uses your camera so you can take a verification selfie and photograph your driver's license or proof of service.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>S.O.S. lets you choose photos of your driver's license, business card, or proof of service to upload.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>S.O.S. uses your location to dispatch, track, and coordinate a roadside mission, including while the app is in the background during an active mission.</string>
 	<key>UIApplicationSceneManifest</key>

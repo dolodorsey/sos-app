@@ -191,3 +191,12 @@ jobs:
       - name: Build, sign, and upload to TestFlight
         working-directory: ios/App
         run: bundle exec fastlane ios beta
+
+      - name: App Store Connect status report (read-only)
+        if: always() && env.ASC_KEY_PATH != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]' 2>/dev/null || python3 -m pip install --quiet 'pyjwt[crypto]'
+          python3 scripts/asc-status.py
