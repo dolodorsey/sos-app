@@ -78,8 +78,10 @@ export const SIDES_OF_TOWN = [
   { id: 'east', label: 'East side', hint: 'Decatur · Stone Mountain · Lithonia' },
   { id: 'south', label: 'South side', hint: 'College Park · East Point · Riverdale' },
   { id: 'west', label: 'West side', hint: 'West End · Austell · Douglasville' },
+  { id: 'gwinnett', label: 'Gwinnett', hint: 'Lawrenceville · Duluth · Snellville · Norcross' },
+  { id: 'sandy_springs', label: 'Sandy Springs', hint: 'Sandy Springs · Dunwoody · Roswell' },
   { id: 'downtown', label: 'Downtown', hint: 'Downtown · Castleberry · Old Fourth Ward' },
   { id: 'midtown', label: 'Midtown', hint: 'Midtown · Atlantic Station · Westside' },
-  { id: 'buckhead', label: 'Buckhead', hint: 'Buckhead · Brookhaven · Sandy Springs' },
+  { id: 'buckhead', label: 'Buckhead', hint: 'Buckhead · Brookhaven · Chamblee' },
 ];
 export const needsTradeProof = ids => ids.some(id => TRADE_PROOF_SERVICES.includes(id));
