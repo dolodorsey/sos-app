@@ -6,7 +6,8 @@ import{observeBody}from'../lib/domObserver';
 import{isCustomerAppRoute,useAppSlot}from'../lib/useAppSlot';
 
 const ASSET='https://woqlhjodiedyqfvzweoe.supabase.co/storage/v1/object/public';
-const MOTION=`${ASSET}/animations/sos-ani2.mp4`;
+// Approved brand footage only: the old sos-ani2 animation misspells the brand (conventional plural).
+const MOTION='/brand/intro/sos-hero-intro.mp4';
 
 const icons={
   tire:'<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="7"/><path d="M24 9v8M24 31v8M9 24h8M31 24h8M13.5 13.5l5.7 5.7M28.8 28.8l5.7 5.7M34.5 13.5l-5.7 5.7M19.2 28.8l-5.7 5.7"/></svg>',
