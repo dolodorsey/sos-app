@@ -1,10 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 
-const ALLOWED=new Set(['https://thesuperherosonstandby.com','https://www.thesuperherosonstandby.com','https://superherosonstandby.com','https://www.superherosonstandby.com']);
+// capacitor://localhost = the S.O.S. iPhone/iPad app (Capacitor serves its bundled files from that address).
+const ALLOWED=new Set(['https://superherosonstandby.com','https://www.superherosonstandby.com','https://thesuperherosonstandby.com','https://www.thesuperherosonstandby.com','capacitor://localhost']);
 const KHG_BRIDGE_URL='https://dzlmtvodpyhetvektfuo.supabase.co/functions/v1/khg-sos-hero-bridge';
 const ACTIVE_APPLICATION_STATUSES=['documents_required','waitlisted','reviewing','needs_information','conditionally_approved','approved'];
-const cors=(origin:string)=>({'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://thesuperherosonstandby.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'});
+const cors=(origin:string)=>({'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://superherosonstandby.com','Access-Control-Allow-Headers':'authorization, apikey, content-type, x-client-info','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'});
 const json=(origin:string,body:unknown,status=200)=>Response.json(body,{status,headers:{...cors(origin),'Cache-Control':'no-store'}});
 const text=(v:unknown,max=3000)=>String(v??'').trim().slice(0,max);
 const list=(v:unknown,max=30)=>Array.isArray(v)?v.map(x=>text(x,100)).filter(Boolean).slice(0,max):[];

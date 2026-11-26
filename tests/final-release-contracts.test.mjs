@@ -46,3 +46,11 @@ test('SOS iOS delivery uses Supabase-backed App Store distribution signing and T
   assert.match(workflow,/bundle exec fastlane ios beta/)
   assert.match(gemfile,/fastlane", "2\.237\.0"/)
 })
+
+test('SOS App Store status can be checked on demand without a build', () => {
+  const workflow=read('.github/workflows/ios-testflight.yml')
+  assert.match(workflow,/status_only:\n\s+description:[^\n]*\n\s+type: boolean\n\s+default: false/)
+  assert.match(workflow,/if: github\.event_name != 'schedule' && !\(github\.event_name == 'workflow_dispatch' && inputs\.status_only\)/)
+  assert.match(workflow,/\n  store-status:\n/, 'store-status job runs on every trigger, including status-only dispatch')
+  assert.match(workflow,/cron: '23 \*\/6 \* \* \*'/)
+})
