@@ -36,7 +36,7 @@ HOW IT WORKS
 4. Confirm the final price and pay in the app.
 
 WHAT IS A SUPERHERO?
-SUPERHEROS are S.O.S. roadside assistance providers who help motorists with vehicle-related difficulties, including towing, jump-starts, tire changes, fuel delivery, and vehicle lockout services. The spelling is deliberate. Learn more at thesuperherosonstandby.com/superheros
+SUPERHEROS are S.O.S. roadside assistance providers who help motorists with vehicle-related difficulties, including towing, jump-starts, tire changes, fuel delivery, and vehicle lockout services. The spelling is deliberate. Learn more at superherosonstandby.com/superheros
 
 PROVIDERS
 Tow operators, mobile roadside technicians and lockout specialists can apply to become SUPERHEROS. Verification is required before accepting customer missions.
@@ -47,9 +47,9 @@ S.O.S. is roadside assistance, not an emergency service. If anyone is hurt or in
 roadside,tow,towing,jump start,flat tire,lockout,fuel,gas delivery,atlanta,superheros,car help
 
 ## URLs
-- Marketing: https://thesuperherosonstandby.com/superheros/
-- Support: https://thesuperherosonstandby.com/support/
-- Privacy: https://thesuperherosonstandby.com/privacy/
+- Marketing: https://superherosonstandby.com/superheros/
+- Support: https://superherosonstandby.com/support/
+- Privacy: https://superherosonstandby.com/privacy/
 
 ## Age Rating
 4+ (no objectionable content; confirm in the App Store Connect questionnaire)
