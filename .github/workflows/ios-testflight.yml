@@ -15,10 +15,9 @@ on:
       - 'Gemfile'
       - '.github/workflows/ios-testflight.yml'
   workflow_dispatch:
-
-concurrency:
-  group: sos-ios-testflight
-  cancel-in-progress: true
+  # Every 6 hours: read-only App Store status for S.O.S. and Good Times (no build, no upload).
+  schedule:
+    - cron: '23 */6 * * *'
 
 permissions:
   contents: read
@@ -27,6 +26,10 @@ permissions:
 jobs:
   verify-build-upload:
     # Apple (ITMS-90725): from April 2027 uploads must be built with the iOS 27 SDK (Xcode 27).
+    if: github.event_name != 'schedule'
+    concurrency:
+      group: sos-ios-testflight
+      cancel-in-progress: true
     runs-on: xcode-27
     timeout-minutes: 45
     env:
@@ -209,3 +212,59 @@ jobs:
           set -euo pipefail
           python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]' 2>/dev/null || python3 -m pip install --quiet 'pyjwt[crypto]'
           python3 scripts/asc-release.py
+
+  # Every 6 hours (and on manual run): App Store Connect status for S.O.S. and Good Times,
+  # then the S.O.S. release step, which only attaches/submits when needed and leaves a
+  # version already with Apple alone. Uses only the App Store Connect key; signing files are discarded.
+  store-status:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: sos-ios-store-status
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Get the App Store Connect key from Supabase
+        shell: bash
+        env:
+          APPLE_CREDENTIAL_BROKER_URL: https://dzlmtvodpyhetvektfuo.supabase.co/functions/v1/github-apple-release-credentials
+        run: |
+          set -euo pipefail
+          TOKEN_FILE="$RUNNER_TEMP/github-oidc.json"
+          CRED_FILE="$RUNNER_TEMP/apple-release-credentials.json"
+          KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
+          curl --fail --silent --show-error --retry 3 --retry-delay 2 --retry-all-errors \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=kollective-apple-release" -o "$TOKEN_FILE"
+          OIDC_TOKEN=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['value'])" "$TOKEN_FILE")
+          curl --fail --silent --show-error --retry 3 --retry-delay 2 --retry-all-errors -X POST \
+            -H "Authorization: Bearer ${OIDC_TOKEN}" -H 'Content-Type: application/json' \
+            "$APPLE_CREDENTIAL_BROKER_URL" -o "$CRED_FILE"
+          python3 - "$CRED_FILE" "$KEY_PATH" "$GITHUB_ENV" <<'PY'
+          import base64,json,os,sys
+          src,key_path,env_path=sys.argv[1:]
+          d=json.load(open(src))
+          if not all(str(d.get(k,'')).strip() for k in ('key_id','issuer_id','key_content_base64')):
+              raise SystemExit('App Store Connect key response is incomplete')
+          open(key_path,'wb').write(base64.b64decode(d['key_content_base64'])); os.chmod(key_path,0o600)
+          with open(env_path,'a') as f:
+              f.write(f"ASC_KEY_ID={d['key_id']}\nASC_ISSUER_ID={d['issuer_id']}\nASC_KEY_PATH={key_path}\n")
+          PY
+          rm -f "$TOKEN_FILE" "$CRED_FILE"
+
+      - name: App Store Connect status report (S.O.S. and Good Times, read-only)
+        shell: bash
+        env:
+          APP_BUNDLE_IDS: com.superherosonstandby.app,com.kollective.goodtimes
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet 'pyjwt[crypto]'
+          python3 scripts/asc-status.py
+
+      - name: S.O.S. App Store release step (attach build / submit only when needed)
+        if: hashFiles('ios/app-store-release.json') != ''
+        continue-on-error: true
+        shell: bash
+        run: python3 scripts/asc-release.py
