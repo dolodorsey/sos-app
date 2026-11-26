@@ -15,6 +15,11 @@ on:
       - 'Gemfile'
       - '.github/workflows/ios-testflight.yml'
   workflow_dispatch:
+    inputs:
+      status_only:
+        description: 'Only check App Store status (no build, no TestFlight upload)'
+        type: boolean
+        default: false
   # Every 6 hours: read-only App Store status for S.O.S. and Good Times (no build, no upload).
   schedule:
     - cron: '23 */6 * * *'
@@ -26,7 +31,7 @@ permissions:
 jobs:
   verify-build-upload:
     # Apple (ITMS-90725): from April 2027 uploads must be built with the iOS 27 SDK (Xcode 27).
-    if: github.event_name != 'schedule'
+    if: github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.status_only)
     concurrency:
       group: sos-ios-testflight
       cancel-in-progress: true
