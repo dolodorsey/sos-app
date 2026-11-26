@@ -85,7 +85,7 @@ export default function SOSUIUpgradeHost(){
         const video=document.createElement('video');
         video.className='sos3-home-motion';
         video.autoplay=true;video.muted=true;video.loop=true;video.playsInline=true;video.setAttribute('aria-label','S.O.S. brand animation');
-        video.src=MOTION;
+        video.poster='/brand/intro/sos-hero-intro-poster.jpg';video.src=MOTION;
         hero.insertBefore(video,hero.firstChild);
       }
 
