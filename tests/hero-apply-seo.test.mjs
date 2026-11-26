@@ -13,7 +13,7 @@ const { default: sitemap } = await import('data:text/javascript,' + encodeURICom
 
 test('Hero application is present once in the public sitemap', () => {
   const urls = sitemap().map(entry => entry.url);
-  const apply = urls.filter(url => url === 'https://thesuperherosonstandby.com/hero/apply/');
+  const apply = urls.filter(url => url === 'https://superherosonstandby.com/hero/apply/');
   assert.equal(apply.length, 1);
   assert.equal(urls.length, new Set(urls).size);
 });
@@ -21,7 +21,7 @@ test('Hero application is present once in the public sitemap', () => {
 test('Hero page declares unique metadata, self canonical, and specific social URL', () => {
   assert.match(layoutSource, /Become a Hero \| S\.O\.S\./);
   assert.match(layoutSource, /canonical: '\/hero\/apply\/'/);
-  assert.match(layoutSource, /url: 'https:\/\/thesuperherosonstandby\.com\/hero\/apply\/'/);
+  assert.match(layoutSource, /url: 'https:\/\/superherosonstandby\.com\/hero\/apply\/'/);
   assert.match(layoutSource, /does not guarantee approval, activation, or jobs/);
   assert.match(nextConfig, /trailingSlash:\s*true/);
 });

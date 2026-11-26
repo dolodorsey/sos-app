@@ -13,7 +13,7 @@
 // - Pages are S.O.S.-published brand material, never presented as Wikipedia,
 //   Wikimedia, Wiktionary or an independent dictionary.
 
-export const SITE = 'https://thesuperherosonstandby.com';
+export const SITE = 'https://superherosonstandby.com';
 export const PUBLISHED = '2026-11-11';
 export const UPDATED = '2026-11-11';
 export const PUBLISHER = 'S.O.S. — Superheros On Standby';

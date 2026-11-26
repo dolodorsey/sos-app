@@ -1,7 +1,7 @@
 // Web front door. The packaged app is sent to /app/ by the root layout before
 // paint, so native users keep the full customer entry point at /app.
-// Website visitors (thesuperherosonstandby.com, and superherosonstandby.com,
-// which forwards here) first see the services-at-launch intro, then the homepage.
+// Website visitors (superherosonstandby.com; the old thesuperherosonstandby.com
+// address forwards here) first see the services-at-launch intro, then the homepage.
 import SOSHome from '@/components/SOSHome';
 import SOSHeroIntro from '@/components/SOSHeroIntro';
 

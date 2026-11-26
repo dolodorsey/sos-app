@@ -33,9 +33,9 @@ test('sosatl.com short links forward to the sign-up page', () => {
     'www.sosatl.com /:code([A-Za-z0-9]{8})', 'www.sosatl.com /:code([A-Za-z0-9]{8})/'])
   for (const r of cfg.redirects) {
     assert.doesNotMatch(r.source, /\)\/?\?$/, 'Vercel rejects an optional trailing slash after a param pattern')
-    assert.match(r.destination, /^https:\/\/thesuperherosonstandby\.com\/hero\/apply\//)
+    assert.match(r.destination, /^https:\/\/superherosonstandby\.com\/hero\/apply\//)
   }
-  assert.equal(codes[0].destination, 'https://thesuperherosonstandby.com/hero/apply/?i=:code')
+  assert.equal(codes[0].destination, 'https://superherosonstandby.com/hero/apply/?i=:code')
 })
 
 test('selfie is an allowed document type at the table level', () => {

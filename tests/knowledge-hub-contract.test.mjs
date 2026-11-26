@@ -25,7 +25,7 @@ test('sitemap lists every wiki article once and nothing else under /wiki', () =>
   assert.deepEqual([...WIKI_SLUGS].sort(), lexicon.ARTICLES.map((a) => a.slug).sort());
   const urls = sitemap().map((e) => e.url);
   assert.equal(urls.length, new Set(urls).size);
-  for (const path of ['/', '/superheros/', '/wiki/', '/hero/apply/', '/wiki/superheros/']) assert.ok(urls.includes(`https://thesuperherosonstandby.com${path}`), path);
+  for (const path of ['/', '/superheros/', '/wiki/', '/hero/apply/', '/wiki/superheros/']) assert.ok(urls.includes(`https://superherosonstandby.com${path}`), path);
   assert.ok(!urls.some((u) => /\/(ops|auth|login)\//.test(u)));
 });
 

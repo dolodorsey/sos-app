@@ -4,7 +4,7 @@ import './sos-home.css';
 import { useEffect, useState } from 'react';
 import { OFFICIAL_INSTAGRAM, PRESS_CONTACT } from '@/content/sosHome';
 
-// Public front door for thesuperherosonstandby.com (web only).
+// Public front door for superherosonstandby.com (web only).
 // The packaged iOS/Android app never shows this page: the root layout sends
 // native shells to /app/ before paint, and the effect below is a backstop.
 
