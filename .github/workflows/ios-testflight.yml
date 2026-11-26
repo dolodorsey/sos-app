@@ -213,11 +213,10 @@ jobs:
           python3 -m pip install --quiet --break-system-packages 'pyjwt[crypto]' 2>/dev/null || python3 -m pip install --quiet 'pyjwt[crypto]'
           python3 scripts/asc-release.py
 
-  # Every 6 hours (and on manual run): App Store Connect status for S.O.S. and Good Times,
+  # Every 6 hours, on manual run, and after every merge: App Store Connect status for S.O.S. and Good Times,
   # then the S.O.S. release step, which only attaches/submits when needed and leaves a
   # version already with Apple alone. Uses only the App Store Connect key; signing files are discarded.
   store-status:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     concurrency:
       group: sos-ios-store-status
       cancel-in-progress: false
