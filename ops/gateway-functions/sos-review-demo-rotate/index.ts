@@ -2,7 +2,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import { createRemoteJWKSet, importPKCS8, jwtVerify, SignJWT } from "npm:jose@5.9.6";
 
-// Rotates the S.O.S. App Review demo sign-in (appreview@sos-app.com) entirely server-side:
+// Rotates the S.O.S. App Review demo sign-in entirely server-side and makes Apple use the
+// dedicated reviewer account (appreview@sos-app.com), never the founder's own login:
 // new random password -> App Store Connect review details -> S.O.S. account -> sign-in check
 // -> saved in credentials. Any failure puts everything back. Returns status only: the
 // password never leaves this function. Caller: dolodorsey/sos-app ios-testflight.yml on main.
@@ -69,23 +70,24 @@ Deno.serve(async(req)=>{
   for(const v of versions.filter((v:any)=>EDITABLE.has(v.state))){
     const d=await apple(jwt,'GET',`/v1/appStoreVersions/${v.id}/appStoreReviewDetail`);
     if(!d.ok||!d.body?.data?.id)continue;
-    const name=String(d.body.data.attributes?.demoAccountName||'');
-    if(name.toLowerCase()!==email.toLowerCase())return fail('apple_demo_name_mismatch',`Version ${v.version} lists a different demo account; not touching it.`);
-    targets.push({...v,detailId:d.body.data.id});
+    const a=d.body.data.attributes||{};
+    // Remember Apple's exact current values so any failure restores them as they were.
+    targets.push({...v,detailId:d.body.data.id,origName:String(a.demoAccountName||''),origPw:String(a.demoAccountPassword||''),listsReviewer:String(a.demoAccountName||'').toLowerCase()===email.toLowerCase()});
   }
   if(!targets.length)return fail('apple_no_editable_review_detail');
 
   const s1=await signIn(email,oldPassword);
   if(!s1.ok)return fail('current_password_sign_in',`S.O.S. sign-in with the stored password failed (${s1.status})`);
-  const summary=targets.map(t=>({version:t.version,state:t.state}));
+  const summary=targets.map(t=>({version:t.version,state:t.state,apple_lists_reviewer_account:t.listsReviewer}));
   if(dryRun)return json({ok:true,dry_run:true,versions:summary,current_sign_in_verified:true});
 
   const pw=newPassword();
-  const patch=(id:string,password:string)=>apple(jwt,'PATCH',`/v1/appStoreReviewDetails/${id}`,{data:{type:'appStoreReviewDetails',id,attributes:{demoAccountPassword:password,demoAccountRequired:true}}});
-  const revertApple=async(ids:string[])=>{for(const id of ids)await patch(id,oldPassword)};
+  // Apple always gets the dedicated reviewer account (never the founder's own login).
+  const patch=(id:string,name:string,password:string)=>apple(jwt,'PATCH',`/v1/appStoreReviewDetails/${id}`,{data:{type:'appStoreReviewDetails',id,attributes:{demoAccountName:name,demoAccountPassword:password,demoAccountRequired:true}}});
+  const revertApple=async(ids:string[])=>{for(const t of targets)if(ids.includes(t.detailId))await patch(t.detailId,t.origName,t.origPw)};
   const done:string[]=[];
   for(const t of targets){
-    const p=await patch(t.detailId,pw);
+    const p=await patch(t.detailId,email,pw);
     if(!p.ok){await revertApple(done);return fail('apple_update',`Version ${t.version}: ${appleError(p)}`)}
     done.push(t.detailId);
   }
@@ -99,6 +101,6 @@ Deno.serve(async(req)=>{
   const s3=await signIn(email,oldPassword);
   // Read Apple back so the result proves the reviewer will see the new sign-in.
   let appleMatches=0;
-  for(const t of targets){const d=await apple(jwt,'GET',`/v1/appStoreReviewDetails/${t.detailId}`);if(d.ok&&d.body?.data?.attributes?.demoAccountPassword===pw)appleMatches++;}
+  for(const t of targets){const d=await apple(jwt,'GET',`/v1/appStoreReviewDetails/${t.detailId}`);const x=d.body?.data?.attributes||{};if(d.ok&&x.demoAccountPassword===pw&&String(x.demoAccountName||'').toLowerCase()===email.toLowerCase())appleMatches++;}
   return json({ok:true,rotated_at:now,versions:summary,apple_review_details_updated:done.length,apple_read_back_matches:appleMatches,new_password_sign_in_verified:true,old_password_retired:!s3.ok});
 });
