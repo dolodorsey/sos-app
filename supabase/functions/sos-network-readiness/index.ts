@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-const allowed=new Set(["https://thesuperherosonstandby.com","https://www.thesuperherosonstandby.com","https://superherosonstandby.com","https://www.superherosonstandby.com"]);
-const cors=(origin:string|null)=>({"Access-Control-Allow-Origin":origin&&allowed.has(origin)?origin:"https://thesuperherosonstandby.com","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Content-Type":"application/json","Vary":"Origin","Cache-Control":"no-store"});
+// capacitor://localhost = the S.O.S. iPhone/iPad app.
+const allowed=new Set(["https://superherosonstandby.com","https://www.superherosonstandby.com","https://thesuperherosonstandby.com","https://www.thesuperherosonstandby.com","capacitor://localhost"]);
+const cors=(origin:string|null)=>({"Access-Control-Allow-Origin":origin&&allowed.has(origin)?origin:"https://superherosonstandby.com","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"GET, POST, OPTIONS","Content-Type":"application/json","Vary":"Origin","Cache-Control":"no-store"});
 Deno.serve(async req=>{
  const origin=req.headers.get("origin");if(req.method==="OPTIONS")return new Response("ok",{headers:cors(origin)});if(!["GET","POST"].includes(req.method))return new Response(JSON.stringify({error:"Method not allowed"}),{status:405,headers:cors(origin)});
  try{
