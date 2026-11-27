@@ -35,7 +35,20 @@ TOKEN = token()
 lines = []
 
 
+import re as _re
+_SECRET_KEYS = ("demoAccountPassword", "demoAccountName", "contactPhone", "contactEmail", "contactFirstName", "contactLastName")
+
+
+def redact(text):
+    """Never let sign-in details or contact info reach the (public) workflow log."""
+    for k in _SECRET_KEYS:
+        text = _re.sub(r'("%s"\s*:\s*)"[^"]*"?' % k, r'\1"[hidden]"', text)
+        text = _re.sub(r"('%s'\s*:\s*)'[^']*'?" % k, r"\1'[hidden]'", text)
+    return text
+
+
 def say(s=""):
+    s = redact(str(s))
     print(s); lines.append(s)
 
 
