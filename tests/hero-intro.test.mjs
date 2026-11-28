@@ -26,7 +26,7 @@ test('homepage plays the services-at-launch intro on the website only', () => {
   assert.match(home, /sos-services-intro\.mp4/)
   assert.match(home, /seenKey="sos_services_intro_seen_at"/, 'own replay timer, separate from the Hero sign-up intro')
   assert.match(home, /webOnly/)
-  assert.match(home, /<CustomerApp \/>/, 'still the full customer app underneath')
+  assert.match(home, /<SOSHome \/>/, 'the public homepage underneath; the packaged app is sent to /app/ by the root layout')
   assert.match(intro, /webOnly && window\.Capacitor\?\.isNativePlatform\?\.\(\)/)
   assert.ok(fs.statSync(new URL('../public/brand/intro/sos-services-intro.mp4', import.meta.url)).size < 4_000_000)
 })
