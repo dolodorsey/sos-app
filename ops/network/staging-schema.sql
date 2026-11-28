@@ -5,6 +5,7 @@ create table public.sos_network_members (
  display_name text not null check (length(trim(display_name)) between 2 and 80),
  territory text not null check (territory in ('Downtown','Midtown','Buckhead','Eastside','Westside','Southside','Northside','Gwinnett')),
  referral_code uuid unique not null default gen_random_uuid(),
+ invited_with uuid,
  referred_by uuid references public.sos_network_members(user_id) on delete set null,
  created_at timestamptz not null default now()
 );
@@ -43,13 +44,13 @@ alter table public.sos_network_referrals enable row level security;
 alter table public.sos_network_admins enable row level security;
 revoke all on public.sos_network_members,public.sos_network_mission_catalog,public.sos_network_submissions,public.sos_network_referrals,public.sos_network_admins from public,anon,authenticated;
 grant select on public.sos_network_members,public.sos_network_mission_catalog,public.sos_network_submissions,public.sos_network_referrals,public.sos_network_admins to authenticated;
-grant insert (user_id,display_name,territory) on public.sos_network_members to authenticated;
+grant insert (user_id,display_name,territory,invited_with) on public.sos_network_members to authenticated;
 grant insert (user_id,mission_id,evidence) on public.sos_network_submissions to authenticated;
 grant insert (user_id,kind,reference) on public.sos_network_referrals to authenticated;
 grant update(status) on public.sos_network_submissions,public.sos_network_referrals to authenticated;
 create policy network_admin_self on public.sos_network_admins for select to authenticated using (user_id=(select auth.uid()));
 create policy network_member_read on public.sos_network_members for select to authenticated using (user_id=(select auth.uid()) or exists(select 1 from public.sos_network_admins a where a.user_id=(select auth.uid())));
-create policy network_member_create on public.sos_network_members for insert to authenticated with check (user_id=(select auth.uid()) and referred_by is null);
+create policy network_member_create on public.sos_network_members for insert to authenticated with check (user_id=(select auth.uid()) and (referred_by is null or referred_by<>user_id));
 create policy network_catalog_read on public.sos_network_mission_catalog for select to authenticated using (active);
 create policy network_submission_read on public.sos_network_submissions for select to authenticated using (user_id=(select auth.uid()) or exists(select 1 from public.sos_network_admins a where a.user_id=(select auth.uid())));
 create policy network_submission_create on public.sos_network_submissions for insert to authenticated with check (user_id=(select auth.uid()) and status='pending' and awarded_points=0 and exists(select 1 from public.sos_network_mission_catalog m where m.id=mission_id and m.active));
@@ -66,6 +67,20 @@ begin
 end $$;
 revoke all on function public.sos_network_set_review_points() from public,anon,authenticated;
 create trigger sos_network_review_points before update on public.sos_network_submissions for each row execute function public.sos_network_set_review_points();
+create schema if not exists private;
+create function private.sos_network_attach_inviter() returns trigger language plpgsql security definer set search_path=pg_catalog,public as $
+begin
+ if new.user_id is distinct from auth.uid() then raise exception 'Invalid member identity'; end if;
+ new.referred_by := null;
+ if new.invited_with is not null then
+  select user_id into new.referred_by from public.sos_network_members where referral_code=new.invited_with and user_id<>new.user_id;
+  if new.referred_by is null then raise exception 'Invalid invitation code'; end if;
+ end if;
+ new.invited_with := null;
+ return new;
+end $;
+revoke all on function private.sos_network_attach_inviter() from public,anon,authenticated;
+create trigger sos_network_attach_inviter before insert on public.sos_network_members for each row execute function private.sos_network_attach_inviter();
 create index sos_network_submission_mission_idx on public.sos_network_submissions(mission_id);
 create index sos_network_member_referred_idx on public.sos_network_members(referred_by);
 insert into public.sos_network_mission_catalog(id,category,title,points) values
