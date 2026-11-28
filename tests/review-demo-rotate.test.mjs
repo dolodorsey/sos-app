@@ -18,6 +18,10 @@ test('rotation refuses while Apple is reviewing, and puts everything back on fai
   assert.match(fn, /if\(!s2\.ok\)\{await setPassword\(s1\.token,oldPassword\);await revertApple\(done\)/)
   assert.match(fn, /if\(error\)\{await setPassword\(s2\.token,oldPassword\);await revertApple\(done\)/)
   assert.match(fn, /payload\.workflow_ref!==WORKFLOW_REF/)
+  // Restores Apple's exact original values, and Apple only ever gets the reviewer account.
+  assert.match(fn, /await patch\(t\.detailId,t\.origName,t\.origPw\)/)
+  assert.match(fn, /const p=await patch\(t\.detailId,email,pw\)/)
+  assert.doesNotMatch(fn, /app_login_master/)
 })
 
 test('workflow review-demo job prints only whitelisted status fields and skips the build', () => {
